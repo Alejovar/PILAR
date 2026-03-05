@@ -1,5 +1,5 @@
 <?php
-// order_interface.php - VERSIÓN FINAL Y ROBUSTA con obtención de estado de bloqueo
+// order_interface.php - VERSIÓN FINAL Y ROBUSTA con obtención de estado de bloqueo y Prueba A/B
 
 // Quitar la visualización de errores solo si la quieres ver en el HTML,
 // pero es mejor mantenerlos en 0 para producción y usar logs.
@@ -31,8 +31,6 @@ if ($_SESSION['rol_id'] != MESERO_ROLE_ID && $_SESSION['rol_id'] != MANAGER_ROLE
     header('Location: /KitchenLink/index.php?error=acceso_no_mesero');
     exit();
 }
-// ⚠️ Se eliminó la verificación redundante de !isset($_SESSION['user_id'])
-
 
 // 3. Obtener y validar la mesa
 $table_number = filter_input(INPUT_GET, 'table', FILTER_VALIDATE_INT);
@@ -57,7 +55,6 @@ if ($row_status = $status_result->fetch_assoc()) {
     $mesa_estado = $row_status['pre_bill_status']; // 💥 OBTENEMOS EL ESTADO DE BLOQUEO
 }
 $stmt_status->close();
-
 
 // 6. Consulta de Categorías
 $categories = [];
@@ -119,11 +116,16 @@ try {
 
 // 8. Preparar JSON de datos iniciales
 $initial_data = [
-    'table_status' => $mesa_estado, // 💥 ESTADO DE BLOQUEO INYECTADO AQUÍ
+    'table_status' => $mesa_estado,
     'server_time' => (new DateTime())->format(DateTime::ATOM),
     'items' => $existing_items
 ];
 $initial_order_json = json_encode($initial_data);
+
+// START A/B TEST: FEATURE FLAG LOGIC
+$user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
+// Si el ID es impar = Experimental (Versión B). Si es par = Original (Versión A).
+$is_experimental_group = ($user_id % 2 !== 0); 
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -136,14 +138,31 @@ $initial_order_json = json_encode($initial_data);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
+
+    <?php if ($is_experimental_group): ?>
+        <div id="ab-toast" style="position: fixed; top: 90px; right: 20px; background-color: #2e7d32; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999; font-family: sans-serif; font-weight: bold; transition: opacity 0.5s ease; pointer-events: none;">
+            <i class="fas fa-flask" style="margin-right: 8px;"></i> Versión B (Experimental)
+        </div>
+    <?php else: ?>
+        <div id="ab-toast" style="position: fixed; top: 90px; right: 20px; background-color: #1565c0; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999; font-family: sans-serif; font-weight: bold; transition: opacity 0.5s ease; pointer-events: none;">
+            <i class="fas fa-info-circle" style="margin-right: 8px;"></i> Versión A (Original)
+        </div>
+    <?php endif; ?>
     <div class="tpv-container">
-        <header class="tpv-header">
-            <h2>Mesa Actual: #<?php echo htmlspecialchars($table_number); ?></h2>
+        <header class="tpv-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0;">Mesa Actual: #<?php echo htmlspecialchars($table_number); ?></h2>
             <div id="liveClockContainer"></div>
-            <button onclick="window.location.href='<?php echo $back_url; ?>'" class="btn-back">
-            <i class="fas fa-arrow-left"></i> Volver a Mesas
-            </button>
-        </header>
+
+            <?php if ($is_experimental_group): ?>
+                <button onclick="registerABClick('B', '<?php echo $back_url; ?>')" style="background-color: #0d6efd; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); display: flex; align-items: center; gap: 8px;" id="btn-back-tables">
+                    <i class="fas fa-arrow-left"></i> Volver a Mesas
+                </button>
+            <?php else: ?>
+                <button onclick="registerABClick('A', '<?php echo $back_url; ?>')" style="color: blue; padding: 2px; border: none; background: transparent; cursor: pointer; text-decoration: underline;" id="btn-back-tables">
+                    Volver a Mesas
+                </button>
+            <?php endif; ?>
+            </header>
 
         <div class="tpv-layout">
             <aside class="category-sidebar">
@@ -168,8 +187,7 @@ $initial_order_json = json_encode($initial_data);
                         <input type="text" id="productSearchInput" placeholder="Buscar producto por nombre..." autocomplete="off">
                     </div>
                     
-                    <div id="searchResultsDropdown" class="search-results-dropdown" style="display:none;">
-                        </div>
+                    <div id="searchResultsDropdown" class="search-results-dropdown" style="display:none;"></div>
                 </div>
                 
                 <h2>Productos</h2> 
@@ -225,5 +243,40 @@ $initial_order_json = json_encode($initial_data);
     <script id="initialOrderData" type="application/json"><?php echo $initial_order_json; ?></script>
     <script src="/KitchenLink/src/js/session_interceptor.js"></script>
     <script src="/KitchenLink/src/js/tpv.js"></script> 
+
+    <script>
+        // 🚀 Ocultar el Toast automáticamente después de 3.5 segundos
+        setTimeout(() => {
+            const toast = document.getElementById('ab-toast');
+            if(toast) {
+                toast.style.opacity = '0'; // Efecto de desvanecimiento
+                setTimeout(() => toast.remove(), 500); // Lo borra del HTML al terminar
+            }
+        }, 3500);
+
+        // Guardamos el tiempo exacto en que la interfaz terminó de cargar
+        const viewStartTime = Date.now();
+
+        function registerABClick(version, targetUrl) {
+            const clickTime = Date.now();
+            const elapsedSeconds = ((clickTime - viewStartTime) / 1000).toFixed(2);
+            
+            console.log(`[A/B TEST] Version ${version}: ${elapsedSeconds} seconds`);
+
+            let formData = new FormData();
+            formData.append('version', version);
+            formData.append('time', elapsedSeconds);
+
+            // Enviamos la data al archivo PHP para guardarlo en el .txt
+            fetch('/KitchenLink/test/save_metric.php', {
+                method: 'POST',
+                body: formData
+            }).then(() => {
+                window.location.href = targetUrl;
+            }).catch(() => {
+                window.location.href = targetUrl;
+            });
+        }
+    </script>
 </body>
 </html>
