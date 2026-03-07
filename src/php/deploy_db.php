@@ -13,7 +13,7 @@ if (!isset($conn) || $conn->connect_error) {
     die("❌ Error fatal: No se pudo conectar a la base de datos.");
 }
 
-// Creamos tablas básicas de forma segura para no romper lo que ya tienes
+// SQL unificado sin caracteres especiales invisibles
 $sql = "
 -- Script para creacion de las tablas en la base de datos, con algunos registros inluidos, como los roles que existen
 -- un restaurante y ademas las mesas que existen en el restaurante para el cual esta elaborado
@@ -587,12 +587,19 @@ CREATE TABLE `cash_shifts` (
   
   CONSTRAINT `fk_shift_user` FOREIGN KEY (`user_id_opened`) REFERENCES `users`(`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
- ";
+";
 
-// Ejecutamos silenciosamente
-$conn->multi_query($sql);
-while ($conn->more_results() && $conn->next_result()) {;}
+// Ejecutamos las consultas de forma segura
+if ($conn->multi_query($sql)) {
+    do {
+        if ($result = $conn->store_result()) {
+            $result->free();
+        }
+    } while ($conn->more_results() && $conn->next_result());
+    echo "✅ BD Sincronizada con éxito vía CI/CD";
+} else {
+    echo "❌ Error en la ejecución: " . $conn->error;
+}
 
-echo "✅ BD Sincronizada con éxito vía CI/CD";
 $conn->close();
 ?>
