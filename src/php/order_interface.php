@@ -1,10 +1,5 @@
 <?php
-// order_interface.php - VERSIÓN FINAL Y ROBUSTA con obtención de estado de bloqueo y Prueba A/B
-
-// Quitar la visualización de errores solo si la quieres ver en el HTML,
-// pero es mejor mantenerlos en 0 para producción y usar logs.
-// ini_set('display_errors', 1); 
-// error_reporting(E_ALL);     
+// order_interface.php - VERSIÓN FINAL Y ROBUSTA (Versión B como predeterminada)
 
 // 1. Seguridad (Verifica login/token y obtiene $_SESSION['rol_id'])
 require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
@@ -41,7 +36,7 @@ if (!$table_number) {
 
 // 4. Conexión a DB (Ya está abierta por check_session.php, solo verificamos)
 if (!isset($conn) || $conn->connect_error) {
-    die("Error fatal de conexión a la base de datos."); // Detenemos la ejecución si la conexión falló
+    die("Error fatal de conexión a la base de datos."); 
 }
 
 // 5. Consulta Estado de la Mesa (para el bloqueo)
@@ -121,11 +116,6 @@ $initial_data = [
     'items' => $existing_items
 ];
 $initial_order_json = json_encode($initial_data);
-
-// START A/B TEST: FEATURE FLAG LOGIC
-$user_id = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 0;
-// Si el ID es impar = Experimental (Versión B). Si es par = Original (Versión A).
-$is_experimental_group = ($user_id % 2 !== 0); 
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -139,30 +129,19 @@ $is_experimental_group = ($user_id % 2 !== 0);
 </head>
 <body>
 
-    <?php if ($is_experimental_group): ?>
-        <div id="ab-toast" style="position: fixed; top: 90px; right: 20px; background-color: #2e7d32; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999; font-family: sans-serif; font-weight: bold; transition: opacity 0.5s ease; pointer-events: none;">
-            <i class="fas fa-flask" style="margin-right: 8px;"></i> Versión B (Experimental)
-        </div>
-    <?php else: ?>
-        <div id="ab-toast" style="position: fixed; top: 90px; right: 20px; background-color: #1565c0; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999; font-family: sans-serif; font-weight: bold; transition: opacity 0.5s ease; pointer-events: none;">
-            <i class="fas fa-info-circle" style="margin-right: 8px;"></i> Versión A (Original)
-        </div>
-    <?php endif; ?>
+    <div id="ab-toast" style="position: fixed; top: 90px; right: 20px; background-color: #2e7d32; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999; font-family: sans-serif; font-weight: bold; transition: opacity 0.5s ease; pointer-events: none;">
+        <i class="fas fa-check-circle" style="margin-right: 8px;"></i> Interfaz Actualizada
+    </div>
+
     <div class="tpv-container">
         <header class="tpv-header" style="display: flex; justify-content: space-between; align-items: center;">
             <h2 style="margin: 0;">Mesa Actual: #<?php echo htmlspecialchars($table_number); ?></h2>
             <div id="liveClockContainer"></div>
 
-            <?php if ($is_experimental_group): ?>
-                <button onclick="registerABClick('B', '<?php echo $back_url; ?>')" style="background-color: #0d6efd; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); display: flex; align-items: center; gap: 8px;" id="btn-back-tables">
-                    <i class="fas fa-arrow-left"></i> Volver a Mesas
-                </button>
-            <?php else: ?>
-                <button onclick="registerABClick('A', '<?php echo $back_url; ?>')" style="color: blue; padding: 2px; border: none; background: transparent; cursor: pointer; text-decoration: underline;" id="btn-back-tables">
-                    Volver a Mesas
-                </button>
-            <?php endif; ?>
-            </header>
+            <button onclick="registerABClick('B', '<?php echo $back_url; ?>')" style="background-color: #0d6efd; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); display: flex; align-items: center; gap: 8px;" id="btn-back-tables">
+                <i class="fas fa-arrow-left"></i> Volver a Mesas
+            </button>
+        </header>
 
         <div class="tpv-layout">
             <aside class="category-sidebar">
@@ -245,7 +224,7 @@ $is_experimental_group = ($user_id % 2 !== 0);
     <script src="/KitchenLink/src/js/tpv.js"></script> 
 
     <script>
-        // 🚀 Ocultar el Toast automáticamente después de 3.5 segundos
+        // Ocultar el Toast automáticamente después de 3.5 segundos
         setTimeout(() => {
             const toast = document.getElementById('ab-toast');
             if(toast) {
@@ -261,13 +240,13 @@ $is_experimental_group = ($user_id % 2 !== 0);
             const clickTime = Date.now();
             const elapsedSeconds = ((clickTime - viewStartTime) / 1000).toFixed(2);
             
-            console.log(`[A/B TEST] Version ${version}: ${elapsedSeconds} seconds`);
+            console.log(`[Métrica] Navegación: ${elapsedSeconds} segundos`);
 
             let formData = new FormData();
             formData.append('version', version);
             formData.append('time', elapsedSeconds);
 
-            // Enviamos la data al archivo PHP para guardarlo en el .txt
+            // Enviamos la data al archivo PHP para guardarlo (por si sigues recolectando métricas)
             fetch('/KitchenLink/test/save_metric.php', {
                 method: 'POST',
                 body: formData

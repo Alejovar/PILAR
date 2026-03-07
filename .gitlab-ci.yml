@@ -7,9 +7,7 @@ stages:
   - quality_check
   - build_artifact
 
-# ==========================================================
 # 1. INSTALAR DEPENDENCIAS
-# ==========================================================
 install_deps:
   stage: install_dependencies
   script:
@@ -19,9 +17,7 @@ install_deps:
   only:
     - main
 
-# ==========================================================
 # 2. EJECUTAR PRUEBAS UNITARIAS Y REPORTES
-# ==========================================================
 quality_check:
   stage: quality_check
   needs: ["install_deps"]
@@ -41,9 +37,7 @@ quality_check:
   only:
     - main
 
-# ==========================================================
 # ETAPA EXTRA: DESPLIEGUE A TU SERVIDOR
-# ==========================================================
 build_project:
   stage: build_artifact
   needs: ["quality_check"]
