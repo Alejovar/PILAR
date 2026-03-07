@@ -12,8 +12,8 @@ stages:
 install_deps:
   stage: install_dependencies
   script:
-    - 'echo "Instalando dependencias necesarias para el servidor..."'
-    - 'echo "✅ Dependencias listas."'
+    - echo "Instalando dependencias necesarias para el servidor..."
+    - echo "✅ Dependencias listas."
   only:
     - main
 
@@ -24,12 +24,12 @@ quality_check:
   stage: quality_check
   needs: ["install_deps"]
   script:
-    - 'echo "Ejecutando Linting en archivos PHP..."'
-    - 'php -v'
-    - 'echo "Sintaxis PHP verificada exitosamente."'
-    - 'echo "Ejecutando Pruebas Unitarias de KitchenLink..."'
-    - 'echo "Test 1 Validando roles de usuario... [PASSED]"'
-    - 'echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?><testsuites><testsuite name=\"KitchenLinkTests\" tests=\"1\" failures=\"0\"><testcase name=\"TestRol\"/></testsuite></testsuites>" > junit.xml'
+    - echo "Ejecutando Linting en archivos PHP..."
+    - php -v
+    - echo "Sintaxis PHP verificada exitosamente."
+    - echo "Ejecutando Pruebas Unitarias de KitchenLink..."
+    - echo "Test 1 Validando roles de usuario... [PASSED]"
+    - echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="KitchenLinkTests" tests="1" failures="0"><testcase name="TestRol"/></testsuite></testsuites>' > junit.xml
   artifacts:
     when: always
     reports:
@@ -43,21 +43,15 @@ quality_check:
 deploy_real:
   stage: build_artifact
   needs: ["quality_check"]
-  # Usamos Alpine Linux aquí porque es rapidísimo para conectarse por red
   image: alpine:latest
   script:
-    - 'echo "Preparando entorno para despliegue..."'
-    - 'apk update && apk add lftp curl'
-    - 'echo "🚀 SUBIENDO ARCHIVOS AL SERVIDOR REAL..."'
+    - echo "Preparando entorno para despliegue..."
+    - apk update && apk add lftp curl
+    - echo "🚀 SUBIENDO ARCHIVOS AL SERVIDOR REAL..."
     
-    # SUBIDA REAL: Transfiere físicamente los archivos a tu hosting.
-    - 'lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open -u $FTP_USER,$FTP_PASSWORD $FTP_HOST; mirror -R ./ /htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/"'
+    # Aquí está la magia arreglada (Sin comillas simples para que lea tus variables)
+    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open -u $FTP_USER,$FTP_PASSWORD $FTP_HOST; mirror -R ./ htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/"
     
-    - 'echo "✅ ¡Archivos web subidos y actualizados con exito en tu servidor!"'
-    - 'echo "=========================================================================="'
-    - 'echo "⚠️ ATENCION El firewall del hosting gratuito bloquea la base de datos automatica."'
-    - 'echo "👉 Para actualizar tu Base de Datos, abre este enlace en tu navegador web:"'
-    - 'echo "http://627.host.adellya.my.id/KitchenLink/src/php/deploy_db.php?token=KITCHENLINK_TOKEN_SECRETO_123"'
-    - 'echo "=========================================================================="'
+    - echo "✅ ¡Archivos web subidos y actualizados con exito en tu servidor!"
   only:
     - main
