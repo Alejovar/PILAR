@@ -4,63 +4,56 @@ image: php:8.1-cli
 stages:
   - install_dependencies
   - quality_check
-  - build_artifact
+  - deploy
 
 # ==========================================================
 # 1. INSTALAR DEPENDENCIAS
-# ==========================================================
+# ==========================
 install_deps:
   stage: install_dependencies
   script:
-    - echo "Instalando dependencias necesarias para el servidor..."
-    - echo "✅ Dependencias listas."
-  # Se ejecuta en push a main o al crear un Merge Request
+    - echo "Preparando entorno para KitchenLink..."
+    - echo "✅ Entorno listo."
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 # ==========================================================
-# 2. ETAPA DE CALIDAD (Revisión de TODO el código)
-# ==========================================================
+# 2. ETAPA DE CALIDAD (Linting de todo el proyecto)
+# ==========================
 quality_check:
   stage: quality_check
   needs: ["install_deps"]
   script:
-    - echo "Iniciando escaneo global de calidad en todo el proyecto..."
-    # Busca todos los archivos .php y verifica su sintaxis
-    - find . -name "*.php" -exec php -l {} \; | grep "Errors parsing" && exit 1 || echo "✅ Todo el código PHP es válido."
+    - echo "Iniciando escaneo global de sintaxis PHP..."
+    # Escanea todos los archivos .php. Si encuentra un error, el pipeline se detiene.
+    - find . -name "*.php" -exec php -l {} \; | grep "Errors parsing" && exit 1 || echo "✅ Sin errores de sintaxis detectados."
     
-    - echo "Generando reporte de pruebas unitarias para GitLab..."
-    - echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="GlobalProjectTests" tests="1" failures="0"><testcase name="TotalCodeValidation"/></testsuite></testsuites>' > junit.xml
+    - echo "Generando reporte JUnit para la interfaz de GitLab..."
+    - echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="GlobalProjectTests" tests="1" failures="0"><testcase name="SyntaxValidation"/></testsuite></testsuites>' > junit.xml
   artifacts:
     when: always
     reports:
       junit: junit.xml
-  # Se ejecuta en push a main o al crear un Merge Request
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 # ==========================================================
-# 3. DESPLIEGUE REAL AL SERVIDOR (CD)
-# ==========================================================
+# 3. DESPLIEGUE REAL AL SERVIDOR (Solo archivos via FTP)
+# ==========================
 deploy_to_server:
-  stage: build_artifact
+  stage: deploy
   needs: ["quality_check"]
   image: alpine:latest
   script:
-    - echo "Preparando entorno Alpine para despliegue..."
-    - apk update && apk add lftp curl
+    - echo "Instalando herramientas de transferencia..."
+    - apk update && apk add lftp
     
-    - echo "🚀 ENVIANDO ARCHIVOS AL SERVIDOR REAL..."
-    # Conexión por URL directa usando tus variables corregidas
-    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/;"
+    - echo "🚀 Transfiriendo archivos al servidor de Adellya..."
+    # Solo sube archivos. Ignora carpetas de Git y archivos de configuración del pipeline.
+    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .gitlab-ci.yml;"
     
-    - echo "✅ ¡Archivos web subidos y actualizados de verdad!"
-    
-    - echo "🗄️ ACTUALIZANDO BASE DE DATOS (Webhook)..."
-    - curl -m 10 -sS "http://627.host.adellya.my.id/KitchenLink/src/php/deploy_db.php?token=KITCHENLINK_TOKEN_SECRETO_123" || echo "⚠️ El firewall bloqueó la BD, pero los archivos sí subieron."
-  
-  # Esta etapa SOLO se ejecuta cuando el código ya está en la rama protegida 'main'
+    - echo "✅ ¡Sitio web actualizado exitosamente!"
   only:
     - main
