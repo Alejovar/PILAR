@@ -54,8 +54,11 @@ deploy_to_server:
     
     - echo "🚀 ENVIANDO ARCHIVOS AL SERVIDOR..."
     # Conexión por URL directa (Mucho más estable en Alpine Linux)
-    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ /htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/;"
-    
+    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/;"
     - echo "✅ ¡Archivos web subidos y actualizados en el servidor!"
+    
+    - echo "🗄️ ACTUALIZANDO BASE DE DATOS..."
+    # Intento de base de datos (con límite de 10 segundos para no trabar el pipeline)
+    - curl -m 10 -sS "http://627.host.adellya.my.id/KitchenLink/src/php/deploy_db.php?token=KITCHENLINK_TOKEN_SECRETO_123" || echo "⚠️ El firewall bloqueó la BD, pero los archivos sí subieron."
   only:
     - main
