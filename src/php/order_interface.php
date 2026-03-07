@@ -129,10 +129,6 @@ $initial_order_json = json_encode($initial_data);
 </head>
 <body>
 
-    <div id="ab-toast" style="position: fixed; top: 90px; right: 20px; background-color: #2e7d32; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 9999; font-family: sans-serif; font-weight: bold; transition: opacity 0.5s ease; pointer-events: none;">
-        <i class="fas fa-check-circle" style="margin-right: 8px;"></i> Interfaz Actualizada
-    </div>
-
     <div class="tpv-container">
         <header class="tpv-header" style="display: flex; justify-content: space-between; align-items: center;">
             <h2 style="margin: 0;">Mesa Actual: #<?php echo htmlspecialchars($table_number); ?></h2>

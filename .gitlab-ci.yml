@@ -40,7 +40,7 @@ quality_check:
 # ==========================================================
 # 3. DESPLIEGUE REAL AL SERVIDOR
 # ==========================================================
-deploy_real:
+deploy_to_server:
   stage: build_artifact
   needs: ["quality_check"]
   image: alpine:latest
@@ -48,10 +48,14 @@ deploy_real:
     - echo "Preparando entorno para despliegue..."
     - apk update && apk add lftp curl
     
-    - echo "🚀 ENVIANDO ARCHIVOS AL SERVIDOR REAL..."
-    # FORZAMOS TU USUARIO DIRECTAMENTE (Quitamos la variable FTP_USER que fallaba)
-    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://llya_40123800:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ /htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/;"
+    # Pruebas de diagnóstico (Para ver si GitLab sí está leyendo tus variables)
+    - echo "Verificando conexion con el Host -> ${FTP_HOST}"
+    - echo "Usuario detectado -> ${FTP_USER}"
     
-    - echo "✅ ¡Archivos web subidos y actualizados de verdad en tu servidor!"
+    - echo "🚀 ENVIANDO ARCHIVOS AL SERVIDOR..."
+    # Conexión por URL directa (Mucho más estable en Alpine Linux)
+    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ /htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/;"
+    
+    - echo "✅ ¡Archivos web subidos y actualizados en el servidor!"
   only:
     - main
