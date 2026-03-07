@@ -5,34 +5,26 @@ stages:
   - test
   - deploy
 
-# 1. INSTALAR DEPENDENCIAS
+# FASE 1: INSTALACIÓN (Corre en todas las ramas siempre)
 install_deps:
   stage: install_dependencies
   script:
-    - echo "Preparando el entorno para KitchenLink..."
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - echo "Preparando entorno para KitchenLink..."
 
-# 2. ETAPA DE TEST (3 TRABAJOS EN PARALELO)
-
-# Trabajo 1: Revisión de Sintaxis
+# FASE 2: CALIDAD / TEST (Corre en todas las ramas siempre)
 lint-job:
   stage: test
   needs: ["install_deps"]
   script:
-    - echo "Ejecutando Linting (Sintaxis)..."
+    - echo "Ejecutando Linting..."
     - find . -name "*.php" -exec php -l {} \; | grep "Errors parsing" && exit 1 || echo "✅ Sintaxis OK."
 
-# Trabajo 2: Pruebas Unitarias + Reporte JUnit
 unit-test-job:
   stage: test
   needs: ["install_deps"]
   script:
     - echo "Ejecutando Pruebas Unitarias..."
-    # Validamos que el archivo de conexión exista
-    - php -r "if (file_exists('src/php/db_connection.php')) { echo 'Test DB PASSED'; } else { echo 'Test DB FAILED'; exit(1); }"
-    # GENERACIÓN DEL ARCHIVO JUNIT PARA QUE NO DE ERROR
+    - php -r "if (file_exists('src/php/db_connection.php')) { echo 'Test DB PASSED'; } else { echo 'Test FAILED'; exit(1); }"
     - |
       echo '<?xml version="1.0" encoding="UTF-8"?>
       <testsuites>
@@ -45,23 +37,14 @@ unit-test-job:
     reports:
       junit: junit.xml
 
-# Trabajo 3: Revisión de Seguridad (Opcional, para que se vea otro cuadro)
-security-job:
-  stage: test
-  needs: ["install_deps"]
-  script:
-    - echo "Buscando archivos sensibles expuestos..."
-    - find . -name "*.env" -o -name "*.sql" || echo "Análisis de seguridad completado."
-
-# 3. DESPLIEGUE CONTINUO
+# FASE 3: DESPLIEGUE 
 deploy_to_server:
   stage: deploy
-  needs: ["lint-job", "unit-test-job", "security-job"]
+  needs: ["lint-job", "unit-test-job"]
   image: alpine:latest
   script:
     - apk update && apk add lftp
-    - echo "🚀 Transfiriendo archivos al servidor..."
+    - echo "🚀 Transfiriendo archivos al servidor de Adellya..."
     - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ htdocs/KitchenLink/ --exclude-glob .git* --exclude .gitlab-ci.yml --exclude junit.xml;"
-    - echo "✅ Despliegue completado con éxito."
-  only:
-    - main
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"  
