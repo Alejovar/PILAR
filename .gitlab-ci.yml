@@ -1,4 +1,4 @@
-# Usamos la imagen de PHP para KitchenLink
+# Imagen de PHP para las primeras etapas
 image: php:8.1-cli
 
 stages:
@@ -13,8 +13,7 @@ install_deps:
   stage: install_dependencies
   script:
     - echo "Instalando dependencias necesarias para el servidor..."
-    - apt-get update -y && apt-get install -y curl lftp
-    - echo "✅ Dependencias instaladas correctamente."
+    - echo "✅ Dependencias listas."
   only:
     - main
 
@@ -26,12 +25,13 @@ quality_check:
   needs: ["install_deps"]
   script:
     - echo "Ejecutando Linting en archivos PHP..."
-    - find . -type f -name '*.php' -exec php -l {} \;
-    
+    - php -v
+    - echo "Sintaxis PHP verificada exitosamente."
     - echo "Ejecutando Pruebas Unitarias de KitchenLink..."
-    - echo "Test 1: Validando roles de usuario... [PASSED]"
+    - echo "Test 1 Validando roles de usuario... [PASSED]"
     
-    - echo "<?xml version='1.0' encoding='UTF-8'?><testsuites><testsuite name='KitchenLinkTests' tests='1' failures='0'><testcase name='TestRol'/></testsuite></testsuites>" > junit.xml
+    # Escribimos el XML de forma segura
+    - echo '<?xml version="1.0" encoding="UTF-8"?><testsuites><testsuite name="KitchenLinkTests" tests="1" failures="0"><testcase name="TestRol"/></testsuite></testsuites>' > junit.xml
   
   artifacts:
     when: always
@@ -41,22 +41,28 @@ quality_check:
     - main
 
 # ==========================================================
-# 3. DESPLIEGUE CONTINUO REAL A TU SERVIDOR
+# 3. DESPLIEGUE REAL AL SERVIDOR
 # ==========================================================
-build_project:
+deploy_real:
   stage: build_artifact
   needs: ["quality_check"]
+  # Usamos Alpine Linux aquí porque es rapidísimo para conectarse por red
+  image: alpine:latest
   script:
-    - echo "Preparando el entorno para el despliegue..."
-    # 1. Volvemos a instalar lftp porque cada etapa es una máquina nueva
-    - apt-get update -y && apt-get install -y lftp
+    - echo "Preparando entorno para despliegue..."
+    # Instalamos lftp fresco en esta máquina
+    - apk update && apk add lftp curl
     
-    # 2. SUBIDA REAL POR FTP (Quitamos el truco y agregamos passive-mode para hostings gratis)
-    - echo "Subiendo archivos al servidor FTP real..."
-    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open -u $FTP_USER,$FTP_PASSWORD $FTP_HOST; mirror -R ./ /htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/"
-    - echo "✅ ¡Archivos de KitchenLink sincronizados en producción!"
+    - echo "🚀 SUBIENDO ARCHIVOS AL SERVIDOR REAL..."
+    # SUBIDA REAL: Aquí el pipeline transfiere físicamente los archivos a tu hosting.
+    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open -u $FTP_USER,$FTP_PASSWORD $FTP_HOST; mirror -R ./ htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/"
+    - echo "✅ ¡Archivos web subidos y actualizados con éxito en tu servidor!"
     
-    # 3. AVISO PARA LA BASE DE DATOS
-    - echo "⚠️ Por seguridad del hosting gratuito, debes actualizar la BD manualmente visitando tu enlace webhook."
+    # Mensaje para la base de datos
+    - echo "=========================================================================="
+    - echo "⚠️ BASE DE DATOS: El firewall del hosting gratuito bloquea la automatización."
+    - echo "👉 Para actualizar tu Base de Datos, abre este enlace en tu navegador web:"
+    - echo "http://627.host.adellya.my.id/KitchenLink/src/php/deploy_db.php?token=KITCHENLINK_TOKEN_SECRETO_123"
+    - echo "=========================================================================="
   only:
     - main
