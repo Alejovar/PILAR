@@ -587,7 +587,7 @@ CREATE TABLE `cash_shifts` (
   
   CONSTRAINT `fk_shift_user` FOREIGN KEY (`user_id_opened`) REFERENCES `users`(`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-;
+ ";
 
 // Ejecutamos silenciosamente
 $conn->multi_query($sql);
