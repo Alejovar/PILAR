@@ -134,7 +134,7 @@ $initial_order_json = json_encode($initial_data);
             <h2 style="margin: 0;">Mesa Actual: #<?php echo htmlspecialchars($table_number); ?></h2>
             <div id="liveClockContainer"></div>
 
-            <button onclick="registerABClick('B', '<?php echo $back_url; ?>')" style="background-color: #0d6efd; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); display: flex; align-items: center; gap: 8px;" id="btn-back-tables">
+            <button onclick="registerABClick('B', '<?php echo $back_url; ?>')" style="background-color: #00ff80; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; box-shadow: 0 4px 10px rgba(13, 110, 253, 0.4); display: flex; align-items: center; gap: 8px;" id="btn-back-tables">
                 <i class="fas fa-arrow-left"></i> Volver a Mesas
             </button>
         </header>
