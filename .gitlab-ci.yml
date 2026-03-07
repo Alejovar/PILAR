@@ -5,9 +5,7 @@ stages:
   - test
   - deploy
 
-# ==========================================================
 # 1. INSTALAR DEPENDENCIAS
-# ==========================================================
 install_deps:
   stage: install_dependencies
   script:
@@ -16,9 +14,7 @@ install_deps:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-# ==========================================================
 # 2. ETAPA DE TEST (3 TRABAJOS EN PARALELO)
-# ==========================================================
 
 # Trabajo 1: Revisión de Sintaxis
 lint-job:
@@ -57,9 +53,7 @@ security-job:
     - echo "Buscando archivos sensibles expuestos..."
     - find . -name "*.env" -o -name "*.sql" || echo "Análisis de seguridad completado."
 
-# ==========================================================
 # 3. DESPLIEGUE CONTINUO
-# ==========================================================
 deploy_to_server:
   stage: deploy
   needs: ["lint-job", "unit-test-job", "security-job"]
