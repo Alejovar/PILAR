@@ -38,7 +38,7 @@ quality_check:
     - main
 
 # ==========================================================
-# 3. DESPLIEGUE AL SERVIDOR (Con Salvavidas)
+# 3. DESPLIEGUE REAL AL SERVIDOR
 # ==========================================================
 deploy_real:
   stage: build_artifact
@@ -47,9 +47,15 @@ deploy_real:
   script:
     - echo "Preparando entorno para despliegue..."
     - apk update && apk add lftp curl
-    - echo "🚀 ENVIANDO ARCHIVOS AL SERVIDOR..."
     
-    # Sintaxis con salvavidas incluido para garantizar que el círculo salga verde
-    - lftp -u "$FTP_USER","$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow no; set ftp:passive-mode true; mirror -R ./ htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/; quit" || echo "✅ Simulacion de despliegue exitosa. Archivos listos en produccion."
+    # Pruebas de diagnóstico (Para ver si GitLab sí está leyendo tus variables)
+    - echo "Verificando conexion con el Host -> ${FTP_HOST}"
+    - echo "Usuario detectado -> ${FTP_USER}"
+    
+    - echo "🚀 ENVIANDO ARCHIVOS AL SERVIDOR..."
+    # Conexión por URL directa (Mucho más estable en Alpine Linux)
+    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ /htdocs/KitchenLink/ --ignore-time --parallel=10 --exclude-glob .git* --exclude .git/;"
+    
+    - echo "✅ ¡Archivos web subidos y actualizados de verdad en tu servidor!"
   only:
     - main
