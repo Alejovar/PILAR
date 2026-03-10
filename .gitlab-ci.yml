@@ -55,21 +55,9 @@ deploy_to_server:
   needs: ["lint-job", "unit-test-job", "security-job"]
   image: alpine:latest
   script:
-    - apk update && apk add lftp curl
+    - apk update && apk add lftp
     - echo "🚀 Transfiriendo archivos al servidor de Adellya..."
-    
-    # SOLUCIÓN YAML: Usamos '>' para que el parser no se confunda con el comando lftp
-    - >
-      lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ htdocs/KitchenLink/ --exclude-glob .git* --exclude .gitlab-ci.yml --exclude junit.xml --exclude src/php/db_connection.php;"
-    
-    - echo "✅ Archivos web subidos respetando la conexión a la BD!"
-    - echo "🗄️ DISPARANDO ACTUALIZACIÓN DE BASE DE DATOS (Spoofing)..."
-    
-    # SOLUCIÓN YAML: Usamos '>' nuevamente para proteger la cadena larga de curl
-    - >
-      curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" -H "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8" -H "Accept-Language: es-MX,es;q=0.9" -c cookies.txt -b cookies.txt -m 15 -sS -L "http://627.host.adellya.my.id/KitchenLink/src/php/deploy_db.php?token=KITCHENLINK_TOKEN_SECRETO_123" || echo "⚠️ El webhook falló o fue bloqueado por el firewall, revisa la BD manualmente."
-    
+    - lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ htdocs/KitchenLink/ --exclude-glob .git* --exclude .gitlab-ci.yml --exclude junit.xml;"
     - echo "✅ Despliegue completado con éxito."
   rules:
-    # SOLUCIÓN YAML: Las reglas 'if' que contienen variables deben ir entre comillas simples
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: $CI_COMMIT_BRANCH == "main"  # <--- Esto hace que el cuadro 4 solo salga en main
