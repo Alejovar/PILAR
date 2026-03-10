@@ -91,10 +91,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
           <h1>¡Bienvenido!</h1>
           <img src="src/images/logos/KitchenLink_logo.png" alt="Logo de KitchenLink"
             style="max-width: 80%; margin-top: 20px;" />
-          <p>¿Eres nuevo? habla al gerente para que te apoye en el proceso de registro.</p>
-          <a href="register.html">
-            <button class="hidden">Regístrate</button>
-          </a>
         </div>
       </div>
     </div>
