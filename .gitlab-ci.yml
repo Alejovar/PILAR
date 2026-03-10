@@ -60,7 +60,6 @@ phpunit-advanced-job:
     # Instalamos Git, Zip y Composer temporalmente en el contenedor para poder descargar PHPUnit
     - apt-get update && apt-get install -y git unzip zip
     
-    # 🟢 LA SOLUCIÓN: Instalamos la extensión mysqli nativa en el contenedor
     - docker-php-ext-install mysqli
     
     - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -68,10 +67,8 @@ phpunit-advanced-job:
     - cd KitchenLink-Tests
     - composer install --no-interaction
     
-    # 🟢 LA MAGIA: Le pedimos a PHPUnit que además del texto, genere un XML compatible con GitLab
     - ./vendor/bin/phpunit --testdox --log-junit report-phpunit.xml
   
-  # 🟢 CONEXIÓN CON LA INTERFAZ: Le entregamos el XML a la pestaña "Tests"
   artifacts:
     when: always
     reports:
