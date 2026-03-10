@@ -59,6 +59,10 @@ phpunit-advanced-job:
     - echo "Ejecutando Suite de Pruebas PHPUnit (Mockeando Base de Datos)..."
     # Instalamos Git, Zip y Composer temporalmente en el contenedor para poder descargar PHPUnit
     - apt-get update && apt-get install -y git unzip zip
+    
+    # 🟢 LA SOLUCIÓN: Instalamos la extensión mysqli nativa en el contenedor
+    - docker-php-ext-install mysqli
+    
     - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
     # Entramos a tu carpeta de pruebas, instalamos las dependencias y corremos los tests
     - cd KitchenLink-Tests
