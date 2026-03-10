@@ -67,7 +67,15 @@ phpunit-advanced-job:
     # Entramos a tu carpeta de pruebas, instalamos las dependencias y corremos los tests
     - cd KitchenLink-Tests
     - composer install --no-interaction
-    - ./vendor/bin/phpunit --testdox
+    
+    # 🟢 LA MAGIA: Le pedimos a PHPUnit que además del texto, genere un XML compatible con GitLab
+    - ./vendor/bin/phpunit --testdox --log-junit report-phpunit.xml
+  
+  # 🟢 CONEXIÓN CON LA INTERFAZ: Le entregamos el XML a la pestaña "Tests"
+  artifacts:
+    when: always
+    reports:
+      junit: KitchenLink-Tests/report-phpunit.xml
 
 # ==========================================================
 # 3. DESPLIEGUE CONTINUO (SOLO AL HACER MERGE A MAIN)
