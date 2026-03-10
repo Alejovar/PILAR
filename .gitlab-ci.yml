@@ -61,7 +61,7 @@ phpunit-advanced-job:
     - apt-get update && apt-get install -y git unzip zip
     - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
     # Entramos a tu carpeta de pruebas, instalamos las dependencias y corremos los tests
-    - cd KitchenLink-Tests
+    - cd test
     - composer install --no-interaction
     - ./vendor/bin/phpunit --testdox
 
