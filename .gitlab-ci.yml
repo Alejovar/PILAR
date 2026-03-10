@@ -5,16 +5,18 @@ stages:
   - test
   - deploy
 
-# 1. INSTALACIÓN
+# 1. INSTALACIÓN (Corre en todas las ramas)
 install_deps:
   stage: install_dependencies
   script:
     - echo "Preparando el entorno para KitchenLink..."
+  # Sin reglas restrictivas para que siempre inicie el pipeline
 
 # ==========================================================
-# 2. TEST
+# 2. ETAPA DE TEST (4 TRABAJOS EN PARALELO)
 # ==========================================================
 
+# Trabajo 1: Sintaxis
 lint-job:
   stage: test
   needs: ["install_deps"]
@@ -22,6 +24,7 @@ lint-job:
     - echo "Ejecutando Linting (Sintaxis)..."
     - find . -name "*.php" -exec php -l {} \; | grep "Errors parsing" && exit 1 || echo "✅ Sintaxis OK."
 
+# Trabajo 2: Pruebas Unitarias Básicas
 unit-test-job:
   stage: test
   needs: ["install_deps"]
@@ -40,6 +43,7 @@ unit-test-job:
     reports:
       junit: junit.xml
 
+# Trabajo 3: Seguridad
 security-job:
   stage: test
   needs: ["install_deps"]
@@ -47,56 +51,49 @@ security-job:
     - echo "Buscando archivos sensibles expuestos..."
     - find . -name "*.env" -o -name "*.sql" || echo "Análisis de seguridad completado."
 
+# ---> NUEVO TRABAJO 4: Suite Avanzada PHPUnit (Lógica de Negocio) <---
 phpunit-advanced-job:
   stage: test
   needs: ["install_deps"]
   script:
-    - echo "Ejecutando Suite de Pruebas PHPUnit..."
+    - echo "Ejecutando Suite de Pruebas PHPUnit (Mockeando Base de Datos)..."
+    # Instalamos Git, Zip y Composer temporalmente en el contenedor para poder descargar PHPUnit
     - apt-get update && apt-get install -y git unzip zip
+    
+    # 🟢 LA SOLUCIÓN: Instalamos la extensión mysqli nativa en el contenedor
     - docker-php-ext-install mysqli
+    
     - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    # Entramos a tu carpeta de pruebas, instalamos las dependencias y corremos los tests
     - cd KitchenLink-Tests
     - composer install --no-interaction
+    
+    # 🟢 LA MAGIA: Le pedimos a PHPUnit que además del texto, genere un XML compatible con GitLab
     - ./vendor/bin/phpunit --testdox --log-junit report-phpunit.xml
-
+  
+  # 🟢 CONEXIÓN CON LA INTERFAZ: Le entregamos el XML a la pestaña "Tests"
   artifacts:
     when: always
     reports:
       junit: KitchenLink-Tests/report-phpunit.xml
 
 # ==========================================================
-# 3. DEPLOY
+# 3. DESPLIEGUE CONTINUO (SOLO AL HACER MERGE A MAIN)
 # ==========================================================
-
 deploy_to_server:
   stage: deploy
+  # Actualizamos el array "needs" para que espere también a que pase PHPUnit
   needs: ["lint-job", "unit-test-job", "security-job", "phpunit-advanced-job"]
   image: alpine:latest
-
   script:
-    - apk update && apk add lftp curl
-
+    - apk update && apk add lftp
     - echo "🚀 Transfiriendo archivos al servidor de Adellya..."
-
+    
+    # Se usa el operador '>' para evitar el error de "mapping values" de YAML en comandos largos
     - >
-      lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true;
-      open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST};
-      mirror -R ./ htdocs/KitchenLink/
-      --exclude-glob .git*
-      --exclude .gitlab-ci.yml
-      --exclude junit.xml;"
-
-    - echo "🗄️ Ejecutando migración de base de datos..."
-
-    - >
-      curl -L
-      --retry 5
-      --retry-delay 5
-      --connect-timeout 30
-      --max-time 120
-      "http://627.host.adellya.my.id/KitchenLink/src/php/deploy_db.php?token=KITCHENLINK_TOKEN_SECRETO_123"
-
+      lftp -c "set ftp:ssl-allow no; set ftp:passive-mode true; open ftp://${FTP_USER}:${FTP_PASSWORD}@${FTP_HOST}; mirror -R ./ htdocs/KitchenLink/ --exclude-glob .git* --exclude .gitlab-ci.yml --exclude junit.xml;"
+    
     - echo "✅ Despliegue completado con éxito."
-
   rules:
+    # Se usan comillas simples para proteger las variables y evitar errores YAML
     - if: '$CI_COMMIT_BRANCH == "main"'
