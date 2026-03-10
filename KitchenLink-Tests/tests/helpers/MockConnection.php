@@ -4,25 +4,22 @@
  *
  * Stub de mysqli para pruebas unitarias.
  * Permite inyectar resultados de consultas sin necesidad de una BD real.
- *
- * Uso:
- *   $conn = new MockConnection();
- *   $conn->queueResult(['user_id' => 1, 'name' => 'Juan']); // simula fetch_assoc
- *   $conn->queueRowCount(1);                                 // simula num_rows
  */
 class MockConnection extends mysqli
 {
     /** @var array Cola de resultados a devolver en orden */
     private array $resultQueue = [];
 
-    /** @var int Filas afectadas por la última operación */
-    public int $affected_rows = 1;
+    // 🟢 CORRECCIÓN: Tipos exactos de PHP 8.1 (int|string)
+    /** @var int|string Filas afectadas por la última operación */
+    public int|string $affected_rows = 1;
 
-    /** @var int ID del último INSERT simulado */
-    public int $insert_id = 99;
+    /** @var int|string ID del último INSERT simulado */
+    public int|string $insert_id = 99;
 
-    /** @var bool Si la conexión ha fallado */
-    public bool $connect_errno = false;
+    // 🟢 CORRECCIÓN: connect_errno nativo es int, no bool
+    /** @var int Si la conexión ha fallado */
+    public int $connect_errno = 0;
 
     /** @var bool Si hay una transacción activa */
     public bool $in_transaction = false;
@@ -56,32 +53,45 @@ class MockConnection extends mysqli
     }
 
     // ── API de mysqli ─────────────────────────────────────────────────────────
-
-    public function prepare(string $sql): MockStatement
+    
+    // 🟢 CORRECCIÓN: Atributo para evitar errores si devuelves un MockStatement
+    #[\ReturnTypeWillChange]
+    public function prepare(string $query)
     {
         return new MockStatement($this);
     }
 
-    public function begin_transaction(): void
+    // 🟢 CORRECCIÓN: Las firmas de transacción en PHP 8.1 exigen parámetros y retorno bool
+    public function begin_transaction(int $flags = 0, ?string $name = null): bool
     {
         $this->in_transaction = true;
+        return true;
     }
 
-    public function commit(): void
+    public function commit(int $flags = 0, ?string $name = null): bool
     {
         $this->committed = true;
         $this->in_transaction = false;
+        return true;
     }
 
-    public function rollback(): void
+    public function rollback(int $flags = 0, ?string $name = null): bool
     {
         $this->rolledBack = true;
         $this->in_transaction = false;
+        return true;
     }
 
-    public function close(): void {}
+    // 🟢 CORRECCIÓN: close y ping devuelven bool
+    public function close(): bool 
+    { 
+        return true; 
+    }
 
-    public function ping(): bool { return true; }
+    public function ping(): bool 
+    { 
+        return true; 
+    }
 
     // ── Dequeue interno ───────────────────────────────────────────────────────
 
@@ -90,3 +100,4 @@ class MockConnection extends mysqli
         return array_shift($this->resultQueue);
     }
 }
+?>
