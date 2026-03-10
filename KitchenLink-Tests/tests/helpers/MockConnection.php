@@ -10,7 +10,7 @@
  *   $conn->queueResult(['user_id' => 1, 'name' => 'Juan']); // simula fetch_assoc
  *   $conn->queueRowCount(1);                                 // simula num_rows
  */
-class MockConnection
+class MockConnection extends mysqli
 {
     /** @var array Cola de resultados a devolver en orden */
     private array $resultQueue = [];
