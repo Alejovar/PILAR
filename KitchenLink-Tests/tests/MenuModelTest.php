@@ -5,9 +5,9 @@
  * Pruebas unitarias para: src/api/orders/tpv/MenuModel.php
  *
  * Cubre:
- *  - getProductsByCategory()  → productos disponibles por categoría
- *  - getModifiersByGroup()    → modificadores y nombre de grupo
- *  - getPreparationAreaByProductId() → área de preparación (COCINA / BAR)
+ * - getProductsByCategory()  → productos disponibles por categoría
+ * - getModifiersByGroup()    → modificadores y nombre de grupo
+ * - getPreparationAreaByProductId() → área de preparación (COCINA / BAR)
  */
 
 declare(strict_types=1);
@@ -51,7 +51,9 @@ class MenuModelTest extends TestCase
     {
         $conn = $this->createMock(MockConnection::class);
         $stmt = $this->createMock(MockStatement::class);
-        $result = new MockResult([]);  // Sin filas
+        
+        // 🟢 FIX: Si usas MockResult para fetch_all, debe retornar un array vacío explícito
+        $result = new MockResult([]);  
 
         $conn->method('prepare')->willReturn($stmt);
         $stmt->method('get_result')->willReturn($result);
@@ -68,8 +70,15 @@ class MenuModelTest extends TestCase
         $this->expectException(Exception::class);
         $this->expectExceptionMessageMatches('/Error de BD/');
 
+        // 🟢 FIX: Usamos la clase directa en lugar de createMock para poder modificar $error (si se necesita) o evitamos el read-only
+        $conn = new MockConnection();
+        // $conn->error = "Simulated error"; // PHP 8.1 no lo permite, el test asume error vacío o el que tenga por defecto
+
+        // Para simular que prepare falla usando la clase real instanciada:
+        // Como prepare() en MockConnection ahora devuelve un MockStatement, 
+        // necesitamos crear un MockConnection con PHPUnit para forzar el return false.
         $conn = $this->createMock(MockConnection::class);
-        $conn->method('prepare')->willReturn(false);  // Simula fallo de prepare()
+        $conn->method('prepare')->willReturn(false); 
 
         $model = new MenuModel($conn);
         $model->getProductsByCategory(1);
@@ -113,8 +122,12 @@ class MenuModelTest extends TestCase
         $conn   = $this->createMock(MockConnection::class);
         $stmt1  = $this->createMock(MockStatement::class);
         $stmt2  = $this->createMock(MockStatement::class);
+        
+        // 🟢 FIX: Asegurar array vacío para fetch_all
         $result1 = new MockResult([]);
-        $result2 = new MockResult(['group_name' => 'Vacío']);
+        
+        // El nombre del grupo sí usa fetch_assoc, así que enviamos una sola fila
+        $result2 = new MockResult([['group_name' => 'Vacío']]); 
 
         $conn->method('prepare')->willReturnOnConsecutiveCalls($stmt1, $stmt2);
         $stmt1->method('get_result')->willReturn($result1);
@@ -130,7 +143,7 @@ class MenuModelTest extends TestCase
     public function test_getModifiersByGroup_retorna_fallback_si_prepare_lanza_error(): void
     {
         $conn = $this->createMock(MockConnection::class);
-        $conn->error = 'Error SQL simulado';
+        // 🟢 FIX: Eliminada la escritura a $conn->error (Read-only en PHP 8.1)
         $conn->method('prepare')->willReturn(false);
 
         $model  = new MenuModel($conn);
@@ -150,7 +163,8 @@ class MenuModelTest extends TestCase
     {
         $conn   = $this->createMock(MockConnection::class);
         $stmt   = $this->createMock(MockStatement::class);
-        $result = new MockResult(['preparation_area' => 'COCINA']);
+        // fetch_assoc() toma el primer elemento, por lo que empaquetamos la fila en un array
+        $result = new MockResult([['preparation_area' => 'COCINA']]);
 
         $conn->method('prepare')->willReturn($stmt);
         $stmt->method('get_result')->willReturn($result);
@@ -165,7 +179,7 @@ class MenuModelTest extends TestCase
     {
         $conn   = $this->createMock(MockConnection::class);
         $stmt   = $this->createMock(MockStatement::class);
-        $result = new MockResult(['preparation_area' => 'BAR']);
+        $result = new MockResult([['preparation_area' => 'BAR']]);
 
         $conn->method('prepare')->willReturn($stmt);
         $stmt->method('get_result')->willReturn($result);
@@ -180,7 +194,8 @@ class MenuModelTest extends TestCase
     {
         $conn   = $this->createMock(MockConnection::class);
         $stmt   = $this->createMock(MockStatement::class);
-        $result = new MockResult(null);  // Producto no existe → fetch_assoc() = null
+        // 🟢 FIX: Si no se encuentra, MockResult debe devolver un array vacío o null compatible
+        $result = new MockResult([]); 
 
         $conn->method('prepare')->willReturn($stmt);
         $stmt->method('get_result')->willReturn($result);
@@ -196,7 +211,7 @@ class MenuModelTest extends TestCase
         $this->expectException(Exception::class);
 
         $conn = $this->createMock(MockConnection::class);
-        $conn->error = 'Error SQL';
+        // 🟢 FIX: Eliminada la escritura a $conn->error (Read-only en PHP 8.1)
         $conn->method('prepare')->willReturn(false);
 
         $model = new MenuModel($conn);
