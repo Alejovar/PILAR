@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Si la interfaz no está bloqueada, controlamos los botones de envío normalmente
         if (!isInterfaceLocked) {
             sendOrderBtn.disabled = !hasNewItems;
-            sendOrderBtn.textContent = hasSentItems ? 'Actualizar Orden' : 'Enviar a Cocina';
+            sendOrderBtn.textContent = hasSentItems ? 'Actualizar Comanda' : 'Enviar Comanda'; //Se modifico el texto del botón para reflejar si es una nueva orden o una actualización 
             
             const pendingTimeIndex = getFirstPendingTimeIndex();
             const hasProductsInActiveTime = pendingTimeIndex !== -1 && currentOrder.slice(pendingTimeIndex + 1).some(i => i.type === 'product' && !i.sentTimestamp);
