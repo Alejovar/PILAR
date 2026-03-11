@@ -8,10 +8,10 @@
 // Esto evita el problema de abrir y cerrar prematuramente la conexión.
 // -----------------------------------------------------
 if (!isset($conn)) {
-    $servername = "sql300.host.adellya.my.id";
-    $username_db = "llya_40123800";
-    $password_db = "o9ibzcw7";
-    $dbname = "llya_40123800_KichenLink";
+    $servername = "localhost";
+    $username_db = "KitchenLink";
+    $password_db = "Kl03102026?";
+    $dbname = "KichenLink";
 
     // Crea la conexión
     $conn = new mysqli($servername, $username_db, $password_db, $dbname);
