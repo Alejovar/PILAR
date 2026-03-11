@@ -1,4 +1,4 @@
-// /KitchenLink/src/js/manager_reports.js
+// /src/js/manager_reports.js
 // VERSIÓN FINAL COMPLETA CON LÓGICA DE REPORTES Y MANEJO DE ERRORES.
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnRunRotationReport = document.getElementById('btnRunRotationReport');
     
     // URL APIs
-    const API_ENDPOINT = '/KitchenLink/src/api/manager/reports/reports_api.php';
-    const SERVERS_ENDPOINT = '/KitchenLink/src/api/manager/get_active_servers.php'; 
+    const API_ENDPOINT = '/src/api/manager/reports/reports_api.php';
+    const SERVERS_ENDPOINT = '/src/api/manager/get_active_servers.php'; 
     
     // Función para obtener fechas en formato YYYY-MM-DD
     const formatToDateInput = (dateObj) => {

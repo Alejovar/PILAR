@@ -5,7 +5,7 @@
 // Envía los productos de la orden y el total actual guardado en la base de datos.
 // =====================================================
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -21,7 +21,7 @@ try {
     }
 
     // 2. Conexión a la base de datos
-    require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+    require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
     if (!$conn || $conn->connect_errno) {
         throw new Exception('Error de conexión a la base de datos.');
     }

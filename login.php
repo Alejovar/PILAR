@@ -23,22 +23,22 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
     // Determina la página de destino basada en el rol
     switch ($roleId) {
         case MESERO_ROLE_ID:
-            $destination = '/KitchenLink/src/php/orders.php';
+            $destination = '/src/php/orders.php';
             break;
         case COCINA_ROLE_ID:
-            $destination = '/KitchenLink/src/php/kitchen_orders.php';
+            $destination = '/src/php/kitchen_orders.php';
             break;
         case HOSTESS_ROLE_ID:
-            $destination = '/KitchenLink/src/php/reservations.php';
+            $destination = '/src/php/reservations.php';
             break;
         case BARRA_ROLE_ID: // 🔑 REDIRECCIÓN A BARRA
-            $destination = '/KitchenLink/src/php/bar_orders.php';
+            $destination = '/src/php/bar_orders.php';
             break;
         case CASHIER_ROLE_ID:
-            $destination = '/KitchenLink/src/php/cashier.php';
+            $destination = '/src/php/cashier.php';
             break;
         case MANAGER_ROLE_ID:
-            $destination = '/KitchenLink/src/php/manager_dashboard.php';
+            $destination = '/src/php/manager_dashboard.php';
             break;
         default:
             // Si el rol es desconocido, cerramos la sesión y dejamos que vea el login
@@ -63,15 +63,15 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-  <link rel="stylesheet" href="src/css/style.css" />
+  <link rel="stylesheet" href="/src/css/style.css" />
   <title>Login | KitchenLink</title>
-  <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
 </head>
 
 <body>
   <div class="container" id="container">
     <div class="form-container sign-in">
-      <form id="loginForm" action="/KitchenLink/src/php/login_handler.php" method="POST">
+      <form id="loginForm" action="/src/php/login_handler.php" method="POST">
         <h1>Iniciar Sesión</h1>
         <span>Ingresa tu nombre de usuario y contraseña</span>
 
@@ -89,14 +89,14 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
       <div class="toggle">
         <div class="toggle-panel toggle-right">
           <h1>¡Bienvenido!</h1>
-          <img src="src/images/logos/KitchenLink_logo.png" alt="Logo de KitchenLink"
+          <img src="/src/images/logos/KitchenLink_logo.png" alt="Logo de KitchenLink"
             style="max-width: 80%; margin-top: 20px;" />
         </div>
       </div>
     </div>
   </div>
 
-  <script src="/KitchenLink/src/js/script.js"></script>
+  <script src="/src/js/script.js"></script>
 </body>
 
 </html>

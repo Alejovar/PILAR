@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. VERIFICACIÓN DE TURNO INICIAL
     try {
         // Reutilizamos el API que ya existe
-        const response = await fetch('/KitchenLink/src/api/cashier/history_reports/get_shift_status.php');
+        const response = await fetch('/src/api/cashier/history_reports/get_shift_status.php');
         const data = await response.json();
 
         if (!data.success || data.status === 'CLOSED') {
             // ¡Turno cerrado!
             alert("El turno de caja ha sido cerrado. La sesión se cerrará.");
             // Redirigimos al logout para limpiar la sesión
-            window.location.href = '/KitchenLink/src/php/logout.php';
+            window.location.href = '/src/php/logout.php';
             return; // Detenemos la carga del resto del script
         }
 
@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ordersGrid = document.getElementById('ordersGrid');
     const clockContainer = document.getElementById('liveClockContainer');
     
-    const API_ENDPOINT = '/KitchenLink/src/api/orders/pending_orders/get_pending_orders.php'; 
-    const API_DETAIL = '/KitchenLink/src/api/orders/pending_orders/get_order_details.php'; 
-    const API_COMPLETE = '/KitchenLink/src/api/orders/pending_orders/mark_as_completed.php';
+    const API_ENDPOINT = '/src/api/orders/pending_orders/get_pending_orders.php'; 
+    const API_DETAIL = '/src/api/orders/pending_orders/get_order_details.php'; 
+    const API_COMPLETE = '/src/api/orders/pending_orders/mark_as_completed.php';
 
     const detailsPanel = document.getElementById('orderDetailsPanel');
     const closeDetailsBtn = document.getElementById('closeDetailsPanel');

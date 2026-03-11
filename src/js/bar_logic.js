@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const clockContainer = document.getElementById('liveClockContainer');
     const barGrid = document.getElementById('barOrdersGrid');
     
-    const API_ENDPOINT = '/KitchenLink/src/api/bar/get_bar_orders.php'; 
-    const API_ACTION_ENDPOINT = '/KitchenLink/src/api/bar/update_item_status.php';
+    const API_ENDPOINT = '/src/api/bar/get_bar_orders.php'; 
+    const API_ACTION_ENDPOINT = '/src/api/bar/update_item_status.php';
 
     function parseUTCTimestamp(sqlTimestamp) {
         if (!sqlTimestamp) return new Date(NaN);

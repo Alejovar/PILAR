@@ -1,9 +1,9 @@
 <?php
-// /KitchenLink/src/api/manager/menu/get_modifiers_by_group.php
+// /src/api/manager/menu/get_modifiers_by_group.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json');
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 
 if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 1) { echo json_encode(['success'=>false]); exit; }
 

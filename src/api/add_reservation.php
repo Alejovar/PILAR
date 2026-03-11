@@ -4,7 +4,7 @@
 // los inserta en la base de datos de manera segura y atómica (usando una transacción).
 
 // --- CONFIGURACIÓN INICIAL Y DE RESPUESTA
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 // Se especifica que la respuesta de este script será en formato JSON.
 // Esto es fundamental para que el cliente (JavaScript en el navegador) sepa cómo interpretar los datos que recibe.
 header('Content-Type: application/json');

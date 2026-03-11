@@ -1,6 +1,6 @@
 <?php
 // /src/api/bar/get_bar_orders.php (VERSIÓN CON MODIFICADORES)
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -15,7 +15,7 @@ try {
     
     $area = 'BARRA';
 
-    require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+    require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 
     // Se añade un LEFT JOIN a 'modifiers' y se selecciona 'modifier_name'
     $sql = "

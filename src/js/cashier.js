@@ -1,4 +1,4 @@
-// /KitchenLink/src/js/cashier.js
+// /src/js/cashier.js
 
 // 💥 MODIFICACIÓN: Hacemos el listener principal ASÍNCRONO
 document.addEventListener('DOMContentLoaded', async () => {
@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. VERIFICACIÓN DE TURNO
     // Primero, verificamos si el turno está abierto antes de cargar esta pantalla.
     try {
-        const response = await fetch('/KitchenLink/src/api/cashier/history_reports/get_shift_status.php');
+        const response = await fetch('/src/api/cashier/history_reports/get_shift_status.php');
         
         if (!response.ok) {
             throw new Error(`Error de red: ${response.status}`);
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Bloqueamos la carga de esta página y redirigimos.
             alert("El turno está cerrado. Debes abrir un nuevo turno desde 'Historial y Reportes' para continuar.");
             // Redirigimos a la pantalla de administración
-            window.location.href = '/KitchenLink/src/php/sales_history.php';
+            window.location.href = '/src/php/sales_history.php';
             return; // Detenemos la ejecución de este script
         }
 
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function fetchOpenAccounts() {
         try {
             // Nota: Esta API debe incluir 'pre_bill_status' de restaurant_tables en su respuesta
-            const response = await fetch('/KitchenLink/src/api/cashier/get_open_accounts.php');
+            const response = await fetch('/src/api/cashier/get_open_accounts.php');
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
             if (result.success) {
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         accountDetailsContent.innerHTML = '<p>Cargando detalles...</p>';
         discountAmount = 0;
         try {
-            const response = await fetch(`/KitchenLink/src/api/cashier/get_account_details.php?order_id=${orderId}`);
+            const response = await fetch(`/src/api/cashier/get_account_details.php?order_id=${orderId}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
             if (result.success) {
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            const response = await fetch('/KitchenLink/src/api/cashier/process_payment.php', {
+            const response = await fetch('/src/api/cashier/process_payment.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const received = cashReceived; // Efectivo que el cliente dio
 
                 // Abrimos el recibo final con el ID de la venta y los parámetros necesarios
-                const receiptUrl = `/KitchenLink/src/php/ticket_final_template.php?sale_id=${saleId}&discount=${discountAmount}&cash_received=${received}&change=${cash_change}`;
+                const receiptUrl = `/src/php/ticket_final_template.php?sale_id=${saleId}&discount=${discountAmount}&cash_received=${received}&change=${cash_change}`;
 
                 // Usamos un tamaño grande para asegurar la visibilidad de los botones de impresión
                 const printWindow = window.open(receiptUrl, '_blank', 'width=700,height=800,scrollbars=yes,resizable=yes');
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         try {
-            const response = await fetch('/KitchenLink/src/api/cashier/cancel_prebill.php', {
+            const response = await fetch('/src/api/cashier/cancel_prebill.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ order_id: orderId })
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // 1. 💥 Notificar al servidor que el pre-ticket fue solicitado (Bloqueo de Mesero)
         try {
-            const response = await fetch('/KitchenLink/src/api/cashier/set_prebill_requested.php', {
+            const response = await fetch('/src/api/cashier/set_prebill_requested.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ order_id: selectedOrderId })
@@ -486,7 +486,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         
         // 2. Abrir la ventana de impresión
-        const ticketUrl = `/KitchenLink/src/php/ticket_template.php?order_id=${selectedOrderId}&discount=${discountAmount}`;
+        const ticketUrl = `/src/php/ticket_template.php?order_id=${selectedOrderId}&discount=${discountAmount}`;
 
         // Usamos un tamaño grande para asegurar la visibilidad de los botones de impresión
         const printWindow = window.open(ticketUrl, '_blank', 'width=700,height=800,scrollbars=yes,resizable=yes');

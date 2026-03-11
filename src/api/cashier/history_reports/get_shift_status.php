@@ -1,7 +1,7 @@
 <?php
-// /KitchenLink/src/api/cashier/history_reports/get_shift_status.php
+// /src/api/cashier/history_reports/get_shift_status.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // 💡 CAMBIO: Añadido rol 2 (Mesero) a la lista de roles permitidos

@@ -1,6 +1,6 @@
 <?php
 // src/api/get_current_available_tables.php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 // Le decimos al cliente que la respuesta es JSON.
 header('Content-Type: application/json');
 // Nos conectamos a la base de datos.

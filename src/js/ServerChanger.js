@@ -11,8 +11,8 @@ export class ServerChanger {
 
         this.currentTableNumber = null;
         this.api = {
-            GET_SERVERS: '/KitchenLink/src/api/orders/advanced_options/get_server_list.php',
-            EXECUTE_CHANGE: '/KitchenLink/src/api/orders/advanced_options/change_server.php'
+            GET_SERVERS: '/src/api/orders/advanced_options/get_server_list.php',
+            EXECUTE_CHANGE: '/src/api/orders/advanced_options/change_server.php'
         };
     }
 

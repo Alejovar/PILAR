@@ -1,7 +1,7 @@
 <?php
 // Clase principal para la interfaz de lista de espera
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
 // --- LÓGICA DE SEGURIDAD CRÍTICA ---
 define('HOSTESS_ROLE_ID', 4); // ID 4 según tu base de datos
@@ -30,7 +30,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != HOSTESS_ROLE_ID) {
         session_destroy();
     }
     
-    header('Location: /KitchenLink/index.php?error=acceso_no_hostess_lista');
+    header('Location: /index.php?error=acceso_no_hostess_lista');
     exit();
 }
 // Si el script llega aquí, el usuario es una Hostess válida.
@@ -43,9 +43,9 @@ $hostess_name = htmlspecialchars($_SESSION['user_name'] ?? 'Hostess');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Espera | KitchenLink</title>
-      <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/KitchenLink/src/css/reservations.css">
-    <link rel="stylesheet" href="/KitchenLink/src/css/waiting_list.css">
+      <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="stylesheet" href="/src/css/reservations.css">
+    <link rel="stylesheet" href="/src/css/waiting_list.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
@@ -54,8 +54,8 @@ $hostess_name = htmlspecialchars($_SESSION['user_name'] ?? 'Hostess');
         <div>
             <h2>Restaurante</h2>
             <ul>
-                <li><a href="/KitchenLink/src/php/reservations.php"><i class="fas fa-calendar-alt"></i> Reservaciones</a></li>
-                <li><a href="/KitchenLink/src/php/waiting_list.php" class="active"><i class="fas fa-list-ol"></i> Lista de espera</a></li>
+                <li><a href="/src/php/reservations.php"><i class="fas fa-calendar-alt"></i> Reservaciones</a></li>
+                <li><a href="/src/php/waiting_list.php" class="active"><i class="fas fa-list-ol"></i> Lista de espera</a></li>
             </ul>
         </div>
         <div class="user-info">
@@ -64,7 +64,7 @@ $hostess_name = htmlspecialchars($_SESSION['user_name'] ?? 'Hostess');
                 <strong><?php echo $hostess_name; ?></strong><br>
                 <span>Sesión activa</span>
             </div>
-            <a href="/KitchenLink/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
+            <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
                 <i class="fas fa-sign-out-alt"></i>
             </a>
         </div>
@@ -136,7 +136,7 @@ $hostess_name = htmlspecialchars($_SESSION['user_name'] ?? 'Hostess');
             </div>
         </div>
     </div>
-    <script src="/KitchenLink/src/js/session_interceptor.js"></script>
-    <script src="/KitchenLink/src/js/waiting_list.js"></script>
+    <script src="/src/js/session_interceptor.js"></script>
+    <script src="/src/js/waiting_list.js"></script>
 </body>
 </html>

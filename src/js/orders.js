@@ -7,12 +7,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 1. VERIFICACIÓN DE TURNO (SOLO PARA MESEROS)
     if (typeof window.isManagerMode === 'undefined' || !window.isManagerMode) {
         try {
-            const response = await fetch('/KitchenLink/src/api/cashier/history_reports/get_shift_status.php');
+            const response = await fetch('/src/api/cashier/history_reports/get_shift_status.php');
             const data = await response.json();
 
             if (!data.success || data.status === 'CLOSED') {
                 alert("El turno de caja ha sido cerrado. La sesión se cerrará.");
-                window.location.href = '/KitchenLink/src/php/logout.php';
+                window.location.href = '/src/php/logout.php';
                 return; 
             }
         } catch (error) {
@@ -41,10 +41,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedTable = null;
 
     const API_ROUTES = {
-        GET_TABLES: '/KitchenLink/src/api/orders/get_tables.php',
-        CREATE_TABLE: '/KitchenLink/src/api/orders/create_table.php',
-        GET_SERVERS: '/KitchenLink/src/api/manager/get_active_servers.php',
-        LOCK_TABLE: '/KitchenLink/src/api/orders/lock_table.php' // 🔒 Ruta del semáforo
+        GET_TABLES: '/src/api/orders/get_tables.php',
+        CREATE_TABLE: '/src/api/orders/create_table.php',
+        GET_SERVERS: '/src/api/manager/get_active_servers.php',
+        LOCK_TABLE: '/src/api/orders/lock_table.php' // 🔒 Ruta del semáforo
     };
 
     // --- FUNCIONES ---

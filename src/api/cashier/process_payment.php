@@ -1,7 +1,7 @@
 <?php
-// /KitchenLink/src/api/cashier/process_payment.php
+// /src/api/cashier/process_payment.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf8');
 
 $response = ['success' => false, 'message' => 'An unknown error occurred.'];

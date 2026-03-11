@@ -3,7 +3,7 @@
 // get_products_by_category.php - API para TPV (MySQLi)
 // =====================================================
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // -----------------------------------------------------
@@ -28,7 +28,7 @@ if (!$category_id) {
 // -----------------------------------------------------
 // 🔌 Conexión a la base de datos (MySQLi)
 // -----------------------------------------------------
-$absolute_conn_path = $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+$absolute_conn_path = $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 
 if (!file_exists($absolute_conn_path)) {
     http_response_code(500);

@@ -17,8 +17,8 @@ $_SESSION = [
 ];
 
 // ─── Stub de check_session.php (no hace nada en tests) ───────────────────────
-// Los archivos stub están en tests/stubs/KitchenLink/src/php/security/
-// y tests/stubs/KitchenLink/src/php/
+// Los archivos stub están en tests/stubs/src/php/security/
+// y tests/stubs/src/php/
 
 // ─── Autoload del helper de mocks ─────────────────────────────────────────────
 require_once __DIR__ . '/helpers/MockConnection.php';

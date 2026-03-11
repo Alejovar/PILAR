@@ -2,7 +2,7 @@
 // orders.php - Tu archivo principal en el servidor
 
 // 1. Incluye el check_session universal.
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
 // --- LÓGICA DE SEGURIDAD CRÍTICA ---
 define('MESERO_ROLE_ID', 2);
@@ -31,7 +31,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != MESERO_ROLE_ID) {
         session_destroy();
     }
     
-    header('Location: /KitchenLink/index.php?error=acceso_no_mesero_pendientes');
+    header('Location: /index.php?error=acceso_no_mesero_pendientes');
     exit();
 }
 // Si el script llega aquí, el usuario es un Mesero válido.
@@ -46,9 +46,9 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Mesas | KitchenLink</title>
-  <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/KitchenLink/src/css/orders.css">
-    <link rel="stylesheet" href="/KitchenLink/src/css/modal_advanced_options.css">
+  <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="stylesheet" href="/src/css/orders.css">
+    <link rel="stylesheet" href="/src/css/modal_advanced_options.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -59,7 +59,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
             <h2>Restaurante</h2>
             <ul>
                 <li><a href="#" class="active"><i class="fas fa-utensils"></i> Mesas</a></li>
-                <li><a href="/KitchenLink/src/php/pending_orders.php"><i class="fas fa-bell"></i> Órdenes Pendientes</a></li>
+                <li><a href="/src/php/pending_orders.php"><i class="fas fa-bell"></i> Órdenes Pendientes</a></li>
             </ul>
         </div>
         
@@ -73,7 +73,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
                 </div>
             </div>
             
-            <a href="/KitchenLink/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
+            <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
                 <i class="fas fa-sign-out-alt"></i>
             </a>
         </div>
@@ -109,10 +109,10 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
 
 <?php 
     // Incluimos el archivo que contiene nuestros modales desde la carpeta de componentes.
-    include $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/components/advanced_options_modals.php';
+    include $_SERVER['DOCUMENT_ROOT'] . '/src/components/advanced_options_modals.php';
 ?>
 
-<div id="notification-container"></div> <script src="/KitchenLink/src/js/session_interceptor.js"></script>
-<script type="module" src="/KitchenLink/src/js/orders.js"></script>
-<script type="module" src="/KitchenLink/src/js/notifications.js"></script> </body>
+<div id="notification-container"></div> <script src="/src/js/session_interceptor.js"></script>
+<script type="module" src="/src/js/orders.js"></script>
+<script type="module" src="/src/js/notifications.js"></script> </body>
 </html>

@@ -76,7 +76,7 @@ export class ModalAdvancedOptions {
         const password = this.passwordInput.value;
 
         try {
-            const res = await fetch('/KitchenLink/src/api/orders/auth/verify_manager.php', {
+            const res = await fetch('/src/api/orders/auth/verify_manager.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: password }) 

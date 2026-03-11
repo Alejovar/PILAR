@@ -1,7 +1,7 @@
 <?php
-// /KitchenLink/src/api/reports/open_shift.php
+// /src/api/reports/open_shift.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $response = ['success' => false, 'message' => 'Error desconocido.'];

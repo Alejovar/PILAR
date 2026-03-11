@@ -1,6 +1,6 @@
 <?php
 // Preparamos la respuesta, será en formato JSON.
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json');
 
 // LA FORMA CORRECTA DE INCLUIR EL ARCHIVO

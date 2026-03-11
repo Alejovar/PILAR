@@ -9,12 +9,12 @@ if (session_status() === PHP_SESSION_NONE) {
 if (!isset($_SESSION['user_id'], $_SESSION['session_token'])) {
     session_unset();
     session_destroy();
-    header('Location: /KitchenLink/index.php?error=session_expired');
+    header('Location: /index.php?error=session_expired');
     exit;
 }
 
 // 2. Conexión a DB
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 if (!isset($conn) || $conn->connect_error) {
     die("Error de conexión a la base de datos");
 }
@@ -32,7 +32,7 @@ if (!$user_row || $user_row['session_token'] !== $_SESSION['session_token']) {
     // Solo destruir la sesión local, no tocar token en DB
     session_unset();
     session_destroy();
-    header('Location: /KitchenLink/index.php?error=session_expired');
+    header('Location: /index.php?error=session_expired');
     exit;
 }
 

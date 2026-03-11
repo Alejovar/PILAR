@@ -1,5 +1,5 @@
 <?php
-// Path: /KitchenLink/test/save_metric.php
+// Path: /test/save_metric.php
 
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data_line = "$timestamp,$version,$time\n";
     
     // Save file in the root of the KitchenLink project
-    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/ab_test_results.txt';
+    $file_path = $_SERVER['DOCUMENT_ROOT'] . '/ab_test_results.txt';
     
     if (file_put_contents($file_path, $data_line, FILE_APPEND | LOCK_EX) !== false) {
         echo json_encode(['status' => 'success', 'message' => 'Metric saved successfully']);

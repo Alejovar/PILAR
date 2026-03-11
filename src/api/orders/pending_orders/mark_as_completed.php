@@ -1,7 +1,7 @@
 <?php
 // /api/orders/pending_orders/mark_as_completed.php - VERSIÓN CORREGIDA Y ROBUSTA
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -38,7 +38,7 @@ try {
         throw new Exception("Faltan parámetros para completar la orden. " . $debug_info);
     }
 
-    require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+    require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
     if (!$conn || $conn->connect_errno) {
         throw new Exception('Error de conexión a la base de datos.');
     }

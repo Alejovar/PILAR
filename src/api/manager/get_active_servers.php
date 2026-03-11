@@ -1,7 +1,7 @@
 <?php
-// /KitchenLink/src/api/manager/get_active_servers.php
+// /src/api/manager/get_active_servers.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $response = ['success' => false, 'data' => []];
@@ -15,7 +15,7 @@ if (!isset($_SESSION['rol_id']) || !in_array($_SESSION['rol_id'], [1, 6])) {
     exit;
 }
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 
 try {
     // 2. Obtener usuarios con rol de MESERO (rol_id = 2)

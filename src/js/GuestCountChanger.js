@@ -9,7 +9,7 @@ export class GuestCountChanger {
         this.currentTableDisplay = document.getElementById('currentGuestTableDisplay');
 
         this.currentTableNumber = null;
-        this.apiEndpoint = '/KitchenLink/src/api/orders/advanced_options/change_guest_count.php';
+        this.apiEndpoint = '/src/api/orders/advanced_options/change_guest_count.php';
 
         // Vinculamos el método para que 'this' funcione correctamente en el listener
         this._handleInputFormatting = this._formatInput.bind(this);

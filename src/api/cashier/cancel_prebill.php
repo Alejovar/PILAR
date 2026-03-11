@@ -1,7 +1,7 @@
 <?php
-// /KitchenLink/src/api/cashier/cancel_prebill.php
+// /src/api/cashier/cancel_prebill.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf8');
 // Asegúrate de que db_connection.php esté incluido si no lo hace check_session_api.php
 

@@ -2,11 +2,11 @@
 // =====================================================
 // EXECUTE_CANCEL.PHP - Cancela productos en order_details (MySQLi)
 // =====================================================
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // --- Cargar conexión ---
-$absolute_path_to_conn = $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+$absolute_path_to_conn = $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 require_once $absolute_path_to_conn;
 
 if (!$conn) {

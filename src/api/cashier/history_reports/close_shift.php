@@ -1,10 +1,10 @@
 <?php
-// /KitchenLink/src/api/cashier/history_reports/close_shift.php
+// /src/api/cashier/history_reports/close_shift.php
 // 💡 VERSIÓN CORREGIDA FINAL
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $response = ['success' => false, 'message' => 'Error al cerrar el turno.'];

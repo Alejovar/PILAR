@@ -1,7 +1,7 @@
 <?php
 // get_product_modifiers.php - API para obtener opciones de guisos/sabores
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 // Evitar warnings/notices que rompan JSON
 error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
 

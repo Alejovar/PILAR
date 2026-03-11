@@ -1,13 +1,13 @@
 <?php
-// /KitchenLink/src/php/ticket_server_report_template.php
+// /src/php/ticket_server_report_template.php
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Reporte de Mesero</title>
-    <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/KitchenLink/src/css/cashier.css">
+    <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="stylesheet" href="/src/css/cashier.css">
     <style>
         body.ticket-body { visibility: hidden; }
         @media print {

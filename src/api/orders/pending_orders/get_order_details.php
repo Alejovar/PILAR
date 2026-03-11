@@ -1,7 +1,7 @@
 <?php
 // get_order_details.php - VERSIÓN CORREGIDA CON MODIFICADORES
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
@@ -10,7 +10,7 @@ $response = ['success' => false, 'message' => 'Error desconocido.'];
 
 // --- 1. CONEXIÓN A LA BASE DE DATOS ---
 // 💡 MOVIMOS LA CONEXIÓN AQUÍ, AL INICIO
-require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 if (!$conn || $conn->connect_errno) {
     http_response_code(500);
     $response['message'] = 'Error de conexión a la base de datos.';

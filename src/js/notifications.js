@@ -1,4 +1,4 @@
-// /KitchenLink/src/js/notifications.js
+// /src/js/notifications.js
 
 document.addEventListener('DOMContentLoaded', () => {
     const notificationContainer = document.getElementById('notification-container');

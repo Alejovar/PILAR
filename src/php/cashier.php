@@ -1,14 +1,14 @@
 <?php
 // cashier.php - Interfaz de Caja (CORREGIDO)
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
 // --- LÓGICA DE SEGURIDAD PARA CAJA ---
 define('CASHIER_ROLE_ID', 6);
 define('MANAGER_ROLE_ID', 1);
 
 if (!isset($_SESSION['rol_id']) || !in_array($_SESSION['rol_id'], [CASHIER_ROLE_ID, MANAGER_ROLE_ID])) {
-    header('Location: /KitchenLink/index.php?error=unauthorized_access');
+    header('Location: /index.php?error=unauthorized_access');
     exit();
 }
 
@@ -21,8 +21,8 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Usuario');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Pagos | KitchenLink</title>
-      <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/KitchenLink/src/css/cashier.css"> 
+      <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="stylesheet" href="/src/css/cashier.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -45,7 +45,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Usuario');
                     <div class="session-status-text">Sesión Activa</div>
                 </div>
             </div>
-            <a href="/KitchenLink/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
+            <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
                 <i class="fas fa-sign-out-alt"></i>
             </a>
         </div>
@@ -114,8 +114,8 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Usuario');
     </div>
 </div>
 
-<script src="/KitchenLink/src/js/session_interceptor.js"></script>
-<script type="module" src="/KitchenLink/src/js/cashier.js"></script>
+<script src="/src/js/session_interceptor.js"></script>
+<script type="module" src="/src/js/cashier.js"></script>
 
 </body>
 </html>

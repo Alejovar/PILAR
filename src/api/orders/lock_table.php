@@ -1,9 +1,9 @@
 <?php
-// /KitchenLink/src/api/orders/lock_table.php
+// /src/api/orders/lock_table.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 
 // 1. Verificar Turno
 $stmt_shift = $conn->prepare("SELECT 1 FROM cash_shifts WHERE status = 'OPEN' LIMIT 1");

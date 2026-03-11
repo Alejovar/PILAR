@@ -8,7 +8,7 @@ class TableNumberChanger {
         this.currentTableDisplay = document.getElementById('currentTableDisplay');
 
         this.currentTableNumber = null;
-        this.apiEndpoint = '/KitchenLink/src/api/orders/advanced_options/change_table.php';
+        this.apiEndpoint = '/src/api/orders/advanced_options/change_table.php';
 
         // NUEVO: Vinculamos el método de formateo para usarlo en el event listener.
         this._handleInputFormatting = this._formatInput.bind(this);

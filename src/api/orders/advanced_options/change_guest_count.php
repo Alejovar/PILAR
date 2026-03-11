@@ -2,12 +2,12 @@
 // =====================================================
 // CHANGE_GUEST_COUNT.PHP - Actualizar número de comensales (MySQLi)
 // =====================================================
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // --- Cargar conexión y dependencias ---
 // Usamos la lógica de ruta absoluta, pero asumimos que define $conn (objeto MySQLi)
-$absolute_path_to_conn = $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+$absolute_path_to_conn = $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 require_once $absolute_path_to_conn;
 
 // Verificación de conexión MySQLi

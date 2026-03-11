@@ -1,7 +1,7 @@
 <?php
 // /src/api/orders/get_active_order_id.php - Obtiene el ID de la orden activa para una mesa
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 date_default_timezone_set('America/Mexico_City');
 
@@ -16,7 +16,7 @@ try {
     }
 
     // Conexión
-    require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+    require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
     if (!isset($conn) || !$conn instanceof mysqli || $conn->connect_error) {
         throw new Exception("Error de conexión a la base de datos.");
     }

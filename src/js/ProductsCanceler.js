@@ -19,8 +19,8 @@ export class ProductsCanceler {
 
         // Endpoints de la API
         this.api = {
-            GET_PRODUCTS: '/KitchenLink/src/api/orders/advanced_options/get_cancel_data.php',
-            EXECUTE_CANCEL: '/KitchenLink/src/api/orders/advanced_options/execute_cancel.php'
+            GET_PRODUCTS: '/src/api/orders/advanced_options/get_cancel_data.php',
+            EXECUTE_CANCEL: '/src/api/orders/advanced_options/execute_cancel.php'
         };
 
         // Enlaces (binds)

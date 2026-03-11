@@ -1,7 +1,7 @@
 <?php
 // get_reservation_details.php - Endpoint API para cargar datos de una reservación para edición.
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json');
 
 // Verificar autenticación (opcional, pero buena práctica)

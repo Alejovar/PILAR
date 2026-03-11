@@ -3,7 +3,7 @@
 // send_order.php - VERSIÓN CON PUNTO DE DEBUG
 // ===================================================================
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', 0); 
 error_reporting(E_ALL);
@@ -27,7 +27,7 @@ try {
     if ($table_number <= 0 || empty($times)) throw new Exception('Datos incompletos.');
 
     // Conexión y Modelo
-    require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php'; 
+    require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php'; 
     if (!$conn || $conn->connect_errno) throw new Exception('Error de conexión a la base de datos.');
     
     // Verificar turno de caja

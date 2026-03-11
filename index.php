@@ -24,22 +24,22 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
     // Determina la página de destino basada en el rol
     switch ($roleId) {
         case MESERO_ROLE_ID:
-            $destination = '/KitchenLink/src/php/orders.php';
+            $destination = '/src/php/orders.php';
             break;
         case COCINA_ROLE_ID:
-            $destination = '/KitchenLink/src/php/kitchen_orders.php';
+            $destination = '/src/php/kitchen_orders.php';
             break;
         case HOSTESS_ROLE_ID:
-            $destination = '/KitchenLink/src/php/reservations.php';
+            $destination = '/src/php/reservations.php';
             break;
         case BARRA_ROLE_ID: // 🔑 REDIRECCIÓN A BARRA
-            $destination = '/KitchenLink/src/php/bar_orders.php';
+            $destination = '/src/php/bar_orders.php';
             break;
         case CASHIER_ROLE_ID:
-            $destination = '/KitchenLink/src/php/cashier.php';
+            $destination = '/src/php/cashier.php';
             break;
         case MANAGER_ROLE_ID:
-            $destination = '/KitchenLink/src/php/manager_dashboard.php';
+            $destination = '/src/php/manager_dashboard.php';
             break;
         default:
             // Si el rol es desconocido, cerramos la sesión y dejamos que vea el login
@@ -62,8 +62,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sesión Bloqueada | KitchenLink</title>
-      <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-	  <link rel="manifest" href="/KitchenLink/manifest.json">
+      <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+	  <link rel="manifest" href="/manifest.json">
     
     <style>
         * {
@@ -708,7 +708,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
             <div class="orbit-ring"></div>
             <div class="logo-glow"></div>
             <div class="logo-container">
-                <img src="/KitchenLink/src/images/logos/KitchenLink_logo.png" alt="KitchenLink Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"> 
+                <img src="/src/images/logos/KitchenLink_logo.png" alt="KitchenLink Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"> 
                 <div class="lock-icon" style="display: none;">🔒</div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 <?php
-// Path: /KitchenLink/test/ab_results.php
+// Path: /test/ab_results.php
 
-$file_path = $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/ab_test_results.txt';
+$file_path = $_SERVER['DOCUMENT_ROOT'] . '/ab_test_results.txt';
 $times_A = [];
 $times_B = [];
 
@@ -42,7 +42,7 @@ $total_samples = count($times_A) + count($times_B);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resultados Prueba A/B | KitchenLink</title>
-    <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { 

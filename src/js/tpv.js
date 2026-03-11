@@ -2,12 +2,12 @@
 
 // Rutas a los endpoints PHP (AJAX)
 const API_ROUTES = {
-    API_PRODUCT_URL: '/KitchenLink/src/api/orders/tpv/get_products_by_category.php',
-    API_MODIFIER_URL: '/KitchenLink/src/api/orders/tpv/get_product_modifiers.php',
-    API_SEND_ORDER: '/KitchenLink/src/api/orders/tpv/send_order.php',
-    API_SEARCH_PRODUCT: '/KitchenLink/src/api/orders/tpv/search_products.php',
-    API_GET_ACTIVE_ORDER_ID: '/KitchenLink/src/api/orders/get_active_order_id.php',
-    API_GET_ORDER_ITEMS: '/KitchenLink/src/api/orders/tpv/get_current_order.php'
+    API_PRODUCT_URL: '/src/api/orders/tpv/get_products_by_category.php',
+    API_MODIFIER_URL: '/src/api/orders/tpv/get_product_modifiers.php',
+    API_SEND_ORDER: '/src/api/orders/tpv/send_order.php',
+    API_SEARCH_PRODUCT: '/src/api/orders/tpv/search_products.php',
+    API_GET_ACTIVE_ORDER_ID: '/src/api/orders/get_active_order_id.php',
+    API_GET_ORDER_ITEMS: '/src/api/orders/tpv/get_current_order.php'
 };
 
 // Referencias del DOM y Variables de estado
@@ -38,12 +38,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // <<<--- INICIO DE LA VERIFICACIÓN DE TURNO --- >>>
     // 1. VERIFICACIÓN DE TURNO INICIAL
     try {
-        const response = await fetch('/KitchenLink/src/api/cashier/history_reports/get_shift_status.php');
+        const response = await fetch('/src/api/cashier/history_reports/get_shift_status.php');
         const data = await response.json();
 
         if (!data.success || data.status === 'CLOSED') {
             alert("El turno de caja ha sido cerrado. La sesión se cerrará.");
-            window.location.href = '/KitchenLink/src/php/logout.php';
+            window.location.href = '/src/php/logout.php';
             return; // Detenemos la carga del resto del script
         }
 
@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (response.status === 410) { 
                 const errorData = await response.json();
                 alert(errorData.message + '\nRegresando a la lista de mesas.');
-                window.location.href = '/KitchenLink/src/php/orders.php'; // Regresar a lista de mesas
+                window.location.href = '/src/php/orders.php'; // Regresar a lista de mesas
                 return;
             }
 
@@ -1006,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(() => {
         // Solo enviamos señal si hay una mesa válida y NO estamos bloqueados por la caja
         if (typeof tableNumber !== 'undefined' && tableNumber > 0 && !isInterfaceLocked) {
-            fetch('/KitchenLink/src/api/orders/renew_lock.php', {
+            fetch('/src/api/orders/renew_lock.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ table_number: tableNumber })
@@ -1023,7 +1023,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = JSON.stringify({ table_number: tableNumber });
             // Usamos sendBeacon para asegurar que se envíe aunque se cierre el navegador
             const blob = new Blob([data], {type: 'application/json'});
-            navigator.sendBeacon('/KitchenLink/src/api/orders/unlock_table.php', blob);
+            navigator.sendBeacon('/src/api/orders/unlock_table.php', blob);
         }
     });
 

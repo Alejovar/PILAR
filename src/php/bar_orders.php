@@ -1,7 +1,7 @@
 <?php
 // bar_orders.php - Interfaz principal para la Barra
 // 1. Incluimos el check_session universal.
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
 // --- LÓGICA DE SEGURIDAD (RESTRINGIR POR ROL) ---
 define('BARRA_ROLE_ID', 5); // ID 5 corresponde al rol 'encargado de barra'
@@ -16,7 +16,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != BARRA_ROLE_ID) {
     }
     
     // Redirigir al inicio y forzar el login
-    header('Location: /KitchenLink/index.php?error=acceso_no_barra');
+    header('Location: /index.php?error=acceso_no_barra');
     exit();
 }
 
@@ -30,8 +30,8 @@ $rolName = htmlspecialchars($_SESSION['rol_name'] ?? 'Encargado de Barra');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Órdenes de Barra | KitchenLink</title>
-  <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/KitchenLink/src/css/bar_styles.css"> 
+  <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="stylesheet" href="/src/css/bar_styles.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -42,12 +42,12 @@ $rolName = htmlspecialchars($_SESSION['rol_name'] ?? 'Encargado de Barra');
             <h2>Restaurante</h2>
             <ul>
                 <li>
-                    <a href="/KitchenLink/src/php/bar_orders.php" class="active">
+                    <a href="/src/php/bar_orders.php" class="active">
                         <i class="fas fa-martini-glass-citrus"></i> Órdenes de Barra
                     </a>
                 </li>
                 <li>
-                    <a href="/KitchenLink/src/php/bar_history.php">
+                    <a href="/src/php/bar_history.php">
                         <i class="fas fa-history"></i> Historial de Barra
                     </a>
                 </li>
@@ -64,7 +64,7 @@ $rolName = htmlspecialchars($_SESSION['rol_name'] ?? 'Encargado de Barra');
                 </div>
             </div>
             
-            <a href="/KitchenLink/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
+            <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
                  <i class="fas fa-sign-out-alt"></i> </a>
         </div>
     </aside>
@@ -84,7 +84,7 @@ $rolName = htmlspecialchars($_SESSION['rol_name'] ?? 'Encargado de Barra');
         </div>
     </main>
 </div>
-<script src="/KitchenLink/src/js/session_interceptor.js"></script>
-<script src="/KitchenLink/src/js/bar_logic.js"></script>
+<script src="/src/js/session_interceptor.js"></script>
+<script src="/src/js/bar_logic.js"></script>
 </body>
 </html>

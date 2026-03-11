@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Funciones de inicialización, unlockUI, openNewShift, setupTabs ---
     async function initializePage() {
         try {
-            const response = await fetch('/KitchenLink/src/api/cashier/history_reports/get_shift_status.php');
+            const response = await fetch('/src/api/cashier/history_reports/get_shift_status.php');
             if (!response.ok) throw new Error(`Error ${response.status}: No se pudo contactar al servidor.`);
             const data = await response.json();
             loader.style.display = 'none';
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOpenShiftConfirm.disabled = true;
         btnOpenShiftConfirm.textContent = 'Abriendo...';
         try {
-            const response = await fetch('/KitchenLink/src/api/cashier/history_reports/open_shift.php', {
+            const response = await fetch('/src/api/cashier/history_reports/open_shift.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ starting_cash: amount })
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSearchTickets.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
         ticketResultsBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Buscando...</td></tr>';
         try {
-            const response = await fetch(`/KitchenLink/src/api/cashier/history_reports/search_tickets.php?${queryParams.toString()}`);
+            const response = await fetch(`/src/api/cashier/history_reports/search_tickets.php?${queryParams.toString()}`);
             const result = await response.json();
             if (result.success && result.data.length > 0) {
                 renderTicketResults(result.data);
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function reprintTicket(event) {
         const saleId = event.target.dataset.saleId;
         if (!saleId) return;
-        const receiptUrl = `/KitchenLink/src/php/ticket_final_template.php?sale_id=${saleId}&discount=0&cash_received=0&change=0`;
+        const receiptUrl = `/src/php/ticket_final_template.php?sale_id=${saleId}&discount=0&cash_received=0&change=0`;
         const printWindow = window.open(receiptUrl, '_blank', 'width=700,height=800,scrollbars=yes,resizable=yes');
         if (printWindow) printWindow.focus();
         else alert("El navegador bloqueó la ventana emergente. Por favor, habilite las ventanas emergentes.");
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             
             // --- VERIFICACIÓN DE CUENTAS ABIERTAS ---
-            const openAccountsResponse = await fetch('/KitchenLink/src/api/cashier/get_open_accounts.php');
+            const openAccountsResponse = await fetch('/src/api/cashier/get_open_accounts.php');
             const accountsResult = await openAccountsResponse.json();
 
             // Limpiamos mensajes de advertencia anteriores
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // --- Continuamos cargando el reporte ---
-            const response = await fetch('/KitchenLink/src/api/cashier/history_reports/get_current_shift_report.php');
+            const response = await fetch('/src/api/cashier/history_reports/get_current_shift_report.php');
             const result = await response.json();
             
             if (result.success) {
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadServerList() {
         if (!selectServerReport) return; 
         try {
-            const response = await fetch('/KitchenLink/src/api/cashier/history_reports/get_servers_list.php');
+            const response = await fetch('/src/api/cashier/history_reports/get_servers_list.php');
             const result = await response.json();
             if (result.success && result.data.length > 0) {
                 selectServerReport.innerHTML = '<option value="">-- Seleccione un mesero --</option>'; 
@@ -309,7 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnGenerateShiftReport.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cerrando Turno...';
         
         try {
-            const response = await fetch('/KitchenLink/src/api/cashier/history_reports/close_shift.php', {
+            const response = await fetch('/src/api/cashier/history_reports/close_shift.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ manual_cash_total: manualCashTotal }) // 💡 Aquí se envía la variable
@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (result.success) {
                 localStorage.setItem('currentShiftReportData', JSON.stringify(result));
-                const reportUrl = '/KitchenLink/src/php/ticket_shift_report_template.php';
+                const reportUrl = '/src/php/ticket_shift_report_template.php';
                 const reportWindow = window.open(reportUrl, '_blank', 'width=400,height=800');
                 alert("Turno cerrado exitosamente. El sistema se recargará.");
                 window.location.reload();
@@ -350,12 +350,12 @@ document.addEventListener('DOMContentLoaded', () => {
         btnGenerateServerReport.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
 
         try {
-            const response = await fetch(`/KitchenLink/src/api/cashier/history_reports/get_server_report.php?server_id=${serverId}&deduction_rate=${deductionRate}`);
+            const response = await fetch(`/src/api/cashier/history_reports/get_server_report.php?server_id=${serverId}&deduction_rate=${deductionRate}`);
             const result = await response.json();
 
             if (result.success) {
                 localStorage.setItem('currentServerReportData', JSON.stringify(result));
-                const reportUrl = '/KitchenLink/src/php/ticket_server_report_template.php';
+                const reportUrl = '/src/php/ticket_server_report_template.php';
                 const reportWindow = window.open(reportUrl, '_blank', 'width=400,height=600');
                 
                 if (!reportWindow) {

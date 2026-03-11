@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const clockContainer = document.getElementById('liveClockContainer');
     const barHistoryGrid = document.getElementById('barHistoryGrid');
     const datePicker = document.getElementById('historyDate');
-    const API_ENDPOINT = '/KitchenLink/src/api/bar/get_bar_history.php';
+    const API_ENDPOINT = '/src/api/bar/get_bar_history.php';
 
     // ✅ SE AÑADE LA FUNCIÓN DE CONVERSIÓN DE HORA
     function parseUTCTimestamp(sqlTimestamp) {

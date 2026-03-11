@@ -1,7 +1,7 @@
 <?php
-// /KitchenLink/src/api/cashier/history_reports/get_current_shift_report.php
+// /src/api/cashier/history_reports/get_current_shift_report.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $response = [

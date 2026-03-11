@@ -1,7 +1,7 @@
 <?php
 // pending_orders.php - CORREGIDO
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
 // --- LÓGICA DE SEGURIDAD CRÍTICA ---
 define('MESERO_ROLE_ID', 2);
@@ -30,7 +30,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != MESERO_ROLE_ID) {
         session_destroy();
     }
     
-    header('Location: /KitchenLink/index.php?error=acceso_no_mesero_pendientes');
+    header('Location: /index.php?error=acceso_no_mesero_pendientes');
     exit();
 }
 // Si el script llega aquí, el usuario es un Mesero válido.
@@ -45,8 +45,8 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Órdenes Pendientes | KitchenLink</title>
-  <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-<link rel="stylesheet" href="/KitchenLink/src/css/pending_orders.css">
+  <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+<link rel="stylesheet" href="/src/css/pending_orders.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -57,7 +57,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
             <h2>Restaurante</h2>
             <ul>
                 <li>
-                    <a href="/KitchenLink/src/php/orders.php">
+                    <a href="/src/php/orders.php">
                         <i class="fas fa-utensils"></i> Mesas
                     </a>
                 </li>
@@ -79,7 +79,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
                 </div>
             </div>
             
-            <a href="/KitchenLink/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
+            <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
                 <i class="fas fa-sign-out-alt"></i>
             </a>
         </div>
@@ -118,7 +118,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
     </div>
 </div>
 
-<script src="/KitchenLink/src/js/session_interceptor.js"></script>
-<script src="/KitchenLink/src/js/pending_orders.js"></script>
+<script src="/src/js/session_interceptor.js"></script>
+<script src="/src/js/pending_orders.js"></script>
 </body>
 </html>

@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadWaitingList() {
         try {
             // Realiza una petición GET a la API para obtener la lista de clientes.
-            const response = await fetch('/KitchenLink/src/api/get_waiting_list.php');
+            const response = await fetch('/src/api/get_waiting_list.php');
             // Si la respuesta del servidor no es exitosa (ej: error 500), lanza un error.
             if (!response.ok) throw new Error('Error en la respuesta del servidor');
             // Convierte la respuesta JSON en un array de objetos JavaScript.
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData(waitlistForm);
         try {
             // Realiza una petición POST a la API, enviando los datos del formulario.
-            const response = await fetch('/KitchenLink/src/api/add_to_waitlist.php', { method: 'POST', body: formData });
+            const response = await fetch('/src/api/add_to_waitlist.php', { method: 'POST', body: formData });
             // Interpreta la respuesta JSON del servidor.
             const result = await response.json();
 
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!confirm('¿Marcar este cliente como cancelado y moverlo al historial?')) return;
         try {
             // Realiza una petición POST a la API.
-            const response = await fetch('/KitchenLink/src/api/archive_from_waitlist.php', {
+            const response = await fetch('/src/api/archive_from_waitlist.php', {
                 method: 'POST',
                 // Define las cabeceras para indicar que se enviará contenido en formato JSON.
                 headers: { 'Content-Type': 'application/json' },
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Pide al servidor la lista de mesas con estado 'available'.
-            const response = await fetch('/KitchenLink/src/api/get_current_available_tables.php');
+            const response = await fetch('/src/api/get_current_available_tables.php');
             const data = await response.json();
             // Limpia el mensaje de "Cargando...".
             modalTableGrid.innerHTML = '';
@@ -186,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // Envía los datos al servidor para actualizar la base de datos.
-            const response = await fetch('/KitchenLink/src/api/seat_client.php', {
+            const response = await fetch('/src/api/seat_client.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ client_id: currentClientId, table_ids: tableIds })

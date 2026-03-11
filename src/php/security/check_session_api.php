@@ -14,7 +14,7 @@ if (!isset($_SESSION['user_id'], $_SESSION['session_token'])) {
     exit;
 }
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 
 // 2. Si la conexión a la DB falla, es un error del servidor.
 if (!isset($conn) || $conn->connect_error) {

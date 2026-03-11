@@ -20,6 +20,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     <p>Has iniciado sesión exitosamente como: **<?php echo htmlspecialchars($_SESSION['username']); ?>**.</p>
     <p>Tu rol es: **<?php echo htmlspecialchars($_SESSION['rol']); ?>**.</p>
 
-    <a href="src/php/logout.php">Cerrar sesión</a>
+    <a href="/src/php/logout.php">Cerrar sesión</a>
 </body>
 </html>

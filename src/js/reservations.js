@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function editReservation(reservationId) {
         // 1. Obtener los detalles de la reservación por ID (Necesitas la API get_reservation_details.php)
         try {
-            const response = await fetch(`/KitchenLink/src/api/get_reservation_details.php?id=${reservationId}`);
+            const response = await fetch(`/src/api/get_reservation_details.php?id=${reservationId}`);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             
             const res = await response.json();
@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function loadTableStatuses() {
         try {
-            const response = await fetch('/KitchenLink/src/api/get_table_status.php');
+            const response = await fetch('/src/api/get_table_status.php');
             const tables = await response.json();
 
             tableGrid.innerHTML = ''; 
@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!date || !time) return;
 
         try {
-            const response = await fetch(`/KitchenLink/src/api/get_available_tables.php?date=${date}&time=${time}`);
+            const response = await fetch(`/src/api/get_available_tables.php?date=${date}&time=${time}`);
             const tables = await response.json();
             tableSelectorContainer.innerHTML = '';
             
@@ -179,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadReservations(date) {
         if (!date) return;
         try {
-            const response = await fetch(`/KitchenLink/src/api/get_reservations.php?date=${date}`);
+            const response = await fetch(`/src/api/get_reservations.php?date=${date}`);
             
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status} al cargar reservaciones.`);
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function archiveReservationAPI(reservationId, status) {
         try {
-            const response = await fetch('/KitchenLink/src/api/archive_reservation.php', {
+            const response = await fetch('/src/api/archive_reservation.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ reservation_id: reservationId, status: status })
@@ -317,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // --- Lógica de Edición vs. Registro ---
         const isUpdating = currentEditingReservationId !== null;
-        const apiUrl = isUpdating ? '/KitchenLink/src/api/update_reservation.php' : '/KitchenLink/src/api/add_reservation.php';
+        const apiUrl = isUpdating ? '/src/api/update_reservation.php' : '/src/api/add_reservation.php';
         
         // Si estamos actualizando, añadimos el ID de la reservación al FormData
         if (isUpdating) {
@@ -375,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!confirm(`¿Desea cambiar el estado de la ${tableName}?`)) return;
 
             try {
-                const response = await fetch('/KitchenLink/src/api/update_table_status.php', { 
+                const response = await fetch('/src/api/update_table_status.php', { 
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'}, 
                     body: JSON.stringify({ table_id: tableId }) 
@@ -480,7 +480,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(async () => {
         try {
             console.log("Ejecutando limpieza automática de mesas... " + new Date().toLocaleTimeString());
-            await fetch('/KitchenLink/src/api/cleanup_tables.php');
+            await fetch('/src/api/cleanup_tables.php');
             await loadTableStatuses();
         } catch (error) {
             console.error("Error durante la limpieza automática:", error);

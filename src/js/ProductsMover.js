@@ -19,8 +19,8 @@ export class ProductsMover {
 
         // Endpoints de la API
         this.api = {
-            GET_DATA: '/KitchenLink/src/api/orders/advanced_options/get_move_data.php',
-            EXECUTE_MOVE: '/KitchenLink/src/api/orders/advanced_options/execute_move.php'
+            GET_DATA: '/src/api/orders/advanced_options/get_move_data.php',
+            EXECUTE_MOVE: '/src/api/orders/advanced_options/execute_move.php'
         };
         
         this._handleSubmitBound = this._handleSubmit.bind(this);

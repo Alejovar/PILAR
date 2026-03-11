@@ -1,7 +1,7 @@
 <?php
-// /KitchenLink/src/php/manager_reports.php
+// /src/php/manager_reports.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
 // --- LÓGICA DE SEGURIDAD CRÍTICA (SOLO GERENTE) ---
 define('MANAGER_ROLE_ID', 1); 
@@ -24,7 +24,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != MANAGER_ROLE_ID) {
         session_destroy();
     }
     
-    header('Location: /KitchenLink/index.php?error=acceso_denegado_gerente');
+    header('Location: /index.php?error=acceso_denegado_gerente');
     exit();
 }
 
@@ -37,9 +37,9 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes Analíticos | KitchenLink</title>
-    <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
     
-    <link rel="stylesheet" href="/KitchenLink/src/css/manager_reports.css"> 
+    <link rel="stylesheet" href="/src/css/manager_reports.css"> 
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -67,7 +67,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                     <div class="session-status-text">Gerente General</div>
                 </div>
             </div>
-            <a href="/KitchenLink/src/php/logout.php" class="logout-btn" title="Cerrar Sesión"><i class="fas fa-sign-out-alt"></i></a>
+            <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión"><i class="fas fa-sign-out-alt"></i></a>
         </div>
     </aside>
 
@@ -177,8 +177,8 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
     </main>
 </div> 
 
-<script src="/KitchenLink/src/js/session_interceptor.js"></script>
-<script src="/KitchenLink/src/js/manager_reports.js"></script> 
+<script src="/src/js/session_interceptor.js"></script>
+<script src="/src/js/manager_reports.js"></script> 
 
 </body>
 </html>

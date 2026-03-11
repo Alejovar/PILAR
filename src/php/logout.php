@@ -11,7 +11,7 @@ $sessionToken = $_SESSION['session_token'] ?? null; // <-- Obtenemos también el
 
 // 2. CONEXIÓN Y BORRADO CONDICIONAL DE TOKEN EN DB
 if ($userId && $sessionToken) { // <-- Nos aseguramos de tener ambos datos
-    require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+    require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
     
     if (isset($conn) && $conn->connect_errno === 0) {
         try {
@@ -45,6 +45,6 @@ if (ini_get("session.use_cookies")) {
 }
 
 // 5. Redirigir al inicio
-header("Location: /KitchenLink/index.php?status=logout");
+header("Location: /index.php?status=logout");
 exit();
 ?>

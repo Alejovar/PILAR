@@ -2,7 +2,7 @@
 // login.php - Login con sesión única por usuario y bloqueo por intentos fallidos
 
 session_start();
-require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 header('Content-Type: application/json');
 
 // --- CONFIGURACIÓN ---
@@ -156,27 +156,27 @@ $_SESSION['session_token'] = $session_token;
 session_write_close();
 
 // 🔹 REDIRECCIÓN SEGÚN EL ROL
-$redirect_url = "/KitchenLink/dashboard.php"; // Default
+$redirect_url = "/dashboard.php"; // Default
 switch ($rol_id) { // Usamos la variable $rol_id
     case 1: // Gerente
-        $redirect_url = "/KitchenLink/src/php/manager_dashboard.php";
+        $redirect_url = "/src/php/manager_dashboard.php";
         break;
     case 2: // Mesero
-        $redirect_url = "/KitchenLink/src/php/orders.php";
+        $redirect_url = "/src/php/orders.php";
         break;
     case 3: // Cocina
-        $redirect_url = "/KitchenLink/src/php/kitchen_orders.php";
+        $redirect_url = "/src/php/kitchen_orders.php";
         break;
     case 4: // Hostess
-        $redirect_url = "/KitchenLink/src/php/reservations.php";
+        $redirect_url = "/src/php/reservations.php";
         break;
     case 5: // Barra
-        $redirect_url = "/KitchenLink/src/php/bar_orders.php";
+        $redirect_url = "/src/php/bar_orders.php";
         break;
     case 6: // Caja
         // (La redirección a cashier.php es correcta, porque
         // el cashier.js se encargará de re-redirigir a sales_history.php si es necesario)
-        $redirect_url = "/KitchenLink/src/php/cashier.php";
+        $redirect_url = "/src/php/cashier.php";
         break;
 }
 

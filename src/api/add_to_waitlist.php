@@ -1,6 +1,6 @@
 <?php
 // src/api/add_to_waitlist.php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 // Le decimos al navegador que la respuesta será un JSON.
 header('Content-Type: application/json');
 // Conectamos a la base de datos. Si esto falla, el script se detiene.

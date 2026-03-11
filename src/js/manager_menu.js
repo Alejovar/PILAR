@@ -1,4 +1,4 @@
-// /KitchenLink/src/js/manager_menu.js
+// /src/js/manager_menu.js
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -45,17 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Rutas API
     const API = {
-        GET_CATS: '/KitchenLink/src/api/manager/menu/get_categories.php',
-        GET_PRODS: '/KitchenLink/src/api/manager/menu/get_products_by_category.php',
-        SAVE_CAT: '/KitchenLink/src/api/manager/menu/save_category.php',
-        SAVE_PROD: '/KitchenLink/src/api/manager/menu/save_product.php',
-        TOGGLE_PROD: '/KitchenLink/src/api/manager/menu/toggle_product_status.php',
-        GET_MODIFIERS: '/KitchenLink/src/api/manager/menu/get_modifier_groups.php',
-        SAVE_MOD_GROUP: '/KitchenLink/src/api/manager/menu/save_modifier_group.php',
-        GET_MODS_BY_GROUP: '/KitchenLink/src/api/manager/menu/get_modifiers_by_group.php',
-        SAVE_MOD: '/KitchenLink/src/api/manager/menu/save_modifier.php',
-        TOGGLE_MOD: '/KitchenLink/src/api/manager/menu/toggle_modifier_status.php',
-        GET_ALL_PRODS_FLAT: '/KitchenLink/src/api/manager/menu/get_all_products_flat.php' // Para el buscador global
+        GET_CATS: '/src/api/manager/menu/get_categories.php',
+        GET_PRODS: '/src/api/manager/menu/get_products_by_category.php',
+        SAVE_CAT: '/src/api/manager/menu/save_category.php',
+        SAVE_PROD: '/src/api/manager/menu/save_product.php',
+        TOGGLE_PROD: '/src/api/manager/menu/toggle_product_status.php',
+        GET_MODIFIERS: '/src/api/manager/menu/get_modifier_groups.php',
+        SAVE_MOD_GROUP: '/src/api/manager/menu/save_modifier_group.php',
+        GET_MODS_BY_GROUP: '/src/api/manager/menu/get_modifiers_by_group.php',
+        SAVE_MOD: '/src/api/manager/menu/save_modifier.php',
+        TOGGLE_MOD: '/src/api/manager/menu/toggle_modifier_status.php',
+        GET_ALL_PRODS_FLAT: '/src/api/manager/menu/get_all_products_flat.php' // Para el buscador global
     };
 
     // --- RELOJ ---

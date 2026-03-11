@@ -1,7 +1,7 @@
 <?php
 // /api/orders/get_tables.php - API para obtener las mesas y su tiempo de ocupación
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json');
 
 // 1. VERIFICAR AUTENTICACIÓN
@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // CRÍTICO: Incluye tu archivo de conexión MySQLi
-require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php'; 
+require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php'; 
 
 $user_id = $_SESSION['user_id']; 
 $rol_id  = $_SESSION['rol_id']; // 🟢 Obtenemos el rol para decidir qué mostrar

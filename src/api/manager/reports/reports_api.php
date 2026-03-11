@@ -1,8 +1,8 @@
 <?php
-// /KitchenLink/src/php/reports_api.php - API de Reportes Gerenciales
+// /src/php/reports_api.php - API de Reportes Gerenciales
 // VERSIÓN FINAL Y SEGURA.
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $response = ['success' => false, 'message' => 'Error desconocido.'];
@@ -16,7 +16,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 1) {
 
 try {
     // 2. Conexión y Charset
-    require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+    require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
     if (!$conn) throw new Exception('Error de conexión a la base de datos.');
     $conn->set_charset("utf8mb4");
 

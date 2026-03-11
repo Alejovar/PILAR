@@ -1,5 +1,5 @@
 <?php
-// /KitchenLink/src/php/ticket_final_template.php
+// /src/php/ticket_final_template.php
 $sale_id = $_GET['sale_id'] ?? 0;
 $discount = $_GET['discount'] ?? 0;
 $cash_received = $_GET['cash_received'] ?? 0; // Efectivo que el cliente dio (input)
@@ -10,8 +10,8 @@ $change = $_GET['change'] ?? 0; // Cambio que se entregó (calculado)
 <head>
     <meta charset="UTF-8">
     <title>Recibo Final #<?php echo htmlspecialchars($sale_id); ?> | KitchenLink</title>
-      <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/KitchenLink/src/css/cashier.css">
+      <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="stylesheet" href="/src/css/cashier.css">
     <style>
         body.ticket-body { visibility: hidden; }
     </style>
@@ -38,7 +38,7 @@ $change = $_GET['change'] ?? 0; // Cambio que se entregó (calculado)
 
         try {
             // 1. Obtener datos del nuevo endpoint
-            const response = await fetch(`/KitchenLink/src/api/cashier/get_sale_details.php?sale_id=${saleId}`);
+            const response = await fetch(`/src/api/cashier/get_sale_details.php?sale_id=${saleId}`);
             const result = await response.json();
 
             if (!result.success) throw new Error(result.message);

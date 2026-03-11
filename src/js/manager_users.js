@@ -1,4 +1,4 @@
-// /KitchenLink/src/js/manager_users.js
+// /src/js/manager_users.js
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -17,10 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const passHelp = document.getElementById('passHelpText');
 
     const API_ROUTES = {
-        LIST: '/KitchenLink/src/api/manager/users/get_all_users.php',
-        SAVE: '/KitchenLink/src/api/manager/users/save_user.php',
-        TOGGLE: '/KitchenLink/src/api/manager/users/toggle_user_status.php',
-        ROLES: '/KitchenLink/src/api/manager/users/get_roles.php'
+        LIST: '/src/api/manager/users/get_all_users.php',
+        SAVE: '/src/api/manager/users/save_user.php',
+        TOGGLE: '/src/api/manager/users/toggle_user_status.php',
+        ROLES: '/src/api/manager/users/get_roles.php'
     };
 
      function updateClock() {

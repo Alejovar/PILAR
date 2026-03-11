@@ -2,12 +2,12 @@
 // /src/api/kitchen/get_kitchen_history.php
 
 // 1. Incluye seguridad. ESTO YA ABRE Y DEFINE $conn (si la sesión es válida)
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 $response = ['success' => false, 'production_items' => []];
 
 // ⚠️ Se eliminó: $conn = null;
-// ⚠️ Se eliminó: require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+// ⚠️ Se eliminó: require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 
 try {
     // 2. Comprueba que $conn ha sido definida por el archivo de seguridad.

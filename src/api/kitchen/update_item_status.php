@@ -2,7 +2,7 @@
 // /src/api/kitchen/update_item_status.php (VERSIÓN CORREGIDA FINAL)
 
 // 1. Incluye seguridad.
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $response = ['success' => false, 'message' => 'Error desconocido.'];
@@ -32,7 +32,7 @@ try {
         throw new Exception("Estado no válido.");
     }
 
-    require $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/db_connection.php';
+    require $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
     
     if ($new_status === 'LISTO') {
         $conn->begin_transaction();

@@ -20,7 +20,7 @@
                 alert("Tu sesión ha expirado o se ha iniciado en otro dispositivo. Serás redirigido.");
                 
                 // Redirigimos la página al inicio de sesión.
-                window.location.href = '/KitchenLink/index.php'; 
+                window.location.href = '/index.php'; 
                 
                 // Detenemos la cadena de promesas para evitar errores en el código original.
                 return new Promise(() => {}); 

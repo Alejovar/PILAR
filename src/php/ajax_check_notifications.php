@@ -1,7 +1,7 @@
 <?php
-// /KitchenLink/src/php/ajax_check_notifications.php
+// /src/php/ajax_check_notifications.php
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['rol_id'] != 2 && $_SESSION['rol_id'] != 1)) {
     http_response_code(403);

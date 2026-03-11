@@ -2,16 +2,16 @@
 // order_interface.php - VERSIÓN FINAL Y ROBUSTA (Versión B como predeterminada)
 
 // 1. Seguridad (Verifica login/token y obtiene $_SESSION['rol_id'])
-require_once $_SERVER['DOCUMENT_ROOT'] . '/KitchenLink/src/php/security/check_session.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
 // 2. Definición del rol
 define('MANAGER_ROLE_ID', 1);
 define('MESERO_ROLE_ID', 2);
 
-$back_url = '/KitchenLink/src/php/orders.php'; // Por defecto (Mesero)
+$back_url = '/src/php/orders.php'; // Por defecto (Mesero)
 
 if (isset($_SESSION['rol_id']) && $_SESSION['rol_id'] == MANAGER_ROLE_ID) {
-    $back_url = '/KitchenLink/src/php/manager_dashboard.php'; 
+    $back_url = '/src/php/manager_dashboard.php'; 
 }
 
 // 🔑 VERIFICACIÓN DE ROL: Si no es mesero, redirige.
@@ -23,14 +23,14 @@ if ($_SESSION['rol_id'] != MESERO_ROLE_ID && $_SESSION['rol_id'] != MANAGER_ROLE
         session_destroy();
     }
     
-    header('Location: /KitchenLink/index.php?error=acceso_no_mesero');
+    header('Location: /index.php?error=acceso_no_mesero');
     exit();
 }
 
 // 3. Obtener y validar la mesa
 $table_number = filter_input(INPUT_GET, 'table', FILTER_VALIDATE_INT);
 if (!$table_number) {
-    header('Location: /KitchenLink/src/php/orders.php');
+    header('Location: /src/php/orders.php');
     exit();
 }
 
@@ -123,8 +123,8 @@ $initial_order_json = json_encode($initial_data);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ordenando Mesa #<?php echo htmlspecialchars($table_number); ?> | KitchenLink</title>
-      <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/KitchenLink/src/css/tpv.css">
+      <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="stylesheet" href="/src/css/tpv.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -216,8 +216,8 @@ $initial_order_json = json_encode($initial_data);
     </div>
     
     <script id="initialOrderData" type="application/json"><?php echo $initial_order_json; ?></script>
-    <script src="/KitchenLink/src/js/session_interceptor.js"></script>
-    <script src="/KitchenLink/src/js/tpv.js"></script> 
+    <script src="/src/js/session_interceptor.js"></script>
+    <script src="/src/js/tpv.js"></script> 
 
     <script>
         // Ocultar el Toast automáticamente después de 3.5 segundos
@@ -243,7 +243,7 @@ $initial_order_json = json_encode($initial_data);
             formData.append('time', elapsedSeconds);
 
             // Enviamos la data al archivo PHP para guardarlo (por si sigues recolectando métricas)
-            fetch('/KitchenLink/test/save_metric.php', {
+            fetch('/test/save_metric.php', {
                 method: 'POST',
                 body: formData
             }).then(() => {

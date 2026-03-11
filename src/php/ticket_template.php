@@ -1,5 +1,5 @@
 <?php
-// /KitchenLink/src/php/ticket_template.php
+// /src/php/ticket_template.php
 $order_id = $_GET['order_id'] ?? 0;
 $discount = $_GET['discount'] ?? 0;
 
@@ -11,8 +11,8 @@ header('Content-Type: text/html; charset=UTF-8');
 <head>
     <meta charset="UTF-8">
     <title>Pre-Ticket #<?php echo htmlspecialchars($order_id); ?> | KitchenLink</title>
-      <link rel="icon" href="/KitchenLink/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/KitchenLink/src/css/cashier.css">
+      <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="stylesheet" href="/src/css/cashier.css">
     <style>
         /* Estilos para que la página se vea en blanco mientras carga */
         body.ticket-body { visibility: hidden; }
@@ -36,7 +36,7 @@ header('Content-Type: text/html; charset=UTF-8');
         }
 
         try {
-            const response = await fetch(`/KitchenLink/src/api/cashier/get_ticket_data.php?order_id=${orderId}`);
+            const response = await fetch(`/src/api/cashier/get_ticket_data.php?order_id=${orderId}`);
             const result = await response.json();
 
             if (!result.success) throw new Error(result.message);
