@@ -11,7 +11,7 @@ if (!isset($conn)) {
     $servername = "localhost";
     $username_db = "KitchenLink";
     $password_db = "Kl03102026?";
-    $dbname = "KichenLink";
+    $dbname = "KitchenLink";
 
     // Crea la conexión
     $conn = new mysqli($servername, $username_db, $password_db, $dbname);
