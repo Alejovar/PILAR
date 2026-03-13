@@ -75,8 +75,8 @@ $rolName = htmlspecialchars($_SESSION['rol_name'] ?? 'Jefe de Cocina');
     <main class="content">
         <div id="liveClockContainer"></div>
 
-        <h1>Órdenes de Barra</h1>
-
+        <h1>Órdenes de Producción</h1>
+    
         <div class="production-areas">
             <div id="kitchenArea">
                 <h2>Cocina <i class="fas fa-utensils"></i></h2>
