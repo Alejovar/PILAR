@@ -1,0 +1,43 @@
+services:
+
+  # ── Base de datos MySQL ────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: kitchenlink-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: KitchenLink
+      MYSQL_USER: KitchenLink
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      # Primera vez que arranca: MySQL ejecuta este script y crea todas las tablas
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Volumen persistente: los datos sobreviven reinicios y actualizaciones
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "KitchenLink", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Aplicación PHP + Nginx ─────────────────────────────────────────────────
+  app:
+    image: ${APP_IMAGE:-kitchenlink-app}  # En CI/CD usa la imagen del registry; en local construye
+    build: .
+    container_name: kitchenlink-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      # db_connection.php lee estas variables para conectarse a MySQL
+      DB_HOST: db           # Docker resuelve "db" al contenedor de MySQL
+      DB_USER: KitchenLink
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: KitchenLink
+    depends_on:
+      db:
+        condition: service_healthy  # Espera a que MySQL esté listo antes de arrancar
+
+volumes:
+  db_data:
