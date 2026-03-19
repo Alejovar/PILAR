@@ -1,10 +1,8 @@
-# ─────────────────────────────────────────────────────────────────
 #  KitchenLink — Contenedor de la App
 #  PHP 8.1-FPM + Nginx + mysqli
 #
 #  Uso local:
 #    docker compose up --build
-# ─────────────────────────────────────────────────────────────────
 
 FROM php:8.1-fpm-alpine
 

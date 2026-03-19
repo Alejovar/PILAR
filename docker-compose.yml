@@ -1,6 +1,6 @@
 services:
 
-  # ── Base de datos MySQL ────────────────────────────────────────────────────
+  # ── Base de datos MySQL 
   db:
     image: mysql:8.0
     container_name: kitchenlink-db
@@ -21,7 +21,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # ── Aplicación PHP + Nginx ─────────────────────────────────────────────────
+  # ── Aplicación PHP + Nginx 
   app:
     image: ${APP_IMAGE:-kitchenlink-app}  # En CI/CD usa la imagen del registry; en local construye
     build: .

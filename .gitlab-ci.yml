@@ -15,7 +15,7 @@ install_deps:
 
 # 2. TESTS — 4 trabajos en paralelo
 
-# ── Trabajo 1: Sintaxis PHP ───────────────────────────────────────
+# ── Trabajo 1: Sintaxis PHP 
 lint-job:
   stage: test
   needs: ["install_deps"]
@@ -23,7 +23,7 @@ lint-job:
     - echo "Verificando sintaxis de todos los archivos PHP..."
     - find . -name "*.php" -exec php -l {} \; | grep "Errors parsing" && exit 1 || echo "✅ Sintaxis OK."
 
-# ── Trabajo 2: Prueba unitaria básica ────────────────────────────
+# ── Trabajo 2: Prueba unitaria básica 
 unit-test-job:
   stage: test
   needs: ["install_deps"]
@@ -42,7 +42,7 @@ unit-test-job:
     reports:
       junit: junit.xml
 
-# ── Trabajo 3: Seguridad ─────────────────────────────────────────
+# ── Trabajo 3: Seguridad 
 security-job:
   stage: test
   needs: ["install_deps"]
@@ -56,7 +56,7 @@ security-job:
         echo "✅ No se encontraron archivos sensibles."
       fi
 
-# ── Trabajo 4: Suite PHPUnit avanzada (lógica de negocio) ────────
+# ── Trabajo 4: Suite PHPUnit avanzada (lógica de negocio) 
 phpunit-advanced-job:
   stage: test
   needs: ["install_deps"]
@@ -174,3 +174,4 @@ deploy_to_production:
     - echo "✅ Despliegue a producción completado."
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual

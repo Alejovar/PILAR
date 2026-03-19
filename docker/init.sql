@@ -1,7 +1,5 @@
--- ─────────────────────────────────────────────────────────────
 --  KitchenLink — Script de inicialización de base de datos
 --  Generado para Docker: crea la BD y restaura el backup
--- ─────────────────────────────────────────────────────────────
 
 CREATE DATABASE IF NOT EXISTS KitchenLink CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE KitchenLink;
