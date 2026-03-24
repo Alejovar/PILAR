@@ -15,7 +15,7 @@ install_deps:
 
 # 2. TESTS — 4 trabajos en paralelo
 
-# ── Trabajo 1: Sintaxis PHP -
+# ── Trabajo 1: Sintaxis PHP
 lint-job:
   stage: test
   needs: ["install_deps"]
