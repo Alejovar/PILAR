@@ -145,7 +145,7 @@ deploy_to_production:
     VAULT_ID_TOKEN:
       aud: https://gitlab.com
   variables:
-    VAULT_ADDR: "http://TU_IP_DE_VAULT:8200" # REEMPLAZA CON TU IP
+    VAULT_ADDR: "http://34.56.208.182:8200" 
   before_script:
     - apk add --no-cache openssh-client curl jq
     - eval $(ssh-agent -s)
