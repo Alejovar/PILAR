@@ -1,10 +1,12 @@
 services:
-
   # ── Base de datos MySQL 
   db:
     image: mysql:8.0
     container_name: kitchenlink-db
     restart: unless-stopped
+    # ESTO ES LO QUE PERMITE QUE VAULT SE CONECTE DESDE AFUERA:
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: KitchenLink
@@ -23,7 +25,7 @@ services:
 
   # ── Aplicación PHP + Nginx 
   app:
-    image: ${APP_IMAGE:-kitchenlink-app}  # En CI/CD usa la imagen del registry; en local construye
+    image: ${APP_IMAGE:-kitchenlink-app}
     build: .
     container_name: kitchenlink-app
     restart: unless-stopped
@@ -31,13 +33,13 @@ services:
       - "80:80"
     environment:
       # db_connection.php lee estas variables para conectarse a MySQL
-      DB_HOST: db           # Docker resuelve "db" al contenedor de MySQL
+      DB_HOST: db           
       DB_USER: KitchenLink
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: KitchenLink
     depends_on:
       db:
-        condition: service_healthy  # Espera a que MySQL esté listo antes de arrancar
+        condition: service_healthy
 
 volumes:
   db_data:
