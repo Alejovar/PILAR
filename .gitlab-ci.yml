@@ -7,15 +7,13 @@ stages:
   - deploy_staging
   - deploy_production
 
-# 1. INSTALACIÓN
+# ── 1. INSTALACIÓN ──
 install_deps:
   stage: install_dependencies
   script:
     - echo "Preparando el entorno para KitchenLink..."
 
-# 2. TESTS — 4 trabajos en paralelo
-
-# ── Trabajo 1: Sintaxis PHP
+# ── 2. TESTS ──
 lint-job:
   stage: test
   needs: ["install_deps"]
@@ -23,7 +21,6 @@ lint-job:
     - echo "Verificando sintaxis de todos los archivos PHP..."
     - find . -name "*.php" -exec php -l {} \; | grep "Errors parsing" && exit 1 || echo "✅ Sintaxis OK."
 
-# ── Trabajo 2: Prueba unitaria básica 
 unit-test-job:
   stage: test
   needs: ["install_deps"]
@@ -42,7 +39,6 @@ unit-test-job:
     reports:
       junit: junit.xml
 
-# ── Trabajo 3: Seguridad 
 security-job:
   stage: test
   needs: ["install_deps"]
@@ -56,7 +52,6 @@ security-job:
         echo "✅ No se encontraron archivos sensibles."
       fi
 
-# ── Trabajo 4: Suite PHPUnit avanzada (lógica de negocio) 
 phpunit-advanced-job:
   stage: test
   needs: ["install_deps"]
@@ -73,8 +68,7 @@ phpunit-advanced-job:
     reports:
       junit: KitchenLink-Tests/report-phpunit.xml
 
-# 3. BUILD — Construir imagen Docker y subirla al registry
-
+# ── 3. BUILD ──
 build_docker_image:
   stage: build
   needs: ["lint-job", "unit-test-job", "security-job", "phpunit-advanced-job"]
@@ -83,70 +77,95 @@ build_docker_image:
     - docker:24-dind
   script:
     - echo "🔨 Construyendo imagen Docker de KitchenLink..."
-    # Login al GitLab Container Registry (variables automáticas de GitLab, no necesitas configurarlas)
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    # Construir con dos etiquetas:
-    #   :latest      → siempre apunta a la versión más nueva
-    #   :abc1234     → etiqueta inmutable por commit (trazabilidad)
     - docker build -t $CI_REGISTRY_IMAGE:latest -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    - echo "✅ Imagen lista en el registry → $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
-# 4. DEPLOY A STAGING
+# ── 4. DEPLOY A STAGING (CON VAULT) ──
 deploy_to_staging:
   stage: deploy_staging
   needs: ["build_docker_image"]
   image: alpine:latest
+  id_tokens:
+    VAULT_ID_TOKEN:
+      aud: https://gitlab.com
+  variables:
+    VAULT_ADDR: "http://34.56.208.182:8200" 
   before_script:
-    - apk add --no-cache openssh-client
+    - apk add --no-cache openssh-client curl jq
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - ssh-keyscan $STAGING_VM_IP >> ~/.ssh/known_hosts
+    
+    # Obtener Token de Vault usando el JWT de GitLab
+    - |
+      export VAULT_TOKEN=$(curl -s --request POST \
+        --data "{\"role\": \"gitlab-role\", \"jwt\": \"$VAULT_ID_TOKEN\"}" \
+        $VAULT_ADDR/v1/auth/jwt/login | jq -r '.auth.client_token')
+    
+    # Obtener credenciales dinámicas de la DB
+    - |
+      export DB_CREDS=$(curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
+        $VAULT_ADDR/v1/database/creds/staging-role)
+      export STAGING_DB_USER=$(echo $DB_CREDS | jq -r '.data.username')
+      export STAGING_DB_PASSWORD=$(echo $DB_CREDS | jq -r '.data.password')
+
   script:
-    - echo "🚀 Desplegando en STAGING ($STAGING_VM_IP)..."
-    # Asegurarse de que exista la carpeta en la VM
+    - echo "🚀 Desplegando en STAGING ($STAGING_VM_IP) con usuario dinámico..."
     - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/kitchenlink/docker"
-    # Copiar los archivos que necesita docker compose
     - scp docker-compose.yml $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
     - scp docker/init.sql    $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
     - |
       ssh $VM_USER@$STAGING_VM_IP "
         set -e
         cd ~/kitchenlink
-
-        # Crear el .env con las credenciales de staging
+        # Inyectamos el usuario y pass dinámicos de Vault en el .env
         echo 'DB_ROOT_PASSWORD=${STAGING_DB_ROOT_PASSWORD}' >  .env
+        echo 'DB_USER=${STAGING_DB_USER}'                  >> .env
         echo 'DB_PASSWORD=${STAGING_DB_PASSWORD}'           >> .env
         echo 'APP_IMAGE=${CI_REGISTRY_IMAGE}:latest'        >> .env
 
-        # Login al registry y bajar la imagen nueva de la app
         docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
         docker pull ${CI_REGISTRY_IMAGE}:latest
-
-        # Levantar (o actualizar) los 2 contenedores: app + MySQL
         docker compose up -d --no-build
-
-        echo '✅ Staging corriendo: app + base de datos.'
       "
-    - echo "✅ Deploy a staging completado → http://$STAGING_VM_IP"
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
 
-# 5. DEPLOY A PRODUCCIÓN (Google Cloud)
+# ── 5. DEPLOY A PRODUCCIÓN (CON VAULT) ──
 deploy_to_production:
   stage: deploy_production
   needs: ["deploy_to_staging"]
   image: alpine:latest
+  id_tokens:
+    VAULT_ID_TOKEN:
+      aud: https://gitlab.com
+  variables:
+    VAULT_ADDR: "http://TU_IP_DE_VAULT:8200" # REEMPLAZA CON TU IP
   before_script:
-    - apk add --no-cache openssh-client
+    - apk add --no-cache openssh-client curl jq
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - ssh-keyscan $VM_IP_ADDRESS >> ~/.ssh/known_hosts
+
+    # Autenticación con Vault
+    - |
+      export VAULT_TOKEN=$(curl -s --request POST \
+        --data "{\"role\": \"gitlab-role\", \"jwt\": \"$VAULT_ID_TOKEN\"}" \
+        $VAULT_ADDR/v1/auth/jwt/login | jq -r '.auth.client_token')
+    
+    # Obtener credenciales de Producción
+    - |
+      export DB_CREDS=$(curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
+        $VAULT_ADDR/v1/database/creds/prod-role)
+      export PROD_DB_USER=$(echo $DB_CREDS | jq -r '.data.username')
+      export PROD_DB_PASSWORD=$(echo $DB_CREDS | jq -r '.data.password')
+
   script:
     - echo "🚀 Desplegando en PRODUCCIÓN ($VM_IP_ADDRESS)..."
     - ssh $VM_USER@$VM_IP_ADDRESS "mkdir -p ~/kitchenlink/docker"
@@ -156,22 +175,15 @@ deploy_to_production:
       ssh $VM_USER@$VM_IP_ADDRESS "
         set -e
         cd ~/kitchenlink
-
-        # Crear el .env con las credenciales de producción
         echo 'DB_ROOT_PASSWORD=${PROD_DB_ROOT_PASSWORD}' >  .env
-        echo 'DB_PASSWORD=${PROD_DB_PASSWORD}'           >> .env
-        echo 'APP_IMAGE=${CI_REGISTRY_IMAGE}:latest'     >> .env
+        echo 'DB_USER=${PROD_DB_USER}'                    >> .env
+        echo 'DB_PASSWORD=${PROD_DB_PASSWORD}'             >> .env
+        echo 'APP_IMAGE=${CI_REGISTRY_IMAGE}:latest'       >> .env
 
-        # Login al registry y bajar la imagen nueva
         docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
         docker pull ${CI_REGISTRY_IMAGE}:latest
-
-        # Actualizar los 2 contenedores en producción
         docker compose up -d --no-build
-
-        echo '✅ Producción actualizada: app + base de datos.'
       "
-    - echo "✅ Despliegue a producción completado."
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
       when: manual
