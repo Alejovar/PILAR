@@ -5,7 +5,7 @@ if (!isset($conn)) {
     $password_db = getenv('DB_PASSWORD');
     $dbname      = getenv('DB_NAME') ?: 'KitchenLink';
 
-    // Intentamos la conexión de forma silenciosa para que no mande Warnings
+    // Intentamos la conexión de forma silenciosa para que no mande Warnings-
     $conn = @new mysqli($servername, $username_db, $password_db, $dbname);
 
     if ($conn->connect_error) {
