@@ -88,7 +88,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
     <div class="toggle-container">
       <div class="toggle">
         <div class="toggle-panel toggle-right">
-          <h1>¡Bienvenido!</h1>
+          <h1>¡Bienvenido a KitchenLink!</h1>
           <img src="/src/images/logos/KitchenLink_logo.png" alt="Logo de KitchenLink"
             style="max-width: 80%; margin-top: 20px;" />
         </div>
