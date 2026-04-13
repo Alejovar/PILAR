@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loginError.textContent = "Ocurrió un error en la conexión.";
       } finally {
         // --- RESTAURACIÓN CONDICIONAL DEL BOTÓN ---
-        // Solo reactivamos el botón si el usuario NO ha sido bloqueado.
+        // Solo reactivamos el botón si el usuario NO ha sido bloqueado.//
         if (!isBlocked) {
           submitButton.disabled = false;
           submitButton.textContent = "Iniciar Sesión";
