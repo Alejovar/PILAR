@@ -23,4 +23,4 @@ documentation/
 
 # La carpeta docker en sí no va dentro del contenedor
 # (nginx.conf y start.sh se copian explícitamente en el Dockerfile)
-docker/
+
