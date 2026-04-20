@@ -115,7 +115,7 @@ deploy_to_staging:
   script:
     - echo "🚀 Desplegando en STAGING ($STAGING_VM_IP) con usuario dinámico..."
 
-    # ── Limpiar disco antes de hacer pull ──
+    # ── Limpiar disco antes de hacer pull ─
     - |
       ssh $VM_USER@$STAGING_VM_IP "
         echo '🧹 Limpiando disco...'
