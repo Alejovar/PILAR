@@ -3,7 +3,7 @@
 // 1. Incluimos el check_session universal.
 require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
-// --- LÓGICA DE SEGURIDAD (RESTRINGIR POR ROL) ---
+// --- LÓGICA DE SEGURIDAD (RESTRINGIR POR ROL) ----
 define('BARRA_ROLE_ID', 5); // ID 5 corresponde al rol 'encargado de barra'
 
 // 🔑 Verificación Crítica: Si el rol de la sesión NO es el requerido (5), se deniega el acceso.
