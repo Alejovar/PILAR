@@ -55,7 +55,6 @@ try {
             $order_id = intval($data['order_id'] ?? 0);
             if ($order_id <= 0) throw new Exception('order_id inválido.');
 
-            // Datos de la orden
             $stmt = $conn->prepare("
                 SELECT o.order_id, rt.table_number, u.name AS server_name, o.order_time
                 FROM orders o
@@ -70,7 +69,6 @@ try {
 
             if (!$order) throw new Exception('Orden no encontrada o ya cerrada.');
 
-            // Ítems activos
             $stmt = $conn->prepare("
                 SELECT
                     od.detail_id,
@@ -101,39 +99,35 @@ try {
             exit();
 
         // ── Registrar merma desde cuenta abierta ─────────────────────────────
-        // Cancela el ítem (price_at_order → 0 para el cliente),
-        // guarda waste_price con el precio real para el reporte.
         case 'register_waste':
-            $order_id    = intval($data['order_id']    ?? 0);
-            $detail_ids  = $data['detail_ids']  ?? [];   // array de ints
+            $order_id     = intval($data['order_id']    ?? 0);
+            $detail_ids   = $data['detail_ids']  ?? [];
             $waste_reason = $data['waste_reason'] ?? '';
             $notes        = trim($data['notes']   ?? '');
 
             $allowed_reasons = ['expired', 'kitchen_error', 'waiter_error', 'damaged', 'other'];
 
-            if ($order_id <= 0)           throw new Exception('order_id inválido.');
-            if (empty($detail_ids))       throw new Exception('Selecciona al menos un producto.');
-            if (!in_array($waste_reason, $allowed_reasons)) throw new Exception('Motivo no válido.');
+            if ($order_id <= 0)                                    throw new Exception('order_id inválido.');
+            if (empty($detail_ids))                                throw new Exception('Selecciona al menos un producto.');
+            if (!in_array($waste_reason, $allowed_reasons))        throw new Exception('Motivo no válido.');
 
-            // Sanitizar detail_ids
-            $detail_ids = array_map('intval', $detail_ids);
-            $detail_ids = array_filter($detail_ids, fn($id) => $id > 0);
-            if (empty($detail_ids))       throw new Exception('IDs de detalle inválidos.');
+            $detail_ids = array_values(array_filter(array_map('intval', $detail_ids), fn($id) => $id > 0));
+            if (empty($detail_ids)) throw new Exception('IDs de detalle inválidos.');
 
-            $recorded_by = intval($_SESSION['user_id']);
+            $recorded_by  = intval($_SESSION['user_id']);
             $placeholders = implode(',', array_fill(0, count($detail_ids), '?'));
             $id_types     = str_repeat('i', count($detail_ids));
 
             $conn->begin_transaction();
 
-            // Verificar que los ítems pertenezcan a la orden y no estén cancelados
-            $check_sql  = "SELECT detail_id, price_at_order, quantity FROM order_details
-                           WHERE detail_id IN ($placeholders)
-                             AND order_id = ?
-                             AND is_cancelled = 0";
-            $check_stmt = $conn->prepare($check_sql);
-            $check_params = array_merge([$id_types . 'i'], $detail_ids, [$order_id]);
-            call_user_func_array([$check_stmt, 'bind_param'], $check_params);
+            // ── Verificar que los ítems pertenezcan a la orden y no estén cancelados ──
+            $check_stmt = $conn->prepare(
+                "SELECT detail_id, price_at_order, quantity FROM order_details
+                 WHERE detail_id IN ($placeholders)
+                   AND order_id    = ?
+                   AND is_cancelled = 0"
+            );
+            $check_stmt->bind_param($id_types . 'i', ...[...$detail_ids, $order_id]);
             $check_stmt->execute();
             $found_items = $check_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             $check_stmt->close();
@@ -143,40 +137,26 @@ try {
                 throw new Exception('Algunos ítems no se encontraron o ya estaban cancelados.');
             }
 
-            // Cancelation note incluye el motivo de merma para trazabilidad
             $cancel_note = '[MERMA] ' . $waste_reason . ($notes ? ': ' . $notes : '');
 
-            // UPDATE: marcar como cancelado (precio a 0 para el cliente)
-            //         + guardar waste_price con el precio real
-            $upd_sql = "
+            // ── UPDATE: marcar como merma, precio a 0 para el cliente ──
+            $upd_stmt = $conn->prepare("
                 UPDATE order_details
                 SET
-                    is_cancelled       = 1,
+                    is_cancelled        = 1,
                     cancellation_reason = ?,
-                    price_at_order     = 0.00,
-                    is_waste           = 1,
-                    waste_reason       = ?,
-                    waste_price        = price_at_order,   -- guarda el precio ANTES de ponerlo en 0
-                    waste_recorded_by  = ?,
-                    waste_recorded_at  = NOW()
+                    price_at_order      = 0.00,
+                    is_waste            = 1,
+                    waste_reason        = ?,
+                    waste_price         = price_at_order,
+                    waste_recorded_by   = ?,
+                    waste_recorded_at   = NOW()
                 WHERE detail_id IN ($placeholders)
                   AND order_id    = ?
                   AND is_cancelled = 0
-            ";
-            $upd_stmt = $conn->prepare($upd_sql);
-            $upd_params = array_merge(
-                ['ss' . $id_types . 'i', $cancel_note, $waste_reason],
-                $detail_ids,
-                [$recorded_by, $order_id]
-            );
-            // bind_param necesita: tipos + (reason, waste_reason, ...ids, recorded_by, order_id)
-            $bind_types  = 'ss' . $id_types . 'ii';
-            $bind_values = array_merge(
-                [$bind_types, $cancel_note, $waste_reason],
-                $detail_ids,
-                [$recorded_by, $order_id]
-            );
-            call_user_func_array([$upd_stmt, 'bind_param'], $bind_values);
+            ");
+            // tipos: ss + n*i (detail_ids) + ii (recorded_by, order_id)
+            $upd_stmt->bind_param('ss' . $id_types . 'ii', ...[$cancel_note, $waste_reason, ...$detail_ids, $recorded_by, $order_id]);
             $upd_stmt->execute();
             $affected = $upd_stmt->affected_rows;
             $upd_stmt->close();
@@ -196,14 +176,12 @@ try {
             exit();
 
         // ── Reporte de mermas por fecha ──────────────────────────────────────
-        // Lee de order_details (órdenes aún abiertas o recién cerradas)
-        // y de sales_history_details (órdenes ya cobradas, cuando se cierre el turno).
         case 'get_waste_report':
             $start = $data['start_date'] ?? null;
             $end   = $data['end_date']   ?? null;
             if (!$start || !$end) throw new Exception('Se requieren fecha_inicio y fecha_fin.');
 
-            // ── Mermas en órdenes ACTIVAS (aún abiertas o cerradas sin cobrar) ──
+            // Mermas en órdenes ACTIVAS
             $sql_active = "
                 SELECT
                     od.waste_recorded_at AS waste_date,
@@ -217,16 +195,16 @@ try {
                     rt.table_number,
                     'open'               AS source
                 FROM order_details od
-                JOIN products          p  ON od.product_id  = p.product_id
-                JOIN orders            o  ON od.order_id    = o.order_id
-                JOIN restaurant_tables rt ON o.table_id     = rt.table_id
+                JOIN products          p  ON od.product_id        = p.product_id
+                JOIN orders            o  ON od.order_id          = o.order_id
+                JOIN restaurant_tables rt ON o.table_id           = rt.table_id
                 LEFT JOIN users        u  ON od.waste_recorded_by = u.id
                 WHERE od.is_waste = 1
                   AND od.waste_recorded_at >= ?
                   AND od.waste_recorded_at <  DATE_ADD(?, INTERVAL 1 DAY)
             ";
 
-            // ── Mermas en órdenes YA COBRADAS (sales_history_details) ──
+            // Mermas en órdenes YA COBRADAS
             $sql_history = "
                 SELECT
                     sh.payment_time      AS waste_date,
@@ -246,7 +224,7 @@ try {
                   AND sh.payment_time <  DATE_ADD(?, INTERVAL 1 DAY)
             ";
 
-            $records = [];
+            $records     = [];
             $total_items = 0;
             $total_value = 0;
 
@@ -263,7 +241,6 @@ try {
                 }
             }
 
-            // Ordenar por fecha desc
             usort($records, fn($a, $b) => strtotime($b['waste_date']) - strtotime($a['waste_date']));
 
             echo json_encode([
@@ -285,12 +262,4 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage(),
-        'file'    => $e->getFile(),   // ← agrega esto
-        'line'    => $e->getLine(),   // ← y esto
-    ], JSON_UNESCAPED_UNICODE);
 }
