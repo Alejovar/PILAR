@@ -3,7 +3,7 @@
 // TASK-02: API de mermas del gerente
 // Acciones: get_open_orders | get_order_items | register_waste | get_waste_report
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session_api.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
 // Solo Gerente (rol_id = 1)
@@ -285,4 +285,12 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage(),
+        'file'    => $e->getFile(),   // ← agrega esto
+        'line'    => $e->getLine(),   // ← y esto
+    ], JSON_UNESCAPED_UNICODE);
 }
