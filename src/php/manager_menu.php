@@ -58,6 +58,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                 <li><a href="manager_users.php"><i class="fas fa-users-cog"></i> Usuarios</a></li>
                 <li><a href="#" class="active"><i class="fas fa-utensils"></i> Menú y Productos</a></li>
                 <li><a href="manager_reports.php"><i class="fas fa-chart-line"></i> Gestión de Reportes</a></li>
+                <li><a href="manager_waste.php"><i class="fas fa-trash-alt"></i> Control de Mermas</a></li>
             </ul>
         </div>
         
