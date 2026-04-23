@@ -56,11 +56,11 @@ $rolName = htmlspecialchars($_SESSION['rol_name'] ?? 'Encargado de Barra');
         
         <div class="user-info">
             <div class="user-details">
-                <i class="fas fa-user-circle user-avatar"></i>
+                <i class="fas fa-user-tie user-avatar"></i>
                 
                 <div class="user-text-container">
                     <div class="user-name-text"><?php echo $userName; ?></div>
-                    <div class="session-status-text">Sesión activa </div>
+                    <div class="session-status-text">Sesión activa</div>
                 </div>
             </div>
             

@@ -81,52 +81,14 @@ body {
 }
 
 /* ------------------- Sección de Usuario y Logout ------------------- */
-.user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-.user-details {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 5px;
-}
-.user-details i {
-    font-size: 0.9em;
-    color: var(--color-text-dark);
-}
-.user-text-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-.user-name-text {
-    font-size: 14px;
-    font-weight: bold;
-    color: var(--color-text-dark);
-}
-.session-status-text {
-    font-size: 0.9em;
-    color: var(--color-text-light);
-}
-.logout-btn {
-    display: inline-block;
-    background-color: var(--color-gray-soft);
-    color: var(--color-alert);
-    margin-top: 10px;
-    padding: 6px 12px;
-    font-weight: bold;
-    font-size: 12px;
-    text-decoration: none;
-    border: 1px solid #ddd;
-    border-radius: 16px;
-    transition: all 0.2s ease-in-out;
-}
-.logout-btn:hover {
-    background-color: #ffebee;
-    border-color: #ef9a9a;
-}
+.user-info { display: flex; align-items: center; justify-content: space-between; padding-top: 15px; border-top: 1px solid #e0e0e0; }
+.user-details { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+.user-avatar { font-size: 1.6rem; color: var(--color-primary); flex-shrink: 0; }
+.user-text-container { overflow: hidden; }
+.user-name-text { font-weight: 600; font-size: 0.85rem; color: var(--color-text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.session-status-text { font-size: 0.72rem; color: var(--color-text-light); }
+.logout-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--color-gray-soft); color: var(--color-alert); text-decoration: none; font-size: 1rem; transition: background 0.2s; flex-shrink: 0; }
+.logout-btn:hover { background: #fde8e8; }
 
 /* ------------------- Contenido Principal y Footer ------------------- */
 .content {

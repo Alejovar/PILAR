@@ -19,7 +19,7 @@ services:
       - db_data:/var/lib/mysql
     healthcheck:
       # El healthcheck ahora usa el usuario dinámico para validar la conexión
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "${DB_USER:-KitchenLink}", "-p${DB_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5

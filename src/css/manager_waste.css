@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
 
-/* --- Variables de Color (idénticas al resto del módulo gerente) --- */
 :root {
     --color-primary:    #5a2dfc;
     --color-active-bg:  #ece7ff;
@@ -20,7 +19,7 @@ body { display: flex; background: var(--color-background); }
 
 .main-container { display: flex; min-height: 100vh; width: 100%; }
 
-/* ── Sidebar (idéntico al gerente) ── */
+/* ── Sidebar ── */
 .sidebar {
     width: 220px; flex-shrink: 0; background: #fff; height: 100vh;
     padding: 20px; display: flex; flex-direction: column;
@@ -87,62 +86,42 @@ body { display: flex; background: var(--color-background); }
 .danger-btn:hover { background: #b71c1c; }
 .danger-btn:disabled { background: #bbb; cursor: not-allowed; }
 
-/* ── Área de resultados / panels ── */
+/* ── Área de resultados ── */
 .report-results-area { background: var(--color-background); border-radius: 10px; padding: 20px; min-height: 120px; }
 .initial-msg { color: var(--color-text-light); font-size: 0.9rem; display: flex; align-items: center; gap: 8px; }
 
+/* ── Tabla wrapper (scroll horizontal en pantallas pequeñas) ── */
+.table-wrapper { overflow-x: auto; border-radius: 8px; }
+
 /* ── Selección de orden/mesa ── */
-.orders-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 14px;
-    margin-bottom: 24px;
-}
-.order-card {
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: #fff;
-}
+.orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+.order-card { border: 2px solid #e0e0e0; border-radius: 10px; padding: 16px; cursor: pointer; transition: all 0.2s; background: #fff; }
 .order-card:hover { border-color: var(--color-primary); background: var(--color-active-bg); }
 .order-card.selected { border-color: var(--color-primary); background: var(--color-active-bg); box-shadow: 0 0 0 3px rgba(90,45,252,0.15); }
 .order-card .table-num { font-size: 1.4rem; font-weight: 700; color: var(--color-primary); }
 .order-card .server-name { font-size: 0.8rem; color: var(--color-text-light); margin-top: 4px; }
 .order-card .order-total { font-size: 0.9rem; font-weight: 600; color: var(--color-text-dark); margin-top: 6px; }
 
-/* ── Lista de ítems de la orden ── */
+/* ── Lista de ítems ── */
 .items-panel { margin-top: 4px; }
 .items-panel h5 { font-size: 0.95rem; font-weight: 600; color: var(--color-text-dark); margin-bottom: 14px; }
-.item-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid #ebebeb;
-    background: #fff;
-    margin-bottom: 8px;
-    transition: background 0.15s;
-}
+.item-row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; border: 1px solid #ebebeb; background: #fff; margin-bottom: 8px; transition: background 0.15s; }
 .item-row:hover { background: #fafafa; }
 .item-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--color-alert); cursor: pointer; flex-shrink: 0; }
 .item-name { flex: 1; font-size: 0.9rem; font-weight: 500; color: var(--color-text-dark); }
 .item-modifier { font-size: 0.78rem; color: var(--color-text-light); display: block; }
 .item-qty { font-size: 0.85rem; color: var(--color-text-light); white-space: nowrap; }
 .item-price { font-size: 0.9rem; font-weight: 600; color: var(--color-text-dark); white-space: nowrap; min-width: 70px; text-align: right; }
-
 .waste-form-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin-top: 20px; padding-top: 18px; border-top: 1px solid #ebebeb; }
 
 /* ── Tabla de reporte ── */
 .waste-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-.waste-table thead th { background: var(--color-primary); color: #fff; padding: 11px 14px; text-align: left; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.waste-table thead th { background: var(--color-primary); color: #fff; padding: 11px 14px; text-align: left; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
 .waste-table thead th:first-child { border-radius: 8px 0 0 0; }
 .waste-table thead th:last-child  { border-radius: 0 8px 0 0; }
 .waste-table tbody tr { border-bottom: 1px solid #ebebeb; transition: background 0.15s; }
 .waste-table tbody tr:hover { background: var(--color-active-bg); }
-.waste-table tbody td { padding: 11px 14px; color: var(--color-text-dark); vertical-align: middle; }
+.waste-table tbody td { padding: 11px 14px; color: var(--color-text-dark); vertical-align: middle; white-space: nowrap; }
 
 /* ── Badges de motivo ── */
 .reason-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.77rem; font-weight: 600; }
@@ -172,4 +151,5 @@ body { display: flex; background: var(--color-background); }
     .content { padding: 20px 16px; }
     .filter-controls, .waste-form-row { flex-direction: column; }
     .form-group { min-width: 100%; }
+    .waste-table tbody td { white-space: normal; }
 }

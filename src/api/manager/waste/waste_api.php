@@ -1,12 +1,8 @@
 <?php
 // /src/api/manager/waste/waste_api.php
-// TASK-02: API de mermas del gerente
-// Acciones: get_open_orders | get_order_items | register_waste | get_waste_report
-
 require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 header('Content-Type: application/json; charset=utf-8');
 
-// Solo Gerente (rol_id = 1)
 if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 1) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Acceso denegado. Solo gerentes.'], JSON_UNESCAPED_UNICODE);
@@ -24,7 +20,6 @@ try {
 
     switch ($action) {
 
-        // ── Órdenes abiertas (mesas con cuenta activa) ──────────────────────
         case 'get_open_orders':
             $sql = "
                 SELECT
@@ -44,13 +39,10 @@ try {
             ";
             $result = $conn->query($sql);
             $orders = [];
-            while ($row = $result->fetch_assoc()) {
-                $orders[] = $row;
-            }
+            while ($row = $result->fetch_assoc()) $orders[] = $row;
             echo json_encode(['success' => true, 'orders' => $orders], JSON_UNESCAPED_UNICODE);
             exit();
 
-        // ── Ítems activos (no cancelados) de una orden ──────────────────────
         case 'get_order_items':
             $order_id = intval($data['order_id'] ?? 0);
             if ($order_id <= 0) throw new Exception('order_id inválido.');
@@ -91,14 +83,9 @@ try {
             $items = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             $stmt->close();
 
-            echo json_encode([
-                'success' => true,
-                'order'   => $order,
-                'items'   => $items,
-            ], JSON_UNESCAPED_UNICODE);
+            echo json_encode(['success' => true, 'order' => $order, 'items' => $items], JSON_UNESCAPED_UNICODE);
             exit();
 
-        // ── Registrar merma desde cuenta abierta ─────────────────────────────
         case 'register_waste':
             $order_id     = intval($data['order_id']    ?? 0);
             $detail_ids   = $data['detail_ids']  ?? [];
@@ -120,7 +107,6 @@ try {
 
             $conn->begin_transaction();
 
-            // ── Verificar que los ítems pertenezcan a la orden y no estén cancelados ──
             $check_stmt = $conn->prepare(
                 "SELECT detail_id, price_at_order, quantity FROM order_details
                  WHERE detail_id IN ($placeholders)
@@ -139,7 +125,6 @@ try {
 
             $cancel_note = '[MERMA] ' . $waste_reason . ($notes ? ': ' . $notes : '');
 
-            // ── UPDATE: snapshot para capturar price_at_order ANTES de ponerlo en 0 ──
             $upd_stmt = $conn->prepare("
                 UPDATE order_details od
                 JOIN (
@@ -160,7 +145,6 @@ try {
                   AND od.order_id    = ?
                   AND od.is_cancelled = 0
             ");
-            // tipos: n*i (snapshot JOIN) + ss + i (recorded_by) + n*i (WHERE IN) + i (order_id)
             $upd_stmt->bind_param(
                 $id_types . 'ssi' . $id_types . 'i',
                 ...[...$detail_ids, $cancel_note, $waste_reason, $recorded_by, ...$detail_ids, $order_id]
@@ -183,25 +167,23 @@ try {
             ], JSON_UNESCAPED_UNICODE);
             exit();
 
-        // ── Reporte de mermas por fecha ──────────────────────────────────────
         case 'get_waste_report':
             $start = $data['start_date'] ?? null;
             $end   = $data['end_date']   ?? null;
             if (!$start || !$end) throw new Exception('Se requieren fecha_inicio y fecha_fin.');
 
-            // Mermas en órdenes ACTIVAS
             $sql_active = "
                 SELECT
-                    od.waste_recorded_at AS waste_date,
-                    p.name               AS product_name,
+                    od.waste_recorded_at           AS waste_date,
+                    p.name                         AS product_name,
                     od.quantity,
-                    od.waste_price       AS unit_price,
+                    od.waste_price                 AS unit_price,
                     (od.quantity * od.waste_price) AS total_waste_value,
                     od.waste_reason,
-                    od.cancellation_reason AS notes,
-                    u.name               AS recorded_by,
+                    od.cancellation_reason         AS notes,
+                    u.name                         AS recorded_by,
                     rt.table_number,
-                    'open'               AS source
+                    'open'                         AS source
                 FROM order_details od
                 JOIN products          p  ON od.product_id        = p.product_id
                 JOIN orders            o  ON od.order_id          = o.order_id
@@ -212,19 +194,18 @@ try {
                   AND od.waste_recorded_at <  DATE_ADD(?, INTERVAL 1 DAY)
             ";
 
-            // Mermas en órdenes YA COBRADAS
             $sql_history = "
                 SELECT
-                    sh.payment_time      AS waste_date,
+                    sh.payment_time                    AS waste_date,
                     shd.product_name,
                     shd.quantity,
-                    shd.waste_price      AS unit_price,
-                    (shd.quantity * shd.waste_price) AS total_waste_value,
+                    shd.waste_price                    AS unit_price,
+                    (shd.quantity * shd.waste_price)   AS total_waste_value,
                     shd.waste_reason,
-                    NULL                 AS notes,
-                    NULL                 AS recorded_by,
-                    NULL                 AS table_number,
-                    'history'            AS source
+                    NULL                               AS notes,
+                    NULL                               AS recorded_by,
+                    NULL                               AS table_number,
+                    'history'                          AS source
                 FROM sales_history_details shd
                 JOIN sales_history sh ON shd.sale_id = sh.sale_id
                 WHERE shd.is_waste = 1

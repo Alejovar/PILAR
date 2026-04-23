@@ -88,76 +88,15 @@ body {
 }
 
 
-/* ------------------- Sección de Usuario y Logout (CORRECCIONES FINALES) ------------------- */
-.user-info { 
-    /* Esta es la clase que envuelve todo (avatar/texto y botón) */
-    padding: 60px 0px 0px 0px;
-    display: flex; 
-    flex-direction: column; 
-    align-items: flex-start; 
-    padding-top: 0px;
-    
-    /* CORRECCIÓN 1: ELIMINAR LA LÍNEA GRIS SUPERIOR */
-    border-top: none; 
-}
-.user-details {
-    /* Contenedor del avatar y el texto (Alineación horizontal) */
-    display: flex;
-    align-items: center; 
-    gap: 5x; /* Espacio entre el icono y el texto */
-    margin-bottom: 5px; /* Espacio entre el texto y el botón de logout */
-    margin: 2px 0 0; /* Espacio a la derecha del ícono */
-
-}
-
-/* 1. ESTILO Y TAMAÑO DEL ICONO DE USUARIO */
-.user-details i {
-    /* CORRECCIÓN 2: REDUCIR TAMAÑO DEL ICONO DE USUARIO (De 1.8rem a 1.5rem o menos) */
-    font-size: 0.9em; 
-    color: var(--color-text-dark);
-}
-
-/* 2. CONTENEDOR DEL TEXTO APILADO (Nombre + Sesión) */
-.user-text-container {
-    display: flex;
-    flex-direction: column; /* CRÍTICO: Apila el nombre y el estado */
-    align-items: flex-start;
-}
-
-/* 3. ESTILO DEL NOMBRE */
-.user-name-text { 
-    /* CORRECCIÓN 3: Nombre en Negritas (Aumentar el peso de la fuente) */
-    font-size: 14px;
-    font-weight: bold; /* Usamos 700 para negritas fuertes */
-    color: var(--color-text-dark);
-}
-
-/* 4. ESTILO DE LA SESIÓN ACTIVA (Gris más pequeño) */
-.session-status-text {
-    font-size: 0.9em;
-    color: var(--color-text-light); /* Gris suave */
-}
-
-/* BOTÓN DE LOGOUT (PÍLDORA - REGLAS LITERALES DE TU DISEÑO) */
-.logout-btn {
-    display: inline-block;  
-    /* PROPIEDADES DE PÍLDORA Y COLOR */
-    background-color: var(--color-gray-soft); /* f1f3f4 */
-    color: var(--color-alert); /* c62828 */
-    margin-top: 10px;
-    padding: 6px 12px;
-    font-weight: bold;
-    font-size: 12px;
-    text-decoration: none;
-    border: 1px solid #ddd;
-    border-radius: 16px; /* Forma de píldora */
-    transition: all 0.2s ease-in-out;
-}
-
-.logout-btn:hover {
-    background-color: #ffebee; /* Rojo pálido al pasar el mouse */
-    border-color: #ef9a9a;
-}
+/* ------------------- Sección de Usuario y Logout ------------------- */
+.user-info { display: flex; align-items: center; justify-content: space-between; padding-top: 15px; border-top: 1px solid #e0e0e0; }
+.user-details { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+.user-avatar { font-size: 1.6rem; color: var(--color-primary); flex-shrink: 0; }
+.user-text-container { overflow: hidden; }
+.user-name-text { font-weight: 600; font-size: 0.85rem; color: var(--color-text-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.session-status-text { font-size: 0.72rem; color: var(--color-text-light); }
+.logout-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--color-gray-soft); color: var(--color-alert); text-decoration: none; font-size: 1rem; transition: background 0.2s; flex-shrink: 0; }
+.logout-btn:hover { background: #fde8e8; }
 
 
 

@@ -1,6 +1,4 @@
 // /src/js/manager_waste.js
-// Sprint 1 – Control de Mermas
-// US-01: reporte por fecha | US-02: registro de merma desde cuenta de mesa
 
 const API = '/src/api/manager/waste/waste_api.php';
 
@@ -28,7 +26,7 @@ function fmtDate(str) {
     if (!str) return '—';
     return new Date(str).toLocaleString('es-MX', {
         day:'2-digit', month:'2-digit', year:'numeric',
-        hour:'2-digit', minute:'2-digit', hour12: false,
+        hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false,
     });
 }
 
@@ -102,7 +100,6 @@ async function loadOpenOrders() {
 }
 
 async function selectOrder(orderId, cardEl) {
-    // Deselect all
     document.querySelectorAll('.order-card').forEach(c => c.classList.remove('selected'));
     cardEl.classList.add('selected');
     selectedOrderId = orderId;
@@ -145,7 +142,6 @@ async function selectOrder(orderId, cardEl) {
             </div>
         `).join('');
 
-        // Mostrar form de merma cuando se selecciona al menos uno
         listEl.querySelectorAll('.item-check').forEach(chk => {
             chk.addEventListener('change', () => {
                 const anyChecked = listEl.querySelectorAll('.item-check:checked').length > 0;
@@ -164,7 +160,7 @@ async function selectOrder(orderId, cardEl) {
 async function registerWaste() {
     if (!selectedOrderId) return;
 
-    const checked = [...document.querySelectorAll('.item-check:checked')];
+    const checked   = [...document.querySelectorAll('.item-check:checked')];
     const detailIds = checked.map(c => parseInt(c.dataset.detailId));
 
     if (!detailIds.length) {
@@ -192,14 +188,11 @@ async function registerWaste() {
 
         showFeedback('registerFeedback', 'success', data.message);
 
-        // Recargar ítems de la orden y las mesas
         await loadOpenOrders();
-        // Re-seleccionar la misma mesa si sigue abierta
         const sameCard = document.querySelector(`.order-card[data-order-id="${selectedOrderId}"]`);
         if (sameCard) {
             selectOrder(selectedOrderId, sameCard);
         } else {
-            // La mesa ya no tiene ítems o se cerró
             document.getElementById('itemsPanel').style.display = 'none';
             selectedOrderId = null;
         }
@@ -215,8 +208,8 @@ async function registerWaste() {
 // ── US-01: Reporte ────────────────────────────────────────────────────────────
 
 async function runReport() {
-    const start = document.getElementById('reportStartDate').value;
-    const end   = document.getElementById('reportEndDate').value;
+    const start     = document.getElementById('reportStartDate').value;
+    const end       = document.getElementById('reportEndDate').value;
     const container = document.getElementById('reportResults');
 
     if (!start || !end) {
@@ -274,21 +267,23 @@ async function runReport() {
         }).join('');
 
         container.innerHTML = summaryHtml + `
-            <table class="waste-table">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Producto</th>
-                        <th>Cant.</th>
-                        <th>Precio unit.</th>
-                        <th>Valor merma</th>
-                        <th>Motivo</th>
-                        <th>Mesa</th>
-                        <th>Registrado por</th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
+            <div class="table-wrapper">
+                <table class="waste-table">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-clock"></i> Fecha y Hora</th>
+                            <th>Producto</th>
+                            <th>Cant.</th>
+                            <th>Precio unit.</th>
+                            <th>Valor merma</th>
+                            <th>Motivo</th>
+                            <th>Mesa</th>
+                            <th>Registrado por</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
         `;
 
     } catch (err) {

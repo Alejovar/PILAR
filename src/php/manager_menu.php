@@ -66,7 +66,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                 <i class="fas fa-user-tie user-avatar"></i>
                 <div class="user-text-container">
                     <div class="user-name-text"><?php echo $userName; ?></div>
-                    <div class="session-status-text">Sesión activa</div>
+                    <div class="session-status-text">Gerente General</div>
                 </div>
             </div>
             <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">

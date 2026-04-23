@@ -71,7 +71,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
         
         <div class="user-info">
             <div class="user-details">
-                <i class="fas fa-user-circle user-avatar"></i>
+                <i class="fas fa-user-tie user-avatar"></i>
                 
                 <div class="user-text-container">
                     <div class="user-name-text"><?php echo $userName; ?></div>

@@ -60,9 +60,11 @@ $hostess_name = htmlspecialchars($_SESSION['user_name'] ?? 'Hostess');
         </div>
         <div class="user-info">
             <div class="user-details">
-                <i class="fas fa-user-circle user-avatar"></i>
-                <strong><?php echo $hostess_name; ?></strong><br>
-                <span>Sesión activa</span>
+                <i class="fas fa-user-tie user-avatar"></i>
+                <div class="user-text-container">
+                    <div class="user-name-text"><?php echo $hostess_name; ?></div>
+                    <div class="session-status-text">Sesión activa</div>
+                </div>
             </div>
             <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
                 <i class="fas fa-sign-out-alt"></i>
