@@ -10,6 +10,8 @@ define('MESERO_ROLE_ID', 2);
 define('COCINA_ROLE_ID', 3);
 define('HOSTESS_ROLE_ID', 4);
 define('BARRA_ROLE_ID', 5); // 🔑 ROL DE BARRA AÑADIDO
+define('CASHIER_ROLE_ID', 6);
+define('MANAGER_ROLE_ID', 1);
 
 // 1. Bloqueo de caché
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
