@@ -107,9 +107,9 @@ try {
 
             $allowed_reasons = ['expired', 'kitchen_error', 'waiter_error', 'damaged', 'other'];
 
-            if ($order_id <= 0)                                    throw new Exception('order_id inválido.');
-            if (empty($detail_ids))                                throw new Exception('Selecciona al menos un producto.');
-            if (!in_array($waste_reason, $allowed_reasons))        throw new Exception('Motivo no válido.');
+            if ($order_id <= 0)                             throw new Exception('order_id inválido.');
+            if (empty($detail_ids))                         throw new Exception('Selecciona al menos un producto.');
+            if (!in_array($waste_reason, $allowed_reasons)) throw new Exception('Motivo no válido.');
 
             $detail_ids = array_values(array_filter(array_map('intval', $detail_ids), fn($id) => $id > 0));
             if (empty($detail_ids)) throw new Exception('IDs de detalle inválidos.');
@@ -139,24 +139,32 @@ try {
 
             $cancel_note = '[MERMA] ' . $waste_reason . ($notes ? ': ' . $notes : '');
 
-            // ── UPDATE: marcar como merma, precio a 0 para el cliente ──
+            // ── UPDATE: snapshot para capturar price_at_order ANTES de ponerlo en 0 ──
             $upd_stmt = $conn->prepare("
-                UPDATE order_details
+                UPDATE order_details od
+                JOIN (
+                    SELECT detail_id, price_at_order AS original_price
+                    FROM order_details
+                    WHERE detail_id IN ($placeholders)
+                ) AS snapshot ON od.detail_id = snapshot.detail_id
                 SET
-                    is_cancelled        = 1,
-                    cancellation_reason = ?,
-                    price_at_order      = 0.00,
-                    is_waste            = 1,
-                    waste_reason        = ?,
-                    waste_price         = price_at_order,
-                    waste_recorded_by   = ?,
-                    waste_recorded_at   = NOW()
-                WHERE detail_id IN ($placeholders)
-                  AND order_id    = ?
-                  AND is_cancelled = 0
+                    od.is_cancelled        = 1,
+                    od.cancellation_reason = ?,
+                    od.waste_price         = snapshot.original_price,
+                    od.price_at_order      = 0.00,
+                    od.is_waste            = 1,
+                    od.waste_reason        = ?,
+                    od.waste_recorded_by   = ?,
+                    od.waste_recorded_at   = NOW()
+                WHERE od.detail_id IN ($placeholders)
+                  AND od.order_id    = ?
+                  AND od.is_cancelled = 0
             ");
-            // tipos: ss + n*i (detail_ids) + ii (recorded_by, order_id)
-            $upd_stmt->bind_param('ss' . $id_types . 'ii', ...[$cancel_note, $waste_reason, ...$detail_ids, $recorded_by, $order_id]);
+            // tipos: n*i (snapshot JOIN) + ss + i (recorded_by) + n*i (WHERE IN) + i (order_id)
+            $upd_stmt->bind_param(
+                $id_types . 'ssi' . $id_types . 'i',
+                ...[...$detail_ids, $cancel_note, $waste_reason, $recorded_by, ...$detail_ids, $order_id]
+            );
             $upd_stmt->execute();
             $affected = $upd_stmt->affected_rows;
             $upd_stmt->close();
