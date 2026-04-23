@@ -27,11 +27,14 @@ unit-test-job:
   script:
     - echo "Ejecutando pruebas unitarias básicas..."
     - php -r "if (file_exists('src/php/db_connection.php')) { echo 'Test DB PASSED'; } else { echo 'Test DB FAILED'; exit(1); }"
+    # ── SPRINT 1: Verificar que el archivo de migración de mermas existe ──
+    - php -r "if (file_exists('docker/migration_waste.sql')) { echo 'Test Migration PASSED'; } else { echo 'Test Migration FAILED'; exit(1); }"
     - |
       echo '<?xml version="1.0" encoding="UTF-8"?>
       <testsuites>
-        <testsuite name="UnitTests" tests="1" failures="0">
+        <testsuite name="UnitTests" tests="2" failures="0">
           <testcase name="DatabaseConnectionFile"/>
+          <testcase name="WasteMigrationFile"/>
         </testsuite>
       </testsuites>' > junit.xml
   artifacts:
@@ -115,7 +118,6 @@ deploy_to_staging:
   script:
     - echo "🚀 Desplegando en STAGING ($STAGING_VM_IP) con usuario dinámico..."
 
-    # ── Limpiar disco antes de hacer pull ─
     - |
       ssh $VM_USER@$STAGING_VM_IP "
         echo '🧹 Limpiando disco...'
@@ -124,8 +126,10 @@ deploy_to_staging:
       "
 
     - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/kitchenlink/docker"
-    - scp docker-compose.yml $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
-    - scp docker/init.sql    $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
+    - scp docker-compose.yml       $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
+    - scp docker/init.sql          $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
+    # ── SPRINT 1: Copiar migración de mermas ──
+    - scp docker/migration_waste.sql $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_waste.sql
     - |
       ssh $VM_USER@$STAGING_VM_IP "
         set -e
@@ -138,6 +142,18 @@ deploy_to_staging:
         docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
         docker pull ${CI_REGISTRY_IMAGE}:latest
         docker compose up -d --no-build
+
+        # ── SPRINT 1 / TASK-17: Ejecutar migración de mermas ──
+        # Esperar a que MySQL esté listo (hasta 30s)
+        echo '⏳ Esperando que MySQL esté disponible...'
+        for i in \$(seq 1 30); do
+          docker exec kitchenlink-db mysqladmin ping -h localhost -u\${DB_USER} -p\${DB_PASSWORD} --silent && break
+          sleep 1
+        done
+        echo '🗄️ Ejecutando migración de mermas...'
+        docker exec -i kitchenlink-db mysql -u\${DB_USER} -p\${DB_PASSWORD} KitchenLink \
+          < ~/kitchenlink/docker/migration_waste.sql
+        echo '✅ Migración de mermas OK.'
       "
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -173,7 +189,6 @@ deploy_to_production:
   script:
     - echo "🚀 Desplegando en PRODUCCIÓN ($VM_IP_ADDRESS)..."
 
-    # ── Limpiar disco antes de hacer pull ──
     - |
       ssh $VM_USER@$VM_IP_ADDRESS "
         echo '🧹 Limpiando disco...'
@@ -182,8 +197,10 @@ deploy_to_production:
       "
 
     - ssh $VM_USER@$VM_IP_ADDRESS "mkdir -p ~/kitchenlink/docker"
-    - scp docker-compose.yml $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker-compose.yml
-    - scp docker/init.sql    $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/init.sql
+    - scp docker-compose.yml         $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker-compose.yml
+    - scp docker/init.sql            $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/init.sql
+    # ── SPRINT 1: Copiar migración de mermas ──
+    - scp docker/migration_waste.sql $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_waste.sql
     - |
       ssh $VM_USER@$VM_IP_ADDRESS "
         set -e
@@ -196,6 +213,17 @@ deploy_to_production:
         docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
         docker pull ${CI_REGISTRY_IMAGE}:latest
         docker compose up -d --no-build
+
+        # ── SPRINT 1 / TASK-17: Ejecutar migración de mermas ──
+        echo '⏳ Esperando que MySQL esté disponible...'
+        for i in \$(seq 1 30); do
+          docker exec kitchenlink-db mysqladmin ping -h localhost -u\${DB_USER} -p\${DB_PASSWORD} --silent && break
+          sleep 1
+        done
+        echo '🗄️ Ejecutando migración de mermas...'
+        docker exec -i kitchenlink-db mysql -u\${DB_USER} -p\${DB_PASSWORD} KitchenLink \
+          < ~/kitchenlink/docker/migration_waste.sql
+        echo '✅ Migración de mermas OK.'
       "
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
