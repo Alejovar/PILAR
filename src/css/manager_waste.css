@@ -49,9 +49,11 @@ body { display: flex; background: var(--color-background); }
 
 /* ── Contenido ── */
 .content { flex: 1; padding: 30px 35px; overflow-y: auto; }
-.header-status { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.header-status { display: block; width: 100%; margin-bottom: 10px; }
 
 #liveClockContainer {
+    display: block;
+    width: 100%;
     background-color: #2c3e50;
     color: #ecf0f1;
     padding: 10px 0;
