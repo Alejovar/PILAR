@@ -147,11 +147,11 @@ deploy_to_staging:
         # Esperar a que MySQL esté listo (hasta 30s)
         echo '⏳ Esperando que MySQL esté disponible...'
         for i in \$(seq 1 30); do
-          docker exec kitchenlink-db mysqladmin ping -h localhost -u\${DB_USER} -p\${DB_PASSWORD} --silent && break
+          docker exec kitchenlink-db mysqladmin ping -h localhost -u$DB_USER -p$DB_PASSWORD --silent && break
           sleep 1
         done
         echo '🗄️ Ejecutando migración de mermas...'
-        docker exec -i kitchenlink-db mysql -u\${DB_USER} -p\${DB_PASSWORD} KitchenLink \
+        docker exec -i kitchenlink-db mysql -u$DB_USER -p$DB_PASSWORD KitchenLink \
           < ~/kitchenlink/docker/migration_waste.sql
         echo '✅ Migración de mermas OK.'
       "
@@ -217,11 +217,11 @@ deploy_to_production:
         # ── SPRINT 1 / TASK-17: Ejecutar migración de mermas ──
         echo '⏳ Esperando que MySQL esté disponible...'
         for i in \$(seq 1 30); do
-          docker exec kitchenlink-db mysqladmin ping -h localhost -u\${DB_USER} -p\${DB_PASSWORD} --silent && break
+          docker exec kitchenlink-db mysqladmin ping -h localhost -u$DB_USER -p$DB_PASSWORD --silent && break
           sleep 1
         done
         echo '🗄️ Ejecutando migración de mermas...'
-        docker exec -i kitchenlink-db mysql -u\${DB_USER} -p\${DB_PASSWORD} KitchenLink \
+        docker exec -i kitchenlink-db mysql -u$DB_USER -p$DB_PASSWORD KitchenLink \
           < ~/kitchenlink/docker/migration_waste.sql
         echo '✅ Migración de mermas OK.'
       "
