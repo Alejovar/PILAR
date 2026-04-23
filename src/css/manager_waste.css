@@ -50,7 +50,20 @@ body { display: flex; background: var(--color-background); }
 /* ── Contenido ── */
 .content { flex: 1; padding: 30px 35px; overflow-y: auto; }
 .header-status { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-.clock-widget { font-size: 0.9rem; color: var(--color-text-light); font-weight: 500; }
+
+#liveClockContainer {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 10px 0;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    text-align: center;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
 .page-title { font-size: 1.6rem; font-weight: 700; color: var(--color-text-dark); margin-bottom: 6px; }
 .page-subtitle { font-size: 0.9rem; color: var(--color-text-light); margin-bottom: 24px; }
 
