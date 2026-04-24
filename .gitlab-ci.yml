@@ -128,7 +128,7 @@ deploy_to_staging:
     - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/kitchenlink/docker"
     - scp docker-compose.yml         $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
     - scp docker/init.sql            $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
-    # ── SPRINT 1: Copiar migración de mermas ──
+    # ── SPRINT 1: Copiar migración de mermas ──-
     - scp docker/migration_waste.sql $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_waste.sql
 
     - |
