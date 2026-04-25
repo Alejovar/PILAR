@@ -58,7 +58,8 @@ try {
         throw new Exception('No se pudo preparar la consulta de verificación.');
     }
 
-    $stmt->bind_param('i', MANAGER_ROLE_ID);
+    $managerRoleId = MANAGER_ROLE_ID;
+    $stmt->bind_param('i', $managerRoleId);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -75,6 +76,7 @@ try {
         'message' => $isVerified ? 'Verificación exitosa.' : 'Contraseña no válida.'
     ]);
 } catch (Throwable $e) {
+    error_log('verify_manager.php error: ' . $e->getMessage());
     respondJson([
         'success' => false,
         'message' => 'Error interno al verificar credenciales.'
