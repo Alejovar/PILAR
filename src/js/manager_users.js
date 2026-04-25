@@ -173,7 +173,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const newStatus = currentStatus === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
         const action = newStatus === 'ACTIVO' ? "activar" : "desactivar";
         
-        if(!confirm(`¿Estás seguro de ${action} a este usuario?`)) return;
+        const confirmed = window.appConfirm
+            ? await window.appConfirm(`¿Estás seguro de ${action} a este usuario?`, 'Confirmar acción')
+            : confirm(`¿Estás seguro de ${action} a este usuario?`);
+        if (!confirmed) return;
 
         try {
             const res = await fetch(API_ROUTES.TOGGLE, {

@@ -439,7 +439,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // 💡 NUEVA FUNCIÓN: Cancelar la solicitud de pre-ticket
     async function cancelPreBillRequest(orderId) {
-        if (!confirm(`¿Estás seguro de cancelar la solicitud de cobro para la Orden #${orderId}? Esto desbloqueará al mesero para que pueda añadir más ítems.`)) {
+        const confirmed = window.appConfirm
+            ? await window.appConfirm(`¿Estás seguro de cancelar la solicitud de cobro para la Orden #${orderId}? Esto desbloqueará al mesero para que pueda añadir más ítems.`, 'Confirmar acción')
+            : confirm(`¿Estás seguro de cancelar la solicitud de cobro para la Orden #${orderId}? Esto desbloqueará al mesero para que pueda añadir más ítems.`);
+
+        if (!confirmed) {
             return;
         }
         try {

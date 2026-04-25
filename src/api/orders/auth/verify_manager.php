@@ -1,107 +1,83 @@
 <?php
-// =====================================================
-// VERIFY_MANAGER.PHP - Versión FINAL y ESTABLE
-// =====================================================
-
-// 1. Incluimos el archivo de sesión/conexión
 require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
-// Limpieza de buffer y headers
-ob_clean();
-header('Content-Type: application/json; charset=utf-8');
-// Solo usa este header si es estrictamente necesario y estás en testing
-// header("Access-Control-Allow-Origin: *"); 
 
-// NOTA: session_start() y ini_set() ya están en check_session_api.php
+header('Content-Type: application/json; charset=utf-8');
 
 define('MANAGER_ROLE_ID', 1);
 
-// Estructura base de respuesta
-$response = [
-    'success' => false,
-    'message' => 'Contraseña no válida.'
-];
-
-// =====================================================
-// 1. Obtener la contraseña enviada por JS
-// =====================================================
-$data = json_decode(file_get_contents('php://input'), true);
-$password = $data['password'] ?? '';
-
-if (empty($password)) {
-    $response['message'] = 'Por favor, ingrese una contraseña.';
-    echo json_encode($response);
-    exit();
+/**
+ * Helper para devolver respuestas JSON consistentes.
+ */
+function respondJson(array $payload, int $statusCode = 200): void {
+    http_response_code($statusCode);
+    echo json_encode($payload);
+    exit;
 }
 
-// =====================================================
-// 2. Verificación de Conexión (Usamos la conexión global $conn)
-// =====================================================
 try {
-    if (!isset($conn) || !$conn || $conn->connect_errno) {
-        throw new Exception("Error al conectar con la base de datos.");
+    // 1) Solo aceptamos POST para este endpoint.
+    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+        respondJson([
+            'success' => false,
+            'message' => 'Método no permitido.'
+        ], 405);
     }
-} catch (Throwable $e) {
-    http_response_code(500);
-    $response = [
-        'success' => false,
-        'message' => 'Error de conexión con el servidor.',
-        'error_details' => $e->getMessage()
-    ];
-    echo json_encode($response);
-    exit();
-}
 
-// =====================================================
-// 3. Verificación de la contraseña
-// =====================================================
-try {
-    // Usamos LIMIT 1 porque solo necesitamos la contraseña del gerente (rol_id=1)
-    $sql = "SELECT password FROM users WHERE rol_id = ? LIMIT 1"; 
-    $stmt = $conn->prepare($sql);
+    // 2) Validación defensiva de conexión compartida.
+    if (!isset($conn) || !$conn || $conn->connect_error) {
+        respondJson([
+            'success' => false,
+            'message' => 'Error de conexión con el servidor.'
+        ], 500);
+    }
 
+    // 3) Parseo del body JSON.
+    $rawInput = file_get_contents('php://input');
+    $data = json_decode($rawInput, true);
+
+    if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
+        respondJson([
+            'success' => false,
+            'message' => 'Formato JSON inválido.'
+        ], 400);
+    }
+
+    // 4) Validación del dato recibido.
+    $password = trim($data['password'] ?? '');
+
+    if ($password === '') {
+        respondJson([
+            'success' => false,
+            'message' => 'Por favor, ingrese una contraseña.'
+        ]);
+    }
+
+    // 5) Obtenemos hash del gerente principal (rol_id = 1).
+    $stmt = $conn->prepare('SELECT password FROM users WHERE rol_id = ? LIMIT 1');
     if ($stmt === false) {
-        throw new Exception("Error al preparar la consulta SQL: " . $conn->error);
+        throw new Exception('No se pudo preparar la consulta de verificación.');
     }
 
-    $roleId = MANAGER_ROLE_ID;
-    $stmt->bind_param("i", $roleId);
-
+    $stmt->bind_param('i', MANAGER_ROLE_ID);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    $is_verified = false;
-
-    // Solo necesitamos verificar la primera (y única) contraseña del gerente.
+    $isVerified = false;
     if ($manager = $result->fetch_assoc()) {
-        if (password_verify($password, $manager['password'])) {
-            $is_verified = true;
-        }
-    }
-
-    if ($is_verified) {
-        $response['success'] = true;
-        $response['message'] = 'Verificación exitosa.';
-    } else {
-        $response['message'] = 'Contraseña no válida.';
+        $isVerified = password_verify($password, $manager['password']);
     }
 
     $stmt->close();
 
+    // 6) Respuesta final del endpoint.
+    respondJson([
+        'success' => $isVerified,
+        'message' => $isVerified ? 'Verificación exitosa.' : 'Contraseña no válida.'
+    ]);
 } catch (Throwable $e) {
-    http_response_code(500);
-    $response = [
+    respondJson([
         'success' => false,
-        'message' => 'Error en el servidor durante la ejecución de la consulta.',
-        'error_details' => $e->getMessage()
-    ];
-    echo json_encode($response);
-    exit();
+        'message' => 'Error interno al verificar credenciales.'
+    ], 500);
 }
-
-// =====================================================
-// 4. Responder
-// =====================================================
-// ⚠️ NO CERRAMOS LA CONEXIÓN. Ya eliminamos el bloque de cierre antes.
-echo json_encode($response);
-exit();
 ?>

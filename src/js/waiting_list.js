@@ -97,7 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function archiveClientAsCancelled(clientId) {
         // Pide confirmación al usuario antes de realizar la acción. Si cancela, la función termina.
-        if (!confirm('¿Marcar este cliente como cancelado y moverlo al historial?')) return;
+        const confirmed = window.appConfirm
+            ? await window.appConfirm('¿Marcar este cliente como cancelado y moverlo al historial?', 'Confirmar accion')
+            : confirm('¿Marcar este cliente como cancelado y moverlo al historial?');
+        if (!confirmed) return;
         try {
             // Realiza una petición POST a la API.
             const response = await fetch('/src/api/archive_from_waitlist.php', {

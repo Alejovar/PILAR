@@ -372,7 +372,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tableName = tableNameElement.textContent;
 
-            if (!confirm(`¿Desea cambiar el estado de la ${tableName}?`)) return;
+            const tableStatusConfirmed = window.appConfirm
+                ? await window.appConfirm(`¿Desea cambiar el estado de la ${tableName}?`, 'Confirmar cambio')
+                : confirm(`¿Desea cambiar el estado de la ${tableName}?`);
+            if (!tableStatusConfirmed) return;
 
             try {
                 const response = await fetch('/src/api/update_table_status.php', { 
@@ -438,7 +441,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let action = confirmButton ? 'confirmar la llegada del cliente' : 'CANCELAR esta reservación';
             let status = confirmButton ? 'completada' : 'cancelada';
 
-            if (confirm(`¿Está seguro de que desea ${action}?`)) {
+            const reservationActionConfirmed = window.appConfirm
+                ? await window.appConfirm(`¿Está seguro de que desea ${action}?`, 'Confirmar acción')
+                : confirm(`¿Está seguro de que desea ${action}?`);
+
+            if (reservationActionConfirmed) {
                 btnConfirm.classList.add('processing');
                 btnCancel.classList.add('processing');
                 btnConfirm.disabled = true;

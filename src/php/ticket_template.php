@@ -24,6 +24,7 @@ header('Content-Type: text/html; charset=UTF-8');
     <p>Cargando ticket...</p>
 </div>
 
+<script src="/src/js/session_interceptor.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
         const orderId = <?php echo json_encode($order_id); ?>;

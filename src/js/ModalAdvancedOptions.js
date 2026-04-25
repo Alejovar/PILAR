@@ -81,7 +81,18 @@ export class ModalAdvancedOptions {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ password: password }) 
             });
-            const result = await res.json();
+            const raw = await res.text();
+            let result;
+
+            try {
+                result = JSON.parse(raw);
+            } catch (parseError) {
+                throw new Error('Respuesta no valida del servidor.');
+            }
+
+            if (!res.ok) {
+                throw new Error(result.message || 'No se pudo verificar la contraseña.');
+            }
 
             if (result.success) {
                 this.passwordModal.close();
@@ -93,7 +104,7 @@ export class ModalAdvancedOptions {
             }
         } catch (error) {
             console.error('Error de verificación:', error);
-            this.passwordErrorMsg.textContent = 'Error de conexión.';
+            this.passwordErrorMsg.textContent = error.message || 'Error de conexión.';
             this.passwordErrorMsg.style.display = 'block';
         }
     }

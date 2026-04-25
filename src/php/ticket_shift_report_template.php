@@ -32,6 +32,7 @@
     <button onclick="window.close()" style="padding: 10px 20px; font-size: 16px;">Cerrar</button>
 </div>
 
+<script src="/src/js/session_interceptor.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const ticketContent = document.getElementById('ticketContent');

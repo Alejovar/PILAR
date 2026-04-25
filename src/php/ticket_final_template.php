@@ -22,6 +22,7 @@ $change = $_GET['change'] ?? 0; // Cambio que se entregó (calculado)
     <p>Cargando recibo...</p>
 </div>
 
+<script src="/src/js/session_interceptor.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', async () => {
         const saleId = <?php echo json_encode($sale_id); ?>;

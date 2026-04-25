@@ -298,11 +298,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generateShiftReportZ() {
-        if (!confirm("¿Estás seguro de que deseas cerrar el turno?\nEsta acción es IRREVERSIBLE y generará el Corte Z final.")) return;
+        const closeShiftConfirmed = window.appConfirm
+            ? await window.appConfirm("¿Estás seguro de que deseas cerrar el turno?\nEsta acción es IRREVERSIBLE y generará el Corte Z final.", 'Cierre de turno')
+            : confirm("¿Estás seguro de que deseas cerrar el turno?\nEsta acción es IRREVERSIBLE y generará el Corte Z final.");
+        if (!closeShiftConfirmed) return;
         
         // 💡 Esta validación ahora usa la variable global
         if (manualCashTotal === 0) {
-            if (!confirm("ADVERTENCIA: No has realizado el conteo de efectivo en la pestaña 'Arqueo de Caja'. ¿Deseas cerrar el turno con un conteo de $0.00?")) return;
+            const zeroCashConfirmed = window.appConfirm
+                ? await window.appConfirm("ADVERTENCIA: No has realizado el conteo de efectivo en la pestaña 'Arqueo de Caja'. ¿Deseas cerrar el turno con un conteo de $0.00?", 'Advertencia')
+                : confirm("ADVERTENCIA: No has realizado el conteo de efectivo en la pestaña 'Arqueo de Caja'. ¿Deseas cerrar el turno con un conteo de $0.00?");
+            if (!zeroCashConfirmed) return;
         }
 
         btnGenerateShiftReport.disabled = true;

@@ -98,6 +98,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
     </div>
   </div>
 
+  <script src="/src/js/session_interceptor.js"></script>
   <script src="/src/js/script.js"></script>
 </body>
 

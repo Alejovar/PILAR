@@ -21,5 +21,6 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     <p>Tu rol es: **<?php echo htmlspecialchars($_SESSION['rol']); ?>**.</p>
 
     <a href="/src/php/logout.php">Cerrar sesión</a>
+    <script src="/src/js/session_interceptor.js"></script>
 </body>
 </html>
