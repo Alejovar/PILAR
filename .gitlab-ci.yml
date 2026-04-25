@@ -121,19 +121,16 @@ deploy_to_staging:
     - |
       ssh $VM_USER@$STAGING_VM_IP "
         echo '🧹 Limpiando disco...'
-        docker system prune -af --volumes
+        docker system prune -af
         df -h
       "
 
     - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/kitchenlink/docker"
     - scp docker-compose.yml         $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
     - scp docker/init.sql            $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
-    # ── SPRINT 1: Copiar migración de mermas ──
+    # ── SPRINT 1: Copiar migración de mermas ──-
     - scp docker/migration_waste.sql $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_waste.sql
 
-    # FIX: Las variables STAGING_DB_USER y STAGING_DB_PASSWORD se expanden AQUÍ en el runner
-    # (comillas dobles en el exterior) antes de enviarse al servidor remoto.
-    # Se usan comillas simples alrededor del valor para proteger caracteres especiales de Vault.
     - |
       ssh $VM_USER@$STAGING_VM_IP "
         set -e
@@ -148,19 +145,41 @@ deploy_to_staging:
         docker compose up -d --no-build
 
         # ── SPRINT 1 / TASK-17: Ejecutar migración de mermas ──
-        # Esperar a que MySQL esté listo (hasta 30s)
         echo '⏳ Esperando que MySQL esté disponible...'
         for i in \$(seq 1 30); do
           docker exec kitchenlink-db mysqladmin ping -h localhost \
-            -u'${STAGING_DB_USER}' -p'${STAGING_DB_PASSWORD}' --silent && break
+            -uroot -p'${STAGING_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
         done
 
         echo '🗄️ Ejecutando migración de mermas...'
         docker exec -i kitchenlink-db mysql \
-          -u'${STAGING_DB_USER}' -p'${STAGING_DB_PASSWORD}' KitchenLink \
+          -uroot -p'${STAGING_DB_ROOT_PASSWORD}' KitchenLink \
           < ~/kitchenlink/docker/migration_waste.sql
         echo '✅ Migración de mermas OK.'
+
+        # ── FIX: Validar que el usuario de Vault existe en MySQL ──
+        # Cuando MySQL se reinicia (ej. reboot de VM), el volumen persiste pero
+        # MYSQL_USER solo se aplica en el primer arranque. Si el contenedor fue
+        # recreado o el usuario fue revocado por un lease anterior, se recrea aquí.
+        echo '🔍 Validando que el usuario de Vault existe en MySQL...'
+        USER_EXISTS=\$(docker exec kitchenlink-db mysql \
+          -uroot -p'${STAGING_DB_ROOT_PASSWORD}' \
+          -se \"SELECT COUNT(*) FROM mysql.user WHERE user='${STAGING_DB_USER}';\" 2>/dev/null)
+
+        if [ \"\$USER_EXISTS\" = \"0\" ] || [ -z \"\$USER_EXISTS\" ]; then
+          echo '⚠️  Usuario de Vault no encontrado en MySQL. Recreando...'
+          docker exec kitchenlink-db mysql \
+            -uroot -p'${STAGING_DB_ROOT_PASSWORD}' -e \"
+              CREATE USER '${STAGING_DB_USER}'@'%'
+                IDENTIFIED WITH mysql_native_password BY '${STAGING_DB_PASSWORD}';
+              GRANT ALL PRIVILEGES ON KitchenLink.* TO '${STAGING_DB_USER}'@'%';
+              FLUSH PRIVILEGES;
+            \"
+          echo '✅ Usuario de Vault recreado correctamente.'
+        else
+          echo '✅ Usuario de Vault verificado en MySQL.'
+        fi
       "
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
@@ -199,7 +218,7 @@ deploy_to_production:
     - |
       ssh $VM_USER@$VM_IP_ADDRESS "
         echo '🧹 Limpiando disco...'
-        docker system prune -af --volumes
+        docker system prune -af
         df -h
       "
 
@@ -209,9 +228,6 @@ deploy_to_production:
     # ── SPRINT 1: Copiar migración de mermas ──
     - scp docker/migration_waste.sql $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_waste.sql
 
-    # FIX: Las variables PROD_DB_USER y PROD_DB_PASSWORD se expanden AQUÍ en el runner
-    # (comillas dobles en el exterior) antes de enviarse al servidor remoto.
-    # Se usan comillas simples alrededor del valor para proteger caracteres especiales de Vault.
     - |
       ssh $VM_USER@$VM_IP_ADDRESS "
         set -e
@@ -229,15 +245,38 @@ deploy_to_production:
         echo '⏳ Esperando que MySQL esté disponible...'
         for i in \$(seq 1 30); do
           docker exec kitchenlink-db mysqladmin ping -h localhost \
-            -u'${PROD_DB_USER}' -p'${PROD_DB_PASSWORD}' --silent && break
+            -uroot -p'${PROD_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
         done
 
         echo '🗄️ Ejecutando migración de mermas...'
         docker exec -i kitchenlink-db mysql \
-          -u'${PROD_DB_USER}' -p'${PROD_DB_PASSWORD}' KitchenLink \
+          -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
           < ~/kitchenlink/docker/migration_waste.sql
         echo '✅ Migración de mermas OK.'
+
+        # ── FIX: Validar que el usuario de Vault existe en MySQL ──
+        # Cuando MySQL se reinicia (ej. reboot de VM), el volumen persiste pero
+        # MYSQL_USER solo se aplica en el primer arranque. Si el contenedor fue
+        # recreado o el usuario fue revocado por un lease anterior, se recrea aquí.
+        echo '🔍 Validando que el usuario de Vault existe en MySQL...'
+        USER_EXISTS=\$(docker exec kitchenlink-db mysql \
+          -uroot -p'${PROD_DB_ROOT_PASSWORD}' \
+          -se \"SELECT COUNT(*) FROM mysql.user WHERE user='${PROD_DB_USER}';\" 2>/dev/null)
+
+        if [ \"\$USER_EXISTS\" = \"0\" ] || [ -z \"\$USER_EXISTS\" ]; then
+          echo '⚠️  Usuario de Vault no encontrado en MySQL. Recreando...'
+          docker exec kitchenlink-db mysql \
+            -uroot -p'${PROD_DB_ROOT_PASSWORD}' -e \"
+              CREATE USER '${PROD_DB_USER}'@'%'
+                IDENTIFIED WITH mysql_native_password BY '${PROD_DB_PASSWORD}';
+              GRANT ALL PRIVILEGES ON KitchenLink.* TO '${PROD_DB_USER}'@'%';
+              FLUSH PRIVILEGES;
+            \"
+          echo '✅ Usuario de Vault recreado correctamente.'
+        else
+          echo '✅ Usuario de Vault verificado en MySQL.'
+        fi
       "
   rules:
     - if: '$CI_COMMIT_BRANCH == "main"'
