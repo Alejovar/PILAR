@@ -88,7 +88,7 @@ export class GuestCountChanger {
             const result = await res.json();
 
             if (result.success) {
-                alert(`${result.message}`);
+                window.appAlert(`${result.message}`);
                 this.advancedModal.close();
                 // Dispara un evento global para que otras partes de la UI se actualicen.
                 window.dispatchEvent(new CustomEvent('table-list-update')); 

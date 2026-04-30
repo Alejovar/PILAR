@@ -49,13 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = new Date();
 
         if (reservationDateTime < (now - 60000)) {
-            alert('Error: No se puede reservar en una fecha u hora que ya ha pasado.');
+            window.appAlert('Error: No se puede reservar en una fecha u hora que ya ha pasado.');
             return false;
         }
 
         const hour = parseInt(selectedTime.split(':')[0]);
         if (hour < 8 || hour > 22) { 
-            alert('Error: Las reservaciones solo están disponibles de 8:00 AM a 10:00 PM.');
+            window.appAlert('Error: Las reservaciones solo están disponibles de 8:00 AM a 10:00 PM.');
             return false;
         }
 
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const res = await response.json();
             if (!res.success || !res.reservation) {
-                alert("Error: No se encontraron los detalles de la reservación.");
+                window.appAlert("Error: No se encontraron los detalles de la reservación.");
                 return;
             }
 
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error('Error al cargar datos para edición:', error);
-            alert('Error al cargar la reservación. Por favor, revisa tu conexión y API.');
+            window.appAlert('Error al cargar la reservación. Por favor, revisa tu conexión y API.');
         }
     }
 
@@ -255,15 +255,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             if (result.success) {
-                alert(`Reservación ${status} con éxito.`);
+                window.appAlert(`Reservación ${status} con éxito.`);
                 return true;
             } else {
-                alert(`Error al ${status === 'completada' ? 'confirmar' : 'cancelar'}: ` + result.message);
+                window.appAlert(`Error al ${status === 'completada' ? 'confirmar' : 'cancelar'}: ` + result.message);
                 return false;
             }
         } catch (error) {
             console.error('Error en la API de archivo:', error);
-            alert(`Error de conexión al procesar la reservación. Error: ${error.message}`);
+            window.appAlert(`Error de conexión al procesar la reservación. Error: ${error.message}`);
             return false;
         }
     }
@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
             formData.append('reservation_id', currentEditingReservationId);
         } else if (!formData.has('table_ids[]')) {
             // Si es nueva reservación, verifica que se haya seleccionado al menos una mesa.
-            alert('Por favor, seleccione al menos una mesa.');
+            window.appAlert('Por favor, seleccione al menos una mesa.');
             return;
         }
 
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
             if (result.success) {
-                alert(`¡Reservación ${isUpdating ? 'actualizada' : 'registrada'} con éxito!`);
+                window.appAlert(`¡Reservación ${isUpdating ? 'actualizada' : 'registrada'} con éxito!`);
                 resetFormToNew(); // Vuelve al estado de registro
                 
                 // Recarga las vistas 
@@ -345,11 +345,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadReservations(viewDateInput.value);
                 loadTableStatuses();
             } else {
-                alert(`Error al ${isUpdating ? 'actualizar' : 'registrar'} reservación: ` + result.message);
+                window.appAlert(`Error al ${isUpdating ? 'actualizar' : 'registrar'} reservación: ` + result.message);
             }
         } catch (error) {
             console.error('Error en el envío del formulario:', error);
-            alert(`Error de conexión al ${isUpdating ? 'actualizar' : 'registrar'} la reservación.`);
+            window.appAlert(`Error de conexión al ${isUpdating ? 'actualizar' : 'registrar'} la reservación.`);
         }
     });
 
@@ -372,9 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tableName = tableNameElement.textContent;
 
-            const tableStatusConfirmed = window.appConfirm
-                ? await window.appConfirm(`¿Desea cambiar el estado de la ${tableName}?`, 'Confirmar cambio')
-                : confirm(`¿Desea cambiar el estado de la ${tableName}?`);
+            const tableStatusConfirmed = await window.appConfirm(`¿Desea cambiar el estado de la ${tableName}?`, 'Confirmar cambio');
             if (!tableStatusConfirmed) return;
 
             try {
@@ -394,11 +392,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadTableStatuses();
                     fetchAvailableTablesForForm();
                 } else {
-                    alert("Error: " + result.message);
+                    window.appAlert("Error: " + result.message);
                 }
             } catch (error) { 
                 console.error('Error al actualizar estado:', error);
-                alert("Error de conexión al actualizar el estado de la mesa. Revisa la Consola (F12) para detalles.");
+                window.appAlert("Error de conexión al actualizar el estado de la mesa. Revisa la Consola (F12) para detalles.");
             }
         }
     }, true);
@@ -441,9 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let action = confirmButton ? 'confirmar la llegada del cliente' : 'CANCELAR esta reservación';
             let status = confirmButton ? 'completada' : 'cancelada';
 
-            const reservationActionConfirmed = window.appConfirm
-                ? await window.appConfirm(`¿Está seguro de que desea ${action}?`, 'Confirmar acción')
-                : confirm(`¿Está seguro de que desea ${action}?`);
+            const reservationActionConfirmed = await window.appConfirm(`¿Está seguro de que desea ${action}?`, 'Confirmar acción');
 
             if (reservationActionConfirmed) {
                 btnConfirm.classList.add('processing');

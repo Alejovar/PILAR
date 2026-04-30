@@ -157,14 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await res.json();
 
             if (result.success) {
-                alert("Usuario guardado correctamente.");
+                window.appAlert("Usuario guardado correctamente.");
                 userModal.classList.remove('visible');
                 loadUsers();
             } else {
-                alert("Error: " + result.message);
+                window.appAlert("Error: " + result.message);
             }
         } catch (error) {
-            alert("Error de red al guardar.");
+            window.appAlert("Error de red al guardar.");
         }
     });
     
@@ -173,9 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newStatus = currentStatus === 'ACTIVO' ? 'INACTIVO' : 'ACTIVO';
         const action = newStatus === 'ACTIVO' ? "activar" : "desactivar";
         
-        const confirmed = window.appConfirm
-            ? await window.appConfirm(`¿Estás seguro de ${action} a este usuario?`, 'Confirmar acción')
-            : confirm(`¿Estás seguro de ${action} a este usuario?`);
+        const confirmed = await window.appConfirm(`¿Estás seguro de ${action} a este usuario?`, 'Confirmar acción');
         if (!confirmed) return;
 
         try {
@@ -189,10 +187,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.success) {
                 loadUsers();
             } else {
-                alert("Error: " + result.message);
+                window.appAlert("Error: " + result.message);
             }
         } catch (e) {
-            alert("Error de red.");
+            window.appAlert("Error de red.");
         }
     }
 

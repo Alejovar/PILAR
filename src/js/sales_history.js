@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function openNewShift() {
         const amount = parseFloat(startingCashInput.value);
         if (isNaN(amount) || amount < 0) {
-            alert('Por favor, ingrese un monto de fondo de caja válido.');
+            window.appAlert('Por favor, ingrese un monto de fondo de caja válido.');
             return;
         }
         btnOpenShiftConfirm.disabled = true;
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.message);
             }
         } catch (error) {
-            alert(`Error al abrir el turno: ${error.message}`);
+            window.appAlert(`Error al abrir el turno: ${error.message}`);
             btnOpenShiftConfirm.disabled = false;
             btnOpenShiftConfirm.textContent = 'Abrir Turno';
         }
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
             queryParams.append('start_date', startDate);
             queryParams.append('end_date', endDate);
         } else {
-            alert('Por favor, ingrese un Folio o un rango de Fechas válido.');
+            window.appAlert('Por favor, ingrese un Folio o un rango de Fechas válido.');
             return;
         }
         btnSearchTickets.disabled = true;
@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const receiptUrl = `/src/php/ticket_final_template.php?sale_id=${saleId}&discount=0&cash_received=0&change=0`;
         const printWindow = window.open(receiptUrl, '_blank', 'width=700,height=800,scrollbars=yes,resizable=yes');
         if (printWindow) printWindow.focus();
-        else alert("El navegador bloqueó la ventana emergente. Por favor, habilite las ventanas emergentes.");
+        else window.appAlert("El navegador bloqueó la ventana emergente. Por favor, habilite las ventanas emergentes.");
     }
 
     // --- Lógica de Arqueo y Reporte Z ---
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error fatal al cargar reporte:', error);
-            alert("Error de conexión al cargar el reporte del turno.");
+            window.appAlert("Error de conexión al cargar el reporte del turno.");
         }
     }
     
@@ -298,16 +298,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generateShiftReportZ() {
-        const closeShiftConfirmed = window.appConfirm
-            ? await window.appConfirm("¿Estás seguro de que deseas cerrar el turno?\nEsta acción es IRREVERSIBLE y generará el Corte Z final.", 'Cierre de turno')
-            : confirm("¿Estás seguro de que deseas cerrar el turno?\nEsta acción es IRREVERSIBLE y generará el Corte Z final.");
+        const closeShiftConfirmed = await window.appConfirm("¿Estás seguro de que deseas cerrar el turno?\nEsta acción es IRREVERSIBLE y generará el Corte Z final.", 'Cierre de turno');
         if (!closeShiftConfirmed) return;
         
         // 💡 Esta validación ahora usa la variable global
         if (manualCashTotal === 0) {
-            const zeroCashConfirmed = window.appConfirm
-                ? await window.appConfirm("ADVERTENCIA: No has realizado el conteo de efectivo en la pestaña 'Arqueo de Caja'. ¿Deseas cerrar el turno con un conteo de $0.00?", 'Advertencia')
-                : confirm("ADVERTENCIA: No has realizado el conteo de efectivo en la pestaña 'Arqueo de Caja'. ¿Deseas cerrar el turno con un conteo de $0.00?");
+            const zeroCashConfirmed = await window.appConfirm("ADVERTENCIA: No has realizado el conteo de efectivo en la pestaña 'Arqueo de Caja'. ¿Deseas cerrar el turno con un conteo de $0.00?", 'Advertencia');
             if (!zeroCashConfirmed) return;
         }
 
@@ -326,13 +322,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('currentShiftReportData', JSON.stringify(result));
                 const reportUrl = '/src/php/ticket_shift_report_template.php';
                 const reportWindow = window.open(reportUrl, '_blank', 'width=400,height=800');
-                alert("Turno cerrado exitosamente. El sistema se recargará.");
+                window.appAlert("Turno cerrado exitosamente. El sistema se recargará.");
                 window.location.reload();
             } else {
                 throw new Error(result.message);
             }
         } catch (error) {
-            alert(`Error grave al cerrar el turno: ${error.message}`);
+            window.appAlert(`Error grave al cerrar el turno: ${error.message}`);
             btnGenerateShiftReport.disabled = false;
             btnGenerateShiftReport.innerHTML = '<i class="fas fa-file-invoice-dollar"></i> Generar Corte Z del Turno';
         }
@@ -343,12 +339,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const deductionRate = parseFloat(serverDeductionRateInput.value) || 0.0;
 
         if (!serverId) {
-            alert("Por favor, seleccione un mesero de la lista.");
+            window.appAlert("Por favor, seleccione un mesero de la lista.");
             return;
         }
         
         if (deductionRate < 0 || deductionRate > 1) {
-            alert("El porcentaje de deducción debe estar entre 0.0 y 1.0 (Ej: 0.30 para 30%).");
+            window.appAlert("El porcentaje de deducción debe estar entre 0.0 y 1.0 (Ej: 0.30 para 30%).");
             return;
         }
 
@@ -365,14 +361,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const reportWindow = window.open(reportUrl, '_blank', 'width=400,height=600');
                 
                 if (!reportWindow) {
-                    alert("El navegador bloqueó la ventana emergente. Por favor, habilite las ventanas emergentes.");
+                    window.appAlert("El navegador bloqueó la ventana emergente. Por favor, habilite las ventanas emergentes.");
                 }
             } else {
                 throw new Error(result.message);
             }
 
         } catch (error) {
-            alert(`Error al generar el reporte de mesero: ${error.message}`);
+            window.appAlert(`Error al generar el reporte de mesero: ${error.message}`);
         } finally {
             btnGenerateServerReport.disabled = false;
             btnGenerateServerReport.innerHTML = '<i class="fas fa-user-tag"></i> Generar Reporte';

@@ -43,11 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 fetchAndDisplayBarOrders(); 
             } else {
-                alert('Error al actualizar estado: ' + data.message);
+                window.appAlert('Error al actualizar estado: ' + data.message);
             }
         } catch (error) {
             console.error('Fallo en la conexión al actualizar:', error);
-            alert('Error de conexión con el servidor.');
+            window.appAlert('Error de conexión con el servidor.');
         }
     }
 

@@ -57,7 +57,7 @@ export class ModalAdvancedOptions {
                 // 👆 FIN DEL CAMBIO 👆
 
             } else {
-                alert('Por favor, seleccione una mesa antes de usar las opciones avanzadas.');
+                window.appAlert('Por favor, seleccione una mesa antes de usar las opciones avanzadas.');
             }
         });
 

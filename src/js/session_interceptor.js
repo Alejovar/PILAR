@@ -14,8 +14,8 @@
             .app-dialog-overlay {
                 position: fixed;
                 inset: 0;
-                background: rgba(15, 23, 42, 0.45);
-                backdrop-filter: blur(2px);
+                background: rgba(30, 27, 75, 0.35);
+                backdrop-filter: blur(3px);
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -31,13 +31,13 @@
                 width: 100%;
                 max-width: 420px;
                 background: #ffffff;
-                border-radius: 14px;
-                border: 1px solid #e2e8f0;
-                box-shadow: 0 14px 38px rgba(15, 23, 42, 0.2);
+                border-radius: 16px;
+                border: 1px solid #e8eaf6;
+                box-shadow: 0 16px 40px rgba(30, 27, 75, 0.22);
                 overflow: hidden;
                 transform: translateY(6px);
                 transition: transform 0.15s ease;
-                font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+                font-family: 'Montserrat', 'Segoe UI', Tahoma, Arial, sans-serif;
             }
             .app-dialog-overlay.visible .app-dialog {
                 transform: translateY(0);
@@ -46,13 +46,13 @@
                 padding: 14px 16px;
                 font-weight: 700;
                 color: #ffffff;
-                border-bottom: 1px solid #e2e8f0;
-                background: linear-gradient(135deg, #0f766e, #0ea5e9);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+                background: linear-gradient(135deg, #4f46e5, #7c3aed);
             }
             .app-dialog-body {
                 padding: 18px 16px;
-                color: #334155;
-                line-height: 1.45;
+                color: #374151;
+                line-height: 1.5;
                 white-space: pre-line;
             }
             .app-dialog-actions {
@@ -63,21 +63,27 @@
             }
             .app-dialog-btn {
                 border: 0;
-                border-radius: 8px;
-                padding: 9px 14px;
+                border-radius: 10px;
+                padding: 9px 16px;
                 font-weight: 600;
                 cursor: pointer;
+                transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
             }
             .app-dialog-btn.cancel {
-                background: #e2e8f0;
-                color: #1e293b;
+                background: #eef2ff;
+                color: #312e81;
+            }
+            .app-dialog-btn.cancel:hover {
+                background: #e0e7ff;
             }
             .app-dialog-btn.confirm {
-                background: #0f766e;
+                background: linear-gradient(135deg, #4f46e5, #7c3aed);
                 color: #ffffff;
+                box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
             }
             .app-dialog-btn.confirm:hover {
-                background: #0d9488;
+                background: linear-gradient(135deg, #4338ca, #6d28d9);
+                box-shadow: 0 8px 18px rgba(109, 40, 217, 0.32);
             }
         `;
         (document.head || document.documentElement).appendChild(style);

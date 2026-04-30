@@ -302,8 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
             const result = await res.json();
-            if (result.success) callback(); else alert("Error: " + result.message);
-        } catch (e) { alert("Error de red."); }
+            if (result.success) callback(); else window.appAlert("Error: " + result.message);
+        } catch (e) { window.appAlert("Error de red."); }
     }
 
     async function toggleProductStatus(id, status) {

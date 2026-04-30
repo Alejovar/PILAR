@@ -182,9 +182,7 @@ async function registerWaste() {
     const btn    = document.getElementById('btnRegisterWaste');
 
     const confirmMsg = `¿Confirmas que ${detailIds.length} producto(s) serán marcados como MERMA?\n\nEl cargo será eliminado de la cuenta del cliente.`;
-    const confirmed = window.appConfirm
-        ? await window.appConfirm(confirmMsg, 'Confirmar merma')
-        : confirm(confirmMsg);
+    const confirmed = await window.appConfirm(confirmMsg, 'Confirmar merma');
     if (!confirmed) return;
 
     btn.disabled = true;

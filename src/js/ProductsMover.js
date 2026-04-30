@@ -200,7 +200,7 @@ export class ProductsMover {
             const result = await res.json();
             
             if (result.success) {
-                alert(result.message);
+                window.appAlert(result.message);
                 this.advancedModal.close();
                 window.dispatchEvent(new CustomEvent('table-list-update')); 
             } else {

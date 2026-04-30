@@ -56,13 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Basic validation for input numbers
         if (isNaN(tableNumber) || isNaN(numPeople) || tableNumber <= 0 || numPeople <= 0) {
-            alert('Por favor, ingresa números válidos para la mesa y el número de personas.');
+            window.appAlert('Por favor, ingresa números válidos para la mesa y el número de personas.');
             return;
         }
 
         // Validate uniqueness: Check if table number is already active
         if (activeTableNumbers.has(tableNumber)) {
-            alert(`Error: La mesa número ${tableNumber} ya está en uso. Por favor, elige otro número.`);
+            window.appAlert(`Error: La mesa número ${tableNumber} ya está en uso. Por favor, elige otro número.`);
             return;
         }
 
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // For now, we simulate success directly:
         console.log(`Table ${tableNumber} created with ${numPeople} people.`);
-        alert(`Mesa ${tableNumber} creada con ${numPeople} personas.`);
+        window.appAlert(`Mesa ${tableNumber} creada con ${numPeople} personas.`);
 
         // Add the table number to the set of active tables
         activeTableNumbers.add(tableNumber);

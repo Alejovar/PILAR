@@ -83,11 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadWaitingList();    // Vuelve a cargar la lista para mostrar al nuevo cliente.
             } else {
                 // Si el servidor indica un error, muestra un mensaje al usuario.
-                alert('Error: ' + (result.message || 'No se pudo agregar al cliente.'));
+                window.appAlert('Error: ' + (result.message || 'No se pudo agregar al cliente.'));
             }
         } catch (error) {
             console.error('Error al agregar cliente:', error);
-            alert('Error de conexión. Inténtelo de nuevo.');
+            window.appAlert('Error de conexión. Inténtelo de nuevo.');
         }
     }
     
@@ -97,9 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function archiveClientAsCancelled(clientId) {
         // Pide confirmación al usuario antes de realizar la acción. Si cancela, la función termina.
-        const confirmed = window.appConfirm
-            ? await window.appConfirm('¿Marcar este cliente como cancelado y moverlo al historial?', 'Confirmar accion')
-            : confirm('¿Marcar este cliente como cancelado y moverlo al historial?');
+        const confirmed = await window.appConfirm('¿Marcar este cliente como cancelado y moverlo al historial?', 'Confirmar accion');
         if (!confirmed) return;
         try {
             // Realiza una petición POST a la API.
@@ -115,11 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Si fue exitoso, recarga la lista para que el cliente desaparezca.
                 loadWaitingList(); 
             } else {
-                alert('Error: ' + (result.message || 'No se pudo archivar al cliente.'));
+                window.appAlert('Error: ' + (result.message || 'No se pudo archivar al cliente.'));
             }
         } catch (error) {
             console.error('Error al archivar cliente:', error);
-            alert('Error de conexión al intentar archivar.');
+            window.appAlert('Error de conexión al intentar archivar.');
         }
     }
 
@@ -180,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedTables = modalTableGrid.querySelectorAll('.modal-table-box.selected');
         // Si no se seleccionó ninguna mesa, muestra una alerta y detiene la función.
         if (selectedTables.length === 0) {
-            alert('Por favor, seleccione al menos una mesa.');
+            window.appAlert('Por favor, seleccione al menos una mesa.');
             return;
         }
 
@@ -196,16 +194,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             const result = await response.json();
             if (result.success) {
-                alert('¡Cliente sentado con éxito!');
+                window.appAlert('¡Cliente sentado con éxito!');
                 // Cierra la modal y recarga la lista de espera (el cliente ya no aparecerá).
                 closeSeatClientModal();
                 loadWaitingList();
             } else {
-                alert('Error: ' + result.message);
+                window.appAlert('Error: ' + result.message);
             }
         } catch (error) {
             console.error("Error al sentar al cliente:", error);
-            alert('Hubo un error de conexión al intentar sentar al cliente.');
+            window.appAlert('Hubo un error de conexión al intentar sentar al cliente.');
         }
     }
 

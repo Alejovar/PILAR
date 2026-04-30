@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await response.json();
 
         if (!data.success || data.status === 'CLOSED') {
-            alert("El turno de caja ha sido cerrado. La sesión se cerrará.");
+            window.appAlert("El turno de caja ha sido cerrado. La sesión se cerrará.");
             window.location.href = '/src/php/logout.php';
             return; // Detenemos la carga del resto del script
         }
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function addItemToOrder(item) {
         if (isInterfaceLocked) {
-            alert("La mesa está bloqueada. Cobro solicitado.");
+            window.appAlert("La mesa está bloqueada. Cobro solicitado.");
             return;
         }
 
@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function sendOrderToKitchen() {
         // 💡 BLOQUEO EN EL FLUJO: Si la interfaz está bloqueada, no envía la orden.
         if (isInterfaceLocked) {
-            alert("No se puede enviar la orden: Cobro solicitado.");
+            window.appAlert("No se puede enviar la orden: Cobro solicitado.");
             return;
         }
         
@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Capturamos el error si la MESA FUE CERRADA (410 Gone)
             if (response.status === 410) { 
                 const errorData = await response.json();
-                alert(errorData.message + '\nRegresando a la lista de mesas.');
+                window.appAlert(errorData.message + '\nRegresando a la lista de mesas.');
                 window.location.href = '/src/php/orders.php'; // Regresar a lista de mesas
                 return;
             }
@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Capturamos el error si la CUENTA FUE SOLICITADA (403 Forbidden)
             if (response.status === 403) {
                 const errorData = await response.json();
-                alert(errorData.message); 
+                window.appAlert(errorData.message); 
                 lockTpvInterface();     
                 return;                 
             }
@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error('Error al enviar la orden:', error);
-            alert(`Error al enviar la comanda: ${error.message}`);
+            window.appAlert(`Error al enviar la comanda: ${error.message}`);
             // Forzamos la recarga de productos si hay error (para ver el 86 aplicado)
             if (activeCategoryId) loadProducts(activeCategoryId);
             renderOrderSummary();
@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function handleCategoryClick(categoryId) {
         // 💡 BLOQUEO EN EL FLUJO: Si la interfaz está bloqueada, no permite cambiar categorías.
         if (isInterfaceLocked) { 
-            alert("La mesa está bloqueada. Cobro solicitado.");
+            window.appAlert("La mesa está bloqueada. Cobro solicitado.");
             return;
         }
         
@@ -680,7 +680,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // 💡 Asegurarse de que el producto encontrado no esté agotado (86)
                 if (item.classList.contains('product-agotado')) {
-                     alert("Este producto está agotado (86) y no puede ser añadido.");
+                     window.appAlert("Este producto está agotado (86) y no puede ser añadido.");
                      searchInput.value = '';
                      searchDropdown.style.display = 'none';
                      return;
@@ -821,7 +821,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     productGrid.addEventListener('click', (e) => {
         if (isInterfaceLocked) {
-            alert("La mesa está bloqueada. Cobro solicitado.");
+            window.appAlert("La mesa está bloqueada. Cobro solicitado.");
             return;
         }
 
@@ -831,7 +831,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 💡 Bloquear si el producto está agotado (la tarjeta tiene la clase 'product-agotado')
         if (productBtn.classList.contains('product-agotado')) {
             // El botón ya debería estar deshabilitado, pero esta es una capa de seguridad extra.
-            alert("Producto agotado (86).");
+            window.appAlert("Producto agotado (86).");
             return;
         }
         
@@ -865,20 +865,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('addModifiedItemBtn').addEventListener('click', () => {
         if (isInterfaceLocked) {
-            alert("La mesa está bloqueada. Cobro solicitado.");
+            window.appAlert("La mesa está bloqueada. Cobro solicitado.");
             return;
         }
         
         if (!currentProduct) return;
         const selectedRadio = modifierOptions.querySelector('input[name="modifier-choice"]:checked');
         if (!selectedRadio) {
-            alert("Por favor, selecciona una opción.");
+            window.appAlert("Por favor, selecciona una opción.");
             return;
         }
         
         // 💡 Bloqueo final si el modificador seleccionado está agotado
         if (selectedRadio.disabled) {
-            alert("La opción seleccionada está agotada (86).");
+            window.appAlert("La opción seleccionada está agotada (86).");
             return;
         }
 
@@ -908,7 +908,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     addTimeBtn.addEventListener('click', () => {
         if (isInterfaceLocked) {
-            alert("La mesa está bloqueada. Cobro solicitado.");
+            window.appAlert("La mesa está bloqueada. Cobro solicitado.");
             return;
         }
         
@@ -951,7 +951,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const removeBtn = e.target.closest('.btn-remove');
             const itemElement = e.target.closest('.order-item');
             if (removeBtn || itemElement) {
-                alert("La mesa está bloqueada. Cobro solicitado.");
+                window.appAlert("La mesa está bloqueada. Cobro solicitado.");
                 return;
             }
         }

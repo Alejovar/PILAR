@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (!data.success || data.status === 'CLOSED') {
-                alert("El turno de caja ha sido cerrado. La sesión se cerrará.");
+                window.appAlert("El turno de caja ha sido cerrado. La sesión se cerrará.");
                 window.location.href = '/src/php/logout.php';
                 return; 
             }
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // -----------------------------------------------------------
     document.getElementById('btn-edit-order').addEventListener('click', async () => {
         if (!selectedTable) {
-            alert('Por favor, selecciona una mesa primero.');
+            window.appAlert('Por favor, selecciona una mesa primero.');
             return;
         }
         const tableNumber = selectedTable.dataset.tableNumber;
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.location.href = `order_interface.php?table=${tableNumber}`;
             } else {
                 // 3. ERROR: Mesa ocupada
-                alert("⚠️ ACCESO DENEGADO\n" + result.message);
+                window.appAlert("⚠️ ACCESO DENEGADO\n" + result.message);
                 
                 btn.innerHTML = originalText;
                 btn.disabled = false;
@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             console.error("Error de bloqueo:", error);
-            alert("Error de conexión al intentar acceder a la mesa.");
+            window.appAlert("Error de conexión al intentar acceder a la mesa.");
             btn.innerHTML = originalText;
             btn.disabled = false;
         }

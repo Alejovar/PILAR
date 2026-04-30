@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (!data.success || data.status === 'CLOSED') {
             // ¡Turno cerrado!
-            alert("El turno de caja ha sido cerrado. La sesión se cerrará.");
+            window.appAlert("El turno de caja ha sido cerrado. La sesión se cerrará.");
             // Redirigimos al logout para limpiar la sesión
             window.location.href = '/src/php/logout.php';
             return; // Detenemos la carga del resto del script
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             fetchAndDisplayOrders();
 
         } catch (error) {
-            alert(`Error al completar la orden: ${error.message}`);
+            window.appAlert(`Error al completar la orden: ${error.message}`);
             btn.disabled = false;
             btn.textContent = 'Marcar como Entregado';
         }

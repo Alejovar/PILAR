@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!data.success || data.status === 'CLOSED') {
             // 2. ¡TURNO CERRADO!
             // Bloqueamos la carga de esta página y redirigimos.
-            alert("El turno está cerrado. Debes abrir un nuevo turno desde 'Historial y Reportes' para continuar.");
+            window.appAlert("El turno está cerrado. Debes abrir un nuevo turno desde 'Historial y Reportes' para continuar.");
             // Redirigimos a la pantalla de administración
             window.location.href = '/src/php/sales_history.php';
             return; // Detenemos la ejecución de este script
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const percentage = parseFloat(value.replace('%', ''));
             if (isNaN(percentage)) return;
             if (percentage > 100) {
-                alert("El descuento en porcentaje no puede ser mayor al 100%.");
+                window.appAlert("El descuento en porcentaje no puede ser mayor al 100%.");
                 input.value = "100%";
                 calculatedDiscount = subtotal;
             } else {
@@ -260,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fixedAmount = parseFloat(value);
             if (isNaN(fixedAmount)) return;
             if (fixedAmount > subtotal) {
-                alert("El descuento no puede ser mayor al subtotal de la cuenta.");
+                window.appAlert("El descuento no puede ser mayor al subtotal de la cuenta.");
                 input.value = subtotal.toFixed(2);
                 calculatedDiscount = subtotal;
             } else {
@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- LÓGICA DEL MODAL DE PAGO ---
     function openPaymentModal() {
         if (!currentAccountDetails) {
-            alert("Por favor, seleccione una cuenta primero.");
+            window.appAlert("Por favor, seleccione una cuenta primero.");
             return;
         }
         paymentsRegistered = [];
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function addPayment(method) {
         let amount = parseFloat(paymentAmountInput.value.replace(',', '.'));
         if (isNaN(amount) || amount <= 0) {
-            alert("Por favor, ingrese un monto de pago válido.");
+            window.appAlert("Por favor, ingrese un monto de pago válido.");
             return;
         }
 
@@ -309,9 +309,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (method.includes('Tarjeta') && amount > remaining + 0.001) {
             paymentAmount = remaining > 0 ? remaining : 0;
             tipAmount = amount - paymentAmount;
-            alert(`Pago de ${formatCurrency(paymentAmount)} y propina de ${formatCurrency(tipAmount)} registrados.`);
+            window.appAlert(`Pago de ${formatCurrency(paymentAmount)} y propina de ${formatCurrency(tipAmount)} registrados.`);
         } else if (amount > remaining + 0.001 && method !== 'Efectivo') {
-            alert(`El monto para ${method} no puede exceder el restante (${formatCurrency(remaining)}).`);
+            window.appAlert(`El monto para ${method} no puede exceder el restante (${formatCurrency(remaining)}).`);
             return;
         }
 
@@ -408,7 +408,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             const result = await response.json();
             if (result.success) {
-                alert(`Cuenta cerrada exitosamente. Movimiento #${result.new_sale_id}`);
+                window.appAlert(`Cuenta cerrada exitosamente. Movimiento #${result.new_sale_id}`);
                 
                 // 💥 LÓGICA: Abrir el Recibo Final
                 const saleId = result.new_sale_id;
@@ -430,18 +430,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btnProcessPayment.disabled = true;
                 btnPrintTicket.disabled = true;
             } else {
-                alert('Error al cerrar la cuenta: ' + result.message);
+                window.appAlert('Error al cerrar la cuenta: ' + result.message);
             }
         } catch (error) {
-            alert('Error de conexión al finalizar el pago.');
+            window.appAlert('Error de conexión al finalizar el pago.');
         }
     }
     
     // 💡 NUEVA FUNCIÓN: Cancelar la solicitud de pre-ticket
     async function cancelPreBillRequest(orderId) {
-        const confirmed = window.appConfirm
-            ? await window.appConfirm(`¿Estás seguro de cancelar la solicitud de cobro para la Orden #${orderId}? Esto desbloqueará al mesero para que pueda añadir más ítems.`, 'Confirmar acción')
-            : confirm(`¿Estás seguro de cancelar la solicitud de cobro para la Orden #${orderId}? Esto desbloqueará al mesero para que pueda añadir más ítems.`);
+        const confirmed = await window.appConfirm(`¿Estás seguro de cancelar la solicitud de cobro para la Orden #${orderId}? Esto desbloqueará al mesero para que pueda añadir más ítems.`, 'Confirmar acción');
 
         if (!confirmed) {
             return;
@@ -455,10 +453,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const result = await response.json();
             
             if (result.success) {
-                alert('Solicitud de cuenta cancelada. La mesa ha sido desbloqueada.');
+                window.appAlert('Solicitud de cuenta cancelada. La mesa ha sido desbloqueada.');
                 fetchOpenAccounts(); // Recarga la lista de mesas para quitar el botón y la alerta
             } else {
-                alert('Error al cancelar: ' + result.message);
+                window.appAlert('Error al cancelar: ' + result.message);
             }
         } catch (error) {
             console.error('Error de red al cancelar pre-ticket:', error);
@@ -469,7 +467,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- LÓGICA DE IMPRESIÓN (PRE-TICKET) ---
     async function printTicket() {
         if (!selectedOrderId) {
-            alert("Por favor, seleccione una cuenta para imprimir el ticket.");
+            window.appAlert("Por favor, seleccione una cuenta para imprimir el ticket.");
             return;
         }
 
@@ -498,7 +496,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (printWindow) {
             printWindow.focus();
         } else {
-            alert("El navegador bloqueó la ventana emergente de impresión. Por favor, permítala.");
+            window.appAlert("El navegador bloqueó la ventana emergente de impresión. Por favor, permítala.");
         }
     }
 

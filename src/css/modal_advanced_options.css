@@ -7,7 +7,8 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(30, 27, 75, 0.35);
+    backdrop-filter: blur(2px);
     display: none; 
     justify-content: center;
     align-items: center;
@@ -21,8 +22,9 @@
 .modal-content {
     background: white;
     padding: 25px 30px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    border-radius: 16px;
+    border: 1px solid #e8eaf6;
+    box-shadow: 0 18px 40px rgba(30, 27, 75, 0.18);
     width: 90%;
     max-width: 500px;
     position: relative;
@@ -44,7 +46,7 @@
     display: block;
     margin-bottom: 5px;
     font-weight: bold;
-    color: #333;
+    color: #312e81;
 }
 
 .modal-content input[type="password"],
@@ -52,7 +54,7 @@
 .modal-content input[type="number"] {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #d6d8f3;
     border-radius: 4px;
     font-size: 1rem;
 }
@@ -83,23 +85,23 @@
 
 /* Botón primario (morado, como "Crear Mesa") */
 .modal-actions .btn-primary {
-    background-color: rgba(90, 45, 252, 0.7);
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
     color: white;
 }
 
 .modal-actions .btn-primary:hover {
-    background-color: rgba(90, 45, 252, 0.7);
+    background: linear-gradient(135deg, #4338ca, #6d28d9);
 }
 
 /* Botón secundario (gris claro, como "Cancelar") */
 .modal-actions .btn-secondary {
-    background-color: #F3F4F6;
-    color: #4B5563;
-    border: 1px solid #E5E7EB;
+    background-color: #eef2ff;
+    color: #312e81;
+    border: 1px solid #e0e7ff;
 }
 
 .modal-actions .btn-secondary:hover {
-    background-color: #E5E7EB;
+    background-color: #e0e7ff;
 }
 
 .error-message {
@@ -131,18 +133,18 @@
     display: block;
     padding: 10px 15px;
     text-decoration: none;
-    color: #333;
+    color: #3730a3;
     border-radius: 5px;
     margin-bottom: 5px;
     transition: background-color 0.2s;
 }
 
 .advanced-options-menu .menu-item:hover {
-    background-color: #f0f0f0;
+    background-color: #eef2ff;
 }
 
 .advanced-options-menu .menu-item.active {
-    background-color: #7C3AED; /* Usamos el mismo morado para consistencia */
+    background-color: #4f46e5;
     color: white;
 }
 
@@ -192,19 +194,19 @@
 
 /* Estilo para el hover y selección */
 .product-item:hover {
-    background-color: #e6f7ff;
-    border-color: #91d5ff;
+    background-color: #eef2ff;
+    border-color: #c7d2fe;
 }
 
 .product-item.selected {
-    background-color: #d9f7be; /* Verde claro para selección */
-    border-color: #52c41a;
+    background-color: #e0e7ff;
+    border-color: #818cf8;
     font-weight: bold;
 }
 
 /* Ocultar el ícono de check por defecto */
 .product-item .selection-icon {
-    color: #52c41a;
+    color: #4f46e5;
     visibility: hidden;
 }
 
