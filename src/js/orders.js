@@ -1,6 +1,7 @@
 // /js/orders.js - VERSIÓN MAESTRA FINAL
 
 import { ModalAdvancedOptions } from './ModalAdvancedOptions.js';
+import { ServerProfileModal }   from './ServerProfileModal.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -284,7 +285,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(fetchAndRenderTables, 5000);
 
     window.addEventListener('table-list-update', fetchAndRenderTables);
+
     const optionsManager = new ModalAdvancedOptions('#btn-advanced-options');
     optionsManager.initialize();
+
+    const profileModal = new ServerProfileModal();
+    profileModal.init();
     
 });

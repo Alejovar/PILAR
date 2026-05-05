@@ -46,9 +46,10 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Mesas | KitchenLink</title>
-  <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
     <link rel="stylesheet" href="/src/css/orders.css">
     <link rel="stylesheet" href="/src/css/modal_advanced_options.css">
+    <link rel="stylesheet" href="/src/css/server_profile_modal.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -63,8 +64,8 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
             </ul>
         </div>
         
-       <div class="user-info">
-            <div class="user-details">
+        <div class="user-info">
+            <div class="user-details" id="userProfileTrigger" title="Ver mi perfil">
                 <i class="fas fa-user-tie user-avatar"></i>
                 
                 <div class="user-text-container">
@@ -103,16 +104,23 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Mesero');
             </div>
         </div>
     </main>
-</div> 
+</div>
 
-<?php include 'modal_create_table.php'; ?> 
+<?php include 'modal_create_table.php'; ?>
+
+<?php
+    // Modal de perfil del mesero
+    include $_SERVER['DOCUMENT_ROOT'] . '/src/components/server_profile_modal.php';
+?>
 
 <?php 
-    // Incluimos el archivo que contiene nuestros modales desde la carpeta de componentes.
+    // Modales de opciones avanzadas
     include $_SERVER['DOCUMENT_ROOT'] . '/src/components/advanced_options_modals.php';
 ?>
 
-<div id="notification-container"></div> <script src="/src/js/session_interceptor.js"></script>
+<div id="notification-container"></div>
+<script src="/src/js/session_interceptor.js"></script>
 <script type="module" src="/src/js/orders.js"></script>
-<script type="module" src="/src/js/notifications.js"></script> </body>
+<script type="module" src="/src/js/notifications.js"></script>
+</body>
 </html>
