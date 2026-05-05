@@ -57,10 +57,11 @@ try {
     $stats = $stmt_stats->get_result()->fetch_assoc();
     $stmt_stats->close();
 
-    // 3. Mesas actualmente abiertas asignadas a este mesero
-    $sql_active = "SELECT COUNT(*) AS mesas_abiertas
-                   FROM active_orders
-                   WHERE server_id = ? AND status NOT IN ('CLOSED','CANCELLED')";
+        // 3. Mesas actualmente abiertas asignadas a este mesero
+        $sql_active = "SELECT COUNT(*) AS mesas_abiertas
+                                     FROM restaurant_tables
+                                     WHERE assigned_server_id = ?
+                                         AND pre_bill_status = 'ACTIVE'";
     $stmt_active = $conn->prepare($sql_active);
     $stmt_active->bind_param("i", $user_id);
     $stmt_active->execute();

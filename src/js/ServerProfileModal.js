@@ -24,6 +24,12 @@ export class ServerProfileModal {
             ticket:   document.getElementById('sp-ticket'),
             mesas:    document.getElementById('sp-mesas'),
             shift:    document.getElementById('sp-shift-start'),
+            rowPropinas: document.getElementById('sp-row-propinas'),
+            rowVenta:    document.getElementById('sp-row-venta'),
+            rowCuentas:  document.getElementById('sp-row-cuentas'),
+            rowClientes: document.getElementById('sp-row-clientes'),
+            rowTicket:   document.getElementById('sp-row-ticket'),
+            rowMesas:    document.getElementById('sp-row-mesas'),
         };
 
         this._loaded = false;
@@ -125,6 +131,14 @@ export class ServerProfileModal {
         this.fields.ticket.textContent   = this._fmt(data.ticket_promedio);
         this.fields.mesas.textContent    = data.mesas_abiertas   ?? 0;
         this.fields.shift.textContent    = this._fmtDate(data.shift_start);
+
+        this.fields.rowPropinas.textContent = this._fmt(data.propinas_tarjeta);
+        this.fields.rowVenta.textContent    = this._fmt(data.venta_total);
+        this.fields.rowCuentas.textContent  = data.cuentas_cerradas ?? 0;
+        this.fields.rowClientes.textContent = data.clientes_atendidos ?? 0;
+        this.fields.rowTicket.textContent   = this._fmt(data.ticket_promedio);
+        this.fields.rowMesas.textContent    = data.mesas_abiertas ?? 0;
+
         this._showBody();
     }
 }
