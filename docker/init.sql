@@ -1009,7 +1009,7 @@ INSERT INTO `roles` (`id`, `rol_name`) VALUES
 --
 
 CREATE TABLE `sales_history` (
-  `sale_id` int(11) NOT NULL COMMENT 'Número de movimiento único para el ticket',
+  `sale_id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Número de movimiento único para el ticket',
   `original_order_id` int(11) NOT NULL,
   `table_number` int(11) NOT NULL,
   `client_count` int(11) NOT NULL COMMENT 'Número de personas en la mesa',
@@ -1023,8 +1023,9 @@ CREATE TABLE `sales_history` (
   `tip_amount_card` decimal(10,2) DEFAULT 0.00 COMMENT 'Propina pagada con tarjeta',
   `grand_total` decimal(10,2) NOT NULL COMMENT 'Monto final pagado por el cliente',
   `is_courtesy` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'TRUE si toda la venta fue una cortesía, FALSE si no.',
-  `payment_methods` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Un JSON que describe los métodos de pago, ej: [{"method": "Cash", "amount": 500}]'
-) ;
+  `payment_methods` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Un JSON que describe los métodos de pago, ej: [{"method": "Cash", "amount": 500}]',
+  PRIMARY KEY (`sale_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `sales_history`
@@ -1137,13 +1138,15 @@ INSERT INTO `sales_history` (`sale_id`, `original_order_id`, `table_number`, `cl
 --
 
 CREATE TABLE `sales_history_details` (
-  `sale_detail_id` int(11) NOT NULL,
+  `sale_detail_id` int(11) NOT NULL AUTO_INCREMENT,
   `sale_id` int(11) NOT NULL,
   `product_name` varchar(255) NOT NULL,
   `modifier_name` varchar(255) DEFAULT NULL,
   `quantity` int(11) NOT NULL,
   `price_at_order` decimal(10,2) NOT NULL,
-  `was_cancelled` tinyint(1) NOT NULL DEFAULT 0
+  `was_cancelled` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`sale_detail_id`),
+  KEY `idx_sale_id` (`sale_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
