@@ -79,39 +79,32 @@
                         <tr>
                             <th>Métrica</th>
                             <th>Valor</th>
-                            <th>Origen</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>Propinas en tarjeta</td>
                             <td id="sp-row-propinas">$0.00</td>
-                            <td>sales_history</td>
                         </tr>
                         <tr>
                             <td>Venta total</td>
                             <td id="sp-row-venta">$0.00</td>
-                            <td>sales_history</td>
                         </tr>
                         <tr>
                             <td>Cuentas cerradas</td>
                             <td id="sp-row-cuentas">0</td>
-                            <td>sales_history</td>
                         </tr>
                         <tr>
                             <td>Clientes atendidos</td>
                             <td id="sp-row-clientes">0</td>
-                            <td>sales_history</td>
                         </tr>
                         <tr>
                             <td>Ticket promedio</td>
                             <td id="sp-row-ticket">$0.00</td>
-                            <td>sales_history</td>
                         </tr>
                         <tr>
                             <td>Mesas abiertas</td>
                             <td id="sp-row-mesas">0</td>
-                            <td>restaurant_tables</td>
                         </tr>
                     </tbody>
                 </table>

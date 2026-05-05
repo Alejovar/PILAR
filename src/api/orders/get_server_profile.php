@@ -18,7 +18,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 2) {
 $user_id   = $_SESSION['user_id']  ?? null;
 $user_name = $_SESSION['user_name'] ?? null;
 
-if (!$user_id || !$user_name) {
+if (!$user_id) {
     http_response_code(400);
     $response['message'] = 'Sesión inválida.';
     echo json_encode($response);
@@ -39,20 +39,21 @@ try {
 
     $start_time = $shift['start_time'];
 
-    // 2. Estadísticas del turno actual para este mesero
+        // 2. Estadísticas del turno actual para este mesero (por ID para evitar desajustes de nombre)
     $sql_stats = "SELECT
-                    COUNT(sale_id)          AS cuentas_cerradas,
-                    SUM(grand_total)        AS venta_total,
-                    SUM(tip_amount_card)    AS propinas_tarjeta,
-                    SUM(discount_amount)    AS descuentos_aplicados,
-                    AVG(grand_total)        AS ticket_promedio,
-                    SUM(client_count)       AS clientes_atendidos
-                  FROM sales_history
-                  WHERE payment_time >= ?
-                    AND server_name = ?";
+                                        COUNT(sh.sale_id)       AS cuentas_cerradas,
+                                        SUM(sh.grand_total)     AS venta_total,
+                                        SUM(sh.tip_amount_card) AS propinas_tarjeta,
+                                        SUM(sh.discount_amount) AS descuentos_aplicados,
+                                        AVG(sh.grand_total)     AS ticket_promedio,
+                                        SUM(sh.client_count)    AS clientes_atendidos
+                                    FROM sales_history sh
+                                    JOIN orders o ON o.order_id = sh.original_order_id
+                                    WHERE sh.payment_time >= ?
+                                        AND o.server_id = ?";
 
     $stmt_stats = $conn->prepare($sql_stats);
-    $stmt_stats->bind_param("ss", $start_time, $user_name);
+    $stmt_stats->bind_param("si", $start_time, $user_id);
     $stmt_stats->execute();
     $stats = $stmt_stats->get_result()->fetch_assoc();
     $stmt_stats->close();
@@ -69,7 +70,7 @@ try {
     $stmt_active->close();
 
     $response['success']             = true;
-    $response['server_name']         = htmlspecialchars($user_name);
+    $response['server_name']         = htmlspecialchars($user_name ?: ('Mesero #' . $user_id));
     $response['shift_start']         = $start_time;
     $response['cuentas_cerradas']    = (int)($stats['cuentas_cerradas']    ?? 0);
     $response['venta_total']         = (float)($stats['venta_total']        ?? 0);

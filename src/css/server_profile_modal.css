@@ -219,12 +219,6 @@
     white-space: nowrap;
 }
 
-.sp-breakdown-table td:nth-child(3) {
-    color: var(--color-text-light);
-    font-family: Consolas, 'Courier New', monospace;
-    white-space: nowrap;
-}
-
 /* Estado de carga */
 .sp-loading {
     text-align: center;

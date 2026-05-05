@@ -32,7 +32,6 @@ export class ServerProfileModal {
             rowMesas:    document.getElementById('sp-row-mesas'),
         };
 
-        this._loaded = false;
     }
 
     init() {
@@ -60,9 +59,7 @@ export class ServerProfileModal {
 
     _open() {
         this.overlay.classList.add('sp-visible');
-        if (!this._loaded) {
-            this._fetchProfile();
-        }
+        this._fetchProfile();
     }
 
     _close() {
@@ -100,7 +97,6 @@ export class ServerProfileModal {
             }
 
             this._render(data);
-            this._loaded = true;
 
         } catch (err) {
             console.error('[ServerProfileModal] Error de red:', err);
