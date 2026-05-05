@@ -36,7 +36,7 @@
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(90,45,252,0.08);
-    width: 300px;
+    width: min(92vw, 360px);
     padding: 22px 20px 18px;
     animation: sp-slide-up 0.22s ease;
 }
@@ -95,9 +95,9 @@
     font-weight: 700;
     color: var(--color-text-dark);
     margin: 0 0 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
 }
 .sp-badge {
     font-size: 0.7rem;
@@ -182,28 +182,33 @@
 
 .sp-breakdown-wrap {
     border: 1px solid #e8ecf0;
-    border-radius: 10px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
     overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
 }
 
 .sp-breakdown-table {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 0.72rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.76rem;
     color: var(--color-text-dark);
-    background: #fff;
+    background: transparent;
+    table-layout: fixed;
 }
 
 .sp-breakdown-table th,
 .sp-breakdown-table td {
-    padding: 7px 8px;
-    border-bottom: 1px solid #f0f2f5;
+    padding: 9px 10px;
+    border-bottom: 1px solid #edf1f4;
     text-align: left;
+    vertical-align: middle;
 }
 
 .sp-breakdown-table thead th {
     font-weight: 700;
-    background: #f9fbfc;
+    background: #f5f7fa;
     color: var(--color-text-light);
     font-size: 0.68rem;
     text-transform: uppercase;
@@ -214,8 +219,33 @@
     border-bottom: none;
 }
 
+.sp-breakdown-table th:first-child,
+.sp-breakdown-table td:first-child {
+    width: 64%;
+}
+
+.sp-breakdown-table th:last-child,
+.sp-breakdown-table td:last-child {
+    width: 36%;
+}
+
+.sp-breakdown-table tbody tr:nth-child(odd) {
+    background: rgba(90, 45, 252, 0.025);
+}
+
+.sp-breakdown-table tbody tr:hover {
+    background: rgba(90, 45, 252, 0.05);
+}
+
+.sp-breakdown-table td:first-child {
+    font-weight: 600;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 .sp-breakdown-table td:nth-child(2) {
     font-weight: 700;
+    text-align: right;
     white-space: nowrap;
 }
 
