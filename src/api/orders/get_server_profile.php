@@ -39,21 +39,21 @@ try {
 
     $start_time = $shift['start_time'];
 
-        // 2. Estadísticas del turno actual para este mesero (por ID para evitar desajustes de nombre)
-    $sql_stats = "SELECT
-                                        COUNT(sh.sale_id)       AS cuentas_cerradas,
-                                        SUM(sh.grand_total)     AS venta_total,
-                                        SUM(sh.tip_amount_card) AS propinas_tarjeta,
-                                        SUM(sh.discount_amount) AS descuentos_aplicados,
-                                        AVG(sh.grand_total)     AS ticket_promedio,
-                                        SUM(sh.client_count)    AS clientes_atendidos
-                                    FROM sales_history sh
-                                    JOIN orders o ON o.order_id = sh.original_order_id
-                                    WHERE sh.payment_time >= ?
-                                        AND o.server_id = ?";
+        // 2. Estadísticas del turno actual para este mesero
+        // Nota: las órdenes se eliminan al cerrar cuenta, así que filtramos por nombre del mesero en sales_history.
+        $sql_stats = "SELECT
+                                            COUNT(sh.sale_id)       AS cuentas_cerradas,
+                                            SUM(sh.grand_total)     AS venta_total,
+                                            SUM(sh.tip_amount_card) AS propinas_tarjeta,
+                                            SUM(sh.discount_amount) AS descuentos_aplicados,
+                                            AVG(sh.grand_total)     AS ticket_promedio,
+                                            SUM(sh.client_count)    AS clientes_atendidos
+                                        FROM sales_history sh
+                                        WHERE sh.payment_time >= ?
+                                            AND sh.server_name = ?";
 
-    $stmt_stats = $conn->prepare($sql_stats);
-    $stmt_stats->bind_param("si", $start_time, $user_id);
+        $stmt_stats = $conn->prepare($sql_stats);
+        $stmt_stats->bind_param("ss", $start_time, $user_name);
     $stmt_stats->execute();
     $stats = $stmt_stats->get_result()->fetch_assoc();
     $stmt_stats->close();
