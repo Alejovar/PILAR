@@ -69,18 +69,26 @@ try {
     $tax_amount = $subtotal * 0.16;
     $grand_total = ($subtotal + $tax_amount - $discount_amount) + $tip_amount_card;
 
+    $sql_next_sale_id = "SELECT COALESCE(MAX(sale_id), 0) + 1 AS next_sale_id FROM sales_history";
+    $stmt_next_sale_id = $conn->prepare($sql_next_sale_id);
+    $stmt_next_sale_id->execute();
+    $next_sale_id_row = $stmt_next_sale_id->get_result()->fetch_assoc();
+    $stmt_next_sale_id->close();
+    $new_sale_id = (int)($next_sale_id_row['next_sale_id'] ?? 1);
+
     // 4. ✅ INSERTAR en 'sales_history' 
     // Añadimos 'cashier_id'
     $sql_insert_sale = "INSERT INTO sales_history 
-                        (original_order_id, table_number, client_count, server_name, cashier_id, time_occupied, subtotal, tax_amount, discount_amount, tip_amount_card, grand_total, is_courtesy, payment_methods) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        (sale_id, original_order_id, table_number, client_count, server_name, cashier_id, time_occupied, subtotal, tax_amount, discount_amount, tip_amount_card, grand_total, is_courtesy, payment_methods) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt_sale = $conn->prepare($sql_insert_sale);
     $payment_methods_json = json_encode($payments);
     
     // <<< ¡AQUÍ ESTABA EL ERROR!
     // El string de tipos original estaba mal (usaba 's' para decimales) y yo lo empeoré.
-    // El string correcto es "iiisisdddddis"
-    $stmt_sale->bind_param("iiisisdddddis", 
+    // Forzamos sale_id para no depender del autoincrement en bases ya existentes.
+    $stmt_sale->bind_param("iiiisisdddddis", 
+        $new_sale_id,                   // i
         $order_id,                      // i
         $order_data['table_number'],    // i
         $order_data['client_count'],    // i
@@ -96,15 +104,22 @@ try {
         $payment_methods_json           // s
     );
     $stmt_sale->execute();
-    $new_sale_id = $conn->insert_id;
     $stmt_sale->close();
 
+    $sql_next_detail_id = "SELECT COALESCE(MAX(sale_detail_id), 0) + 1 AS next_detail_id FROM sales_history_details";
+    $stmt_next_detail_id = $conn->prepare($sql_next_detail_id);
+    $stmt_next_detail_id->execute();
+    $next_detail_id_row = $stmt_next_detail_id->get_result()->fetch_assoc();
+    $stmt_next_detail_id->close();
+    $next_sale_detail_id = (int)($next_detail_id_row['next_detail_id'] ?? 1);
+
     // 5. INSERTAR en sales_history_details
-    $sql_insert_details = "INSERT INTO sales_history_details (sale_id, product_name, modifier_name, quantity, price_at_order, was_cancelled) VALUES (?, ?, ?, ?, ?, ?)";
+    $sql_insert_details = "INSERT INTO sales_history_details (sale_detail_id, sale_id, product_name, modifier_name, quantity, price_at_order, was_cancelled) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt_sale_details = $conn->prepare($sql_insert_details);
     foreach ($order_details_array as $item) {
-        $stmt_sale_details->bind_param("issidi", $new_sale_id, $item['product_name'], $item['modifier_name'], $item['quantity'], $item['price_at_order'], $item['is_cancelled']);
+        $stmt_sale_details->bind_param("iissidi", $next_sale_detail_id, $new_sale_id, $item['product_name'], $item['modifier_name'], $item['quantity'], $item['price_at_order'], $item['is_cancelled']);
         $stmt_sale_details->execute();
+        $next_sale_detail_id++;
     }
     $stmt_sale_details->close();
 
