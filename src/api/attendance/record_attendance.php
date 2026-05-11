@@ -16,6 +16,20 @@ $user_id = intval($data['user_id']  ?? 0);
 $type    = strtoupper(trim($data['type']    ?? '')); // ENTRADA | SALIDA
 $method  = strtoupper(trim($data['method']  ?? 'FACIAL')); // FACIAL | MANUAL
 $comment = trim($data['comment'] ?? '');
+// Timestamp consistente para ticket e insercion
+$now = date('Y-m-d H:i:s');
+// Para SALIDA, obtener la ultima ENTRADA registrada
+$entry_timestamp = null;
+if ($type === 'SALIDA') {
+    $stmt_entry = $conn->prepare(
+        "SELECT timestamp FROM attendance_records WHERE user_id = ? AND type = 'ENTRADA' ORDER BY timestamp DESC LIMIT 1"
+    );
+    $stmt_entry->bind_param("i", $user_id);
+    $stmt_entry->execute();
+    $res_entry = $stmt_entry->get_result();
+    $entry_timestamp = $res_entry->num_rows ? $res_entry->fetch_assoc()['timestamp'] : null;
+    $stmt_entry->close();
+}
 
 // Para método MANUAL, necesitamos autenticar con user+password
 if ($method === 'MANUAL') {
@@ -70,9 +84,9 @@ $comment = mb_substr($comment, 0, 500);
 
 try {
     $stmt_ins = $conn->prepare(
-        "INSERT INTO attendance_records (user_id, type, method, comment) VALUES (?, ?, ?, ?)"
+        "INSERT INTO attendance_records (user_id, type, method, comment, timestamp) VALUES (?, ?, ?, ?, ?)"
     );
-    $stmt_ins->bind_param("isss", $user_id, $type, $method, $comment);
+    $stmt_ins->bind_param("issss", $user_id, $type, $method, $comment, $now);
     $stmt_ins->execute();
     $record_id = $conn->insert_id;
 
@@ -84,7 +98,9 @@ try {
         'user_name'  => $user_name,
         'type'       => $type,
         'method'     => $method,
-        'timestamp'  => date('Y-m-d H:i:s'),
+        'timestamp'  => $now,
+        'entry_timestamp' => $type === 'SALIDA' ? $entry_timestamp : $now,
+        'exit_timestamp'  => $type === 'SALIDA' ? $now : null,
         'comment'    => $comment
     ]);
 } catch (Exception $e) {

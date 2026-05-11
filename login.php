@@ -94,14 +94,20 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
           <!-- Error facial -->
           <div id="faceLoginError" class="login-error" style="margin-top:8px;"></div>
 
-          <button type="button" class="btn-toggle-checador btn-toggle-checador-inline">
-            <i class="fas fa-clock"></i> Ir al Checador
-          </button>
         </form>
       </div>
 
       <!-- ---- MODO: CHECADOR (se inyecta dinámicamente por JS) ---- -->
       <div id="checadorSection" style="display:none; width:100%; height:100%;"></div>
+
+      <div class="left-panel-toggle">
+        <button type="button" class="btn-toggle-checador btn-toggle-checador-inline">
+          <i class="fas fa-clock"></i> Ir al Checador
+        </button>
+        <button type="button" class="btn-toggle-checador btn-toggle-checador-back">
+          <i class="fas fa-sign-in-alt"></i> Volver al Login
+        </button>
+      </div>
 
     </div>
 

@@ -106,16 +106,18 @@
         <h1>KitchenLink</h1>
         <p>COMPROBANTE DE ASISTENCIA</p>
       </header>
-      <div class="summary-separator">---------------------------------</div>
-      <section class="ticket-summary">
+      <section class="ticket-summary-payments">
+        <div class="summary-separator">--- ASISTENCIA ---</div>
         <div class="total-row"><span>Empleado:</span><span id="tkNombre">-</span></div>
+        <div class="total-row"><span>ID:</span><span id="tkId">-</span></div>
         <div class="total-row"><span>Tipo:</span><span id="tkTipo">-</span></div>
         <div class="total-row"><span>Fecha:</span><span id="tkFecha">-</span></div>
-        <div class="total-row"><span>Hora:</span><span id="tkHora">-</span></div>
+        <div class="total-row"><span>Hora entrada:</span><span id="tkHoraEntrada">-</span></div>
+        <div class="total-row" id="tkSalidaRow"><span>Hora salida:</span><span id="tkHoraSalida">-</span></div>
+        <div class="summary-separator-bold">================</div>
         <div class="total-row"><span>Método:</span><span id="tkMetodo">-</span></div>
       </section>
-      <div class="summary-separator">---------------------------------</div>
-      <footer class="ticket-footer"><p>Conserva este comprobante</p></footer>
+      <footer class="ticket-footer"><p>-- Fin del Comprobante --</p></footer>
     </div>
   `;
 
@@ -292,11 +294,18 @@
   // ── TICKET ────────────────────────────────────
   function fillAndPrintTicket(data) {
     const dt = formatDateTime(data.timestamp);
+    const entryDt = data.entry_timestamp ? formatDateTime(data.entry_timestamp) : null;
+    const exitDt = data.exit_timestamp ? formatDateTime(data.exit_timestamp) : null;
     document.getElementById('tkNombre').textContent = data.user_name;
+    document.getElementById('tkId').textContent     = data.user_id || '-';
     document.getElementById('tkTipo').textContent   = data.type;
     document.getElementById('tkFecha').textContent  = dt.fecha;
-    document.getElementById('tkHora').textContent   = dt.hora;
+    document.getElementById('tkHoraEntrada').textContent = entryDt ? entryDt.hora : dt.hora;
+    document.getElementById('tkHoraSalida').textContent  = exitDt ? exitDt.hora : '-';
     document.getElementById('tkMetodo').textContent = data.method;
+
+    const salidaRow = document.getElementById('tkSalidaRow');
+    if (salidaRow) salidaRow.style.display = data.type === 'SALIDA' ? 'flex' : 'none';
 
     const ticket = document.getElementById('ticketAsistencia');
     if (ticket) {
