@@ -100,25 +100,6 @@
       </div>
     </div>
 
-    <!-- TICKET IMPRIMIBLE -->
-    <div id="ticketAsistencia" class="ticket-container">
-      <header class="ticket-header">
-        <h1>KitchenLink</h1>
-        <p>COMPROBANTE DE ASISTENCIA</p>
-      </header>
-      <section class="ticket-summary-payments">
-        <div class="summary-separator">--- ASISTENCIA ---</div>
-        <div class="total-row"><span>Empleado:</span><span id="tkNombre">-</span></div>
-        <div class="total-row"><span>ID:</span><span id="tkId">-</span></div>
-        <div class="total-row"><span>Tipo:</span><span id="tkTipo">-</span></div>
-        <div class="total-row"><span>Fecha:</span><span id="tkFecha">-</span></div>
-        <div class="total-row"><span>Hora entrada:</span><span id="tkHoraEntrada">-</span></div>
-        <div class="total-row" id="tkSalidaRow"><span>Hora salida:</span><span id="tkHoraSalida">-</span></div>
-        <div class="summary-separator-bold">================</div>
-        <div class="total-row"><span>Método:</span><span id="tkMetodo">-</span></div>
-      </section>
-      <footer class="ticket-footer"><p>-- Fin del Comprobante --</p></footer>
-    </div>
   `;
 
   // ── UTILIDADES ────────────────────────────────
@@ -296,20 +277,22 @@
     const dt = formatDateTime(data.timestamp);
     const entryDt = data.entry_timestamp ? formatDateTime(data.entry_timestamp) : null;
     const exitDt = data.exit_timestamp ? formatDateTime(data.exit_timestamp) : null;
-    document.getElementById('tkNombre').textContent = data.user_name;
-    document.getElementById('tkId').textContent     = data.user_id || '-';
-    document.getElementById('tkTipo').textContent   = data.type;
-    document.getElementById('tkFecha').textContent  = dt.fecha;
-    document.getElementById('tkHoraEntrada').textContent = entryDt ? entryDt.hora : dt.hora;
-    document.getElementById('tkHoraSalida').textContent  = exitDt ? exitDt.hora : '-';
-    document.getElementById('tkMetodo').textContent = data.method;
 
-    const salidaRow = document.getElementById('tkSalidaRow');
-    if (salidaRow) salidaRow.style.display = data.type === 'SALIDA' ? 'flex' : 'none';
+    const payload = {
+      user_name: data.user_name || '- ',
+      user_id: data.user_id || '-',
+      type: data.type || '-',
+      date: dt.fecha,
+      entry_time: entryDt ? entryDt.hora : dt.hora,
+      exit_time: exitDt ? exitDt.hora : '-',
+      method: data.method || '-'
+    };
 
-    const ticket = document.getElementById('ticketAsistencia');
-    if (ticket) {
-      ticket.style.display = 'block';
+    localStorage.setItem('currentAttendanceTicketData', JSON.stringify(payload));
+
+    const win = window.open('/src/php/ticket_attendance_template.php', '_blank');
+    if (!win) {
+      window.appAlert('No se pudo abrir la ventana del ticket. Revisa el bloqueo de popups.');
     }
   }
 
