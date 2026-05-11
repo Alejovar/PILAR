@@ -11,6 +11,11 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 1) {
 
 $data = json_decode(file_get_contents('php://input'), true);
 
+if (!is_array($data)) {
+    echo json_encode(['success' => false, 'message' => 'JSON invalido.']);
+    exit;
+}
+
 $id = $data['id'] ?? null;
 $name = trim($data['name']);
 $user = trim($data['user']);
@@ -69,6 +74,10 @@ try {
     echo json_encode(['success' => true]);
 
 } catch (Exception $e) {
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+    $message = $e->getMessage();
+    if (stripos($message, "Field 'id' doesn't have a default value") !== false) {
+        $message = "La tabla users requiere AUTO_INCREMENT en id.";
+    }
+    echo json_encode(['success' => false, 'message' => $message]);
 }
 ?>

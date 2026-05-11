@@ -329,13 +329,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(apiUrl, { method: 'POST', body: formData });
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
             
             if (!response.ok) {
                  throw new Error(`Error HTTP: ${response.status}`);
             }
 
-            const result = await response.json();
+            const rawText = await response.text();
+            let result;
+            try {
+                result = JSON.parse(rawText);
+            } catch (parseError) {
+                console.error('Respuesta no JSON:', rawText);
+                throw new Error('Respuesta invalida del servidor.');
+            }
             if (result.success) {
                 window.appAlert(`¡Reservación ${isUpdating ? 'actualizada' : 'registrada'} con éxito!`);
                 resetFormToNew(); // Vuelve al estado de registro

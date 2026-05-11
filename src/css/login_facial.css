@@ -29,6 +29,7 @@
 
 .toggle-panel {
   padding-bottom: 86px;
+  overflow: visible;
 }
 
 .toggle-panel .btn-toggle-checador {
@@ -37,6 +38,11 @@
   left: 50%;
   transform: translateX(-50%);
   margin-top: 0;
+  z-index: 2;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto;
 }
 
 .toggle-panel .btn-toggle-checador:hover {
