@@ -27,14 +27,21 @@ unit-test-job:
   script:
     - echo "Ejecutando pruebas unitarias básicas..."
     - php -r "if (file_exists('src/php/db_connection.php')) { echo 'Test DB PASSED'; } else { echo 'Test DB FAILED'; exit(1); }"
-    # ── SPRINT 1: Verificar que el archivo de migración de mermas existe ──
-    - php -r "if (file_exists('docker/migration_waste.sql')) { echo 'Test Migration PASSED'; } else { echo 'Test Migration FAILED'; exit(1); }"
+    - php -r "if (file_exists('docker/migration_waste.sql')) { echo 'Test Migration Waste PASSED'; } else { echo 'Test Migration Waste FAILED'; exit(1); }"
+    # ── FACIAL: Verificar que el archivo de migración facial existe ──
+    - php -r "if (file_exists('docker/migration_facial_attendance.sql')) { echo 'Test Migration Facial PASSED'; } else { echo 'Test Migration Facial FAILED'; exit(1); }"
+    # ── FACIAL: Verificar que las APIs del checador existen ──
+    - php -r "if (file_exists('src/api/attendance/record_attendance.php')) { echo 'Test Attendance API PASSED'; } else { echo 'Test Attendance API FAILED'; exit(1); }"
+    - php -r "if (file_exists('src/api/face/get_descriptors.php')) { echo 'Test Face API PASSED'; } else { echo 'Test Face API FAILED'; exit(1); }"
     - |
       echo '<?xml version="1.0" encoding="UTF-8"?>
       <testsuites>
-        <testsuite name="UnitTests" tests="2" failures="0">
+        <testsuite name="UnitTests" tests="5" failures="0">
           <testcase name="DatabaseConnectionFile"/>
           <testcase name="WasteMigrationFile"/>
+          <testcase name="FacialMigrationFile"/>
+          <testcase name="AttendanceAPI"/>
+          <testcase name="FaceAPI"/>
         </testsuite>
       </testsuites>' > junit.xml
   artifacts:
@@ -126,10 +133,11 @@ deploy_to_staging:
       "
 
     - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/kitchenlink/docker"
-    - scp docker-compose.yml         $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
-    - scp docker/init.sql            $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
-    # ── SPRINT 1: Copiar migración de mermas ──-
-    - scp docker/migration_waste.sql $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_waste.sql
+    - scp docker-compose.yml                        $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
+    - scp docker/init.sql                           $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
+    - scp docker/migration_waste.sql                $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_waste.sql
+    # ── FACIAL: Copiar migración de reconocimiento facial y checador ──
+    - scp docker/migration_facial_attendance.sql    $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_facial_attendance.sql
 
     - |
       ssh $VM_USER@$STAGING_VM_IP "
@@ -144,7 +152,7 @@ deploy_to_staging:
         docker pull ${CI_REGISTRY_IMAGE}:latest
         docker compose up -d --no-build
 
-        # ── SPRINT 1 / TASK-17: Ejecutar migración de mermas ──
+        # ── Esperar MySQL ──
         echo '⏳ Esperando que MySQL esté disponible...'
         for i in \$(seq 1 30); do
           docker exec kitchenlink-db mysqladmin ping -h localhost \
@@ -152,16 +160,21 @@ deploy_to_staging:
           sleep 1
         done
 
+        # ── SPRINT 1: Migración de mermas ──
         echo '🗄️ Ejecutando migración de mermas...'
         docker exec -i kitchenlink-db mysql \
           -uroot -p'${STAGING_DB_ROOT_PASSWORD}' KitchenLink \
           < ~/kitchenlink/docker/migration_waste.sql
         echo '✅ Migración de mermas OK.'
 
-        # ── FIX: Validar que el usuario de Vault existe en MySQL ──
-        # Cuando MySQL se reinicia (ej. reboot de VM), el volumen persiste pero
-        # MYSQL_USER solo se aplica en el primer arranque. Si el contenedor fue
-        # recreado o el usuario fue revocado por un lease anterior, se recrea aquí.
+        # ── FACIAL: Migración de reconocimiento facial y checador ──
+        echo '🗄️ Ejecutando migración facial/checador...'
+        docker exec -i kitchenlink-db mysql \
+          -uroot -p'${STAGING_DB_ROOT_PASSWORD}' KitchenLink \
+          < ~/kitchenlink/docker/migration_facial_attendance.sql
+        echo '✅ Migración facial/checador OK.'
+
+        # ── FIX: Validar usuario de Vault en MySQL ──
         echo '🔍 Validando que el usuario de Vault existe en MySQL...'
         USER_EXISTS=\$(docker exec kitchenlink-db mysql \
           -uroot -p'${STAGING_DB_ROOT_PASSWORD}' \
@@ -223,10 +236,11 @@ deploy_to_production:
       "
 
     - ssh $VM_USER@$VM_IP_ADDRESS "mkdir -p ~/kitchenlink/docker"
-    - scp docker-compose.yml         $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker-compose.yml
-    - scp docker/init.sql            $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/init.sql
-    # ── SPRINT 1: Copiar migración de mermas ──
-    - scp docker/migration_waste.sql $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_waste.sql
+    - scp docker-compose.yml                        $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker-compose.yml
+    - scp docker/init.sql                           $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/init.sql
+    - scp docker/migration_waste.sql                $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_waste.sql
+    # ── FACIAL: Copiar migración de reconocimiento facial y checador ──
+    - scp docker/migration_facial_attendance.sql    $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_facial_attendance.sql
 
     - |
       ssh $VM_USER@$VM_IP_ADDRESS "
@@ -241,7 +255,7 @@ deploy_to_production:
         docker pull ${CI_REGISTRY_IMAGE}:latest
         docker compose up -d --no-build
 
-        # ── SPRINT 1 / TASK-17: Ejecutar migración de mermas ──
+        # ── Esperar MySQL ──
         echo '⏳ Esperando que MySQL esté disponible...'
         for i in \$(seq 1 30); do
           docker exec kitchenlink-db mysqladmin ping -h localhost \
@@ -249,16 +263,21 @@ deploy_to_production:
           sleep 1
         done
 
+        # ── SPRINT 1: Migración de mermas ──
         echo '🗄️ Ejecutando migración de mermas...'
         docker exec -i kitchenlink-db mysql \
           -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
           < ~/kitchenlink/docker/migration_waste.sql
         echo '✅ Migración de mermas OK.'
 
-        # ── FIX: Validar que el usuario de Vault existe en MySQL ──
-        # Cuando MySQL se reinicia (ej. reboot de VM), el volumen persiste pero
-        # MYSQL_USER solo se aplica en el primer arranque. Si el contenedor fue
-        # recreado o el usuario fue revocado por un lease anterior, se recrea aquí.
+        # ── FACIAL: Migración de reconocimiento facial y checador ──
+        echo '🗄️ Ejecutando migración facial/checador...'
+        docker exec -i kitchenlink-db mysql \
+          -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
+          < ~/kitchenlink/docker/migration_facial_attendance.sql
+        echo '✅ Migración facial/checador OK.'
+
+        # ── FIX: Validar usuario de Vault en MySQL ──
         echo '🔍 Validando que el usuario de Vault existe en MySQL...'
         USER_EXISTS=\$(docker exec kitchenlink-db mysql \
           -uroot -p'${PROD_DB_ROOT_PASSWORD}' \

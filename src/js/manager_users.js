@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userModal = document.getElementById('userModal');
     const userForm = document.getElementById('userForm');
     const modalTitle = document.getElementById('modalTitle');
-    const clockContainer = document.getElementById('liveClockContainer'); // Elemento del reloj
+    const clockContainer = document.getElementById('liveClockContainer');
     
     // Inputs del formulario
     const inpId = document.getElementById('userId');
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ROLES: '/src/api/manager/users/get_roles.php'
     };
 
-     function updateClock() {
+    function updateClock() {
         const now = new Date();
         const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         const month = months[now.getMonth()];
@@ -34,11 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (clockContainer) clockContainer.textContent = `${month} ${day} ${hours}:${minutes}:${seconds}`;
     }
     
-    // Iniciar el reloj
     updateClock();
     setInterval(updateClock, 1000);
-    // -------------------------------------------------------------------
-
 
     // 1. CARGAR ROLES
     async function loadRoles() {
@@ -59,13 +56,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. CARGAR USUARIOS
     async function loadUsers() {
-        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Cargando...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Cargando...</td></tr>';
         try {
             const res = await fetch(API_ROUTES.LIST);
             const data = await res.json();
             
             if (!data.success || data.users.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No hay usuarios registrados.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px;">No hay usuarios registrados.</td></tr>';
                 return;
             }
 
@@ -89,11 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${u.user}</td>
                     <td><span class="role-badge ${roleClass}">${u.rol_name}</span></td>
                     <td>${statusHtml}</td>
+                    <td>${renderFaceCell(u)}</td>
                     <td>
                         <button class="btn-icon edit" title="Editar" data-json='${JSON.stringify(u)}'><i class="fas fa-edit"></i></button>
                         <button class="btn-icon toggle" title="${isActive ? 'Desactivar' : 'Activar'}" data-id="${u.id}" data-status="${u.status}">
                             <i class="fas ${isActive ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
                         </button>
+                        ${renderFaceBtn(u)}
                     </td>
                 `;
                 tableBody.appendChild(tr);
@@ -108,17 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
         }
     }
 
-    // 3. ABRIR MODAL (MODIFICADO para resetear password visibility)
+    // 3. ABRIR MODAL
     function openEditModal(user = null) {
         userModal.classList.add('visible');
-        resetPasswordVisibility(); // Siempre empezar con contraseña oculta
+        resetPasswordVisibility();
 
         if (user) {
-            // EDICIÓN
             modalTitle.textContent = "Editar Empleado";
             inpId.value = user.id;
             inpName.value = user.name;
@@ -128,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
             inpPass.placeholder = "(Sin cambios)";
             passHelp.style.display = "block";
         } else {
-            // NUEVO
             modalTitle.textContent = "Registrar Nuevo Empleado";
             userForm.reset();
             inpId.value = "";
@@ -194,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 6. BUSCADOR DE USUARIOS
+    // 6. BUSCADOR
     const searchInput = document.getElementById('userSearchInput');
     
     if (searchInput) {
@@ -203,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const rows = tableBody.getElementsByTagName('tr');
 
             Array.from(rows).forEach(row => {
-                // Buscamos en la columna 2 (Nombre) y 3 (Usuario)
                 const name = row.cells[1]?.textContent.toLowerCase() || '';
                 const user = row.cells[2]?.textContent.toLowerCase() || '';
                 
@@ -216,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 7. TOGGLE PASSWORD (OJO)
+    // 7. TOGGLE PASSWORD
     const togglePassBtn = document.getElementById('togglePasswordBtn');
     
     if (togglePassBtn) {
@@ -249,3 +245,30 @@ document.addEventListener('DOMContentLoaded', () => {
     loadRoles();
     loadUsers();
 });
+
+// ── FACIAL: Indicador de rostro registrado ──
+// Requiere que get_all_users.php devuelva `has_face` (0 o 1)
+function renderFaceCell(user) {
+    const hasFace = user.has_face == 1 || (user.face_descriptor && user.face_descriptor !== null);
+    const cls  = hasFace ? 'yes' : 'no';
+    const text = hasFace ? 'Registrado' : 'Sin rostro';
+    return `<span><span class="face-badge ${cls}"></span>${text}</span>`;
+}
+
+// ── FACIAL: Botón de cámara para registrar/actualizar rostro ──
+function renderFaceBtn(user) {
+    const hasFace = user.has_face == 1 || (user.face_descriptor && user.face_descriptor !== null);
+    const title   = hasFace ? 'Actualizar rostro' : 'Registrar rostro';
+    return `
+        <button
+            data-face-btn="1"
+            data-user-id="${user.id}"
+            data-user-name="${user.name.replace(/"/g, '&quot;')}"
+            data-has-face="${hasFace ? '1' : '0'}"
+            title="${title}"
+            style="background:none;border:1px solid #ccc;border-radius:6px;
+                   padding:5px 9px;cursor:pointer;color:#7f00ff;font-size:13px;"
+        >
+            <i class="fas fa-camera"></i>
+        </button>`;
+}

@@ -1,0 +1,394 @@
+/* =============================================================================
+   login_facial.css — Estilos para reconocimiento facial en login y checador
+   KitchenLink | Paleta: #7f00ff / #9129d6 / Montserrat
+   ============================================================================= */
+
+/* ------------------------------------------------------------------
+   BOTÓN TOGGLE: ir al checador / volver al login
+   ------------------------------------------------------------------ */
+.btn-toggle-checador {
+  background-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 2px solid rgba(255, 255, 255, 0.7);
+  border-radius: 25px;
+  padding: 10px 24px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  margin-top: 22px;
+  transition: background 0.25s, transform 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-toggle-checador:hover {
+  background-color: rgba(255, 255, 255, 0.32);
+  transform: scale(1.03);
+}
+
+/* ------------------------------------------------------------------
+   ÁREA DE RECONOCIMIENTO FACIAL (login)
+   ------------------------------------------------------------------ */
+.face-login-area {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.face-video-wrapper {
+  position: relative;
+  width: 220px;
+  height: 165px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1a1a2e;
+  box-shadow: 0 4px 20px rgba(127, 0, 255, 0.3);
+  border: 2px solid #7f00ff;
+}
+
+#faceLoginVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* efecto espejo */
+  display: block;
+}
+
+#faceLoginCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+}
+
+.face-status {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 11px;
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  backdrop-filter: blur(4px);
+}
+
+.face-status.detected  { background: rgba(39, 174, 96, 0.75); }
+.face-status.error     { background: rgba(192, 57, 43, 0.75); }
+.face-status.matched   { background: rgba(39, 174, 96, 0.85); font-weight: 700; }
+.face-status.scanning  { background: rgba(127, 0, 255, 0.65); }
+
+.face-hint {
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+  margin: 0;
+}
+
+.btn-switch-mode {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 12px;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s;
+}
+.btn-switch-mode:hover { background: #f3f3f3; }
+
+/* Pulso mientras escanea */
+@keyframes facePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(127,0,255,0.45); }
+  50%       { box-shadow: 0 0 0 10px rgba(127,0,255,0); }
+}
+.face-video-wrapper.scanning { animation: facePulse 1.4s infinite; }
+.face-video-wrapper.success  {
+  border-color: #27ae60;
+  box-shadow: 0 0 0 4px rgba(39,174,96,0.35);
+}
+
+/* ------------------------------------------------------------------
+   CHECADOR WIDGET (panel izquierdo animado)
+   ------------------------------------------------------------------ */
+#checadorSection {
+  padding: 0 30px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.checador-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.checador-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 2px;
+}
+
+.checador-subtitle {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+/* Vídeo del checador */
+.checador-video-wrapper {
+  position: relative;
+  width: 240px;
+  height: 180px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1a1a2e;
+  box-shadow: 0 4px 20px rgba(127, 0, 255, 0.3);
+  border: 2px solid #7f00ff;
+}
+
+#checadorVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1);
+}
+
+#checadorCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+}
+
+/* Botones ENTRADA / SALIDA */
+.checador-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-entrada, .btn-salida {
+  flex: 1;
+  padding: 11px 0;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.btn-entrada { background: #7f00ff; color: #fff; }
+.btn-salida  { background: #2c3e50; color: #fff; }
+.btn-entrada:hover, .btn-salida:hover { opacity: 0.88; transform: scale(1.02); }
+
+/* Modo manual checador */
+.checador-manual {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checador-manual input {
+  background: #eee;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  width: 100%;
+  outline: none;
+}
+
+/* Área de comentario */
+.checador-comment-area {
+  width: 100%;
+}
+
+.checador-comment-area textarea {
+  width: 100%;
+  height: 58px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: 'Montserrat', sans-serif;
+  resize: none;
+  outline: none;
+  color: #444;
+}
+
+.checador-comment-label {
+  font-size: 11px;
+  color: #777;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Switch facial/manual en checador */
+.checador-mode-switch {
+  font-size: 11px;
+  color: #7f00ff;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  text-decoration: underline;
+}
+
+/* Mensaje de resultado */
+.checador-result {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  display: none;
+  width: 100%;
+}
+.checador-result.success { background: #e8f8f0; color: #1a7a45; display: block; }
+.checador-result.error   { background: #fdecea; color: #c0392b; display: block; }
+
+/* Historial de usuario */
+.checador-historial {
+  width: 100%;
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 11.5px;
+}
+
+.historial-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #f0f0f0;
+  color: #444;
+}
+
+.historial-row .badge-entrada { color: #27ae60; font-weight: 700; }
+.historial-row .badge-salida  { color: #e74c3c; font-weight: 700; }
+
+/* ------------------------------------------------------------------
+   TICKET DE ASISTENCIA (ventana de impresión)
+   ------------------------------------------------------------------ */
+@media print {
+  body * { visibility: hidden; }
+  #ticketAsistencia, #ticketAsistencia * { visibility: visible; }
+  #ticketAsistencia {
+    position: fixed;
+    top: 0; left: 0;
+    width: 80mm;
+    font-family: 'Courier New', monospace;
+  }
+}
+
+#ticketAsistencia {
+  display: none;
+  width: 280px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  text-align: center;
+  border: 1px dashed #ccc;
+  padding: 16px 12px;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.ticket-header-att h3 {
+  font-size: 16px;
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+
+.ticket-divider {
+  border-top: 1px dashed #999;
+  margin: 8px 0;
+}
+
+.ticket-row-att {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+/* ------------------------------------------------------------------
+   MÓDULO GERENTE: Checador de empleados (manager_checador.php)
+   ------------------------------------------------------------------ */
+.mgr-attendance-filter {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+
+.mgr-attendance-filter select,
+.mgr-attendance-filter input[type="date"] {
+  padding: 9px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.mgr-attendance-filter button {
+  background: #5a2dfc;
+  color: #fff;
+  border: none;
+  padding: 9px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.attendance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.attendance-table th {
+  background: #ece7ff;
+  color: #5a2dfc;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.attendance-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #333;
+}
+
+.attendance-table tr:hover td { background: #fafafa; }
+
+.badge-type {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badge-type.entrada { background: #e8f8f0; color: #1a7a45; }
+.badge-type.salida  { background: #fdecea; color: #c0392b; }
+.badge-method       { font-size: 11px; color: #999; }
