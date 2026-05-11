@@ -55,6 +55,7 @@ body {
     color: var(--color-text-dark);
 }
 
+
 .sidebar div:first-child ul {
     list-style: none;
     padding: 0;

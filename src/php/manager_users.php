@@ -107,15 +107,37 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                         <th>Usuario (Login)</th>
                         <th>Rol</th>
                         <th>Estado</th>
+                        <th>Rostro</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="usersTableBody">
-                    <tr><td colspan="6" style="text-align:center; padding: 20px;">Cargando personal...</td></tr>
+                    <tr><td colspan="7" style="text-align:center; padding: 20px;">Cargando personal...</td></tr>
                 </tbody>
             </table>
         </div>
     </main>
+</div>
+
+<div id="faceModal" class="face-modal">
+    <div class="face-modal-content">
+        <div class="face-modal-header">
+            <h2 id="faceModalTitle">Registrar Rostro</h2>
+            <p id="faceModalSubtitle"></p>
+        </div>
+        <div class="face-modal-body">
+            <div class="face-video-wrapper">
+                <video id="faceRegVideo" autoplay muted playsinline></video>
+                <canvas id="faceRegCanvas"></canvas>
+            </div>
+            <div id="faceRegStatus" class="face-status">Iniciando camara...</div>
+        </div>
+        <div class="face-modal-actions">
+            <button id="btnCaptureFace" class="face-btn primary">Capturar Rostro</button>
+            <button id="btnDeleteFace" class="face-btn danger">Eliminar Rostro</button>
+            <button id="cancelFaceModal" class="face-btn">Cancelar</button>
+        </div>
+    </div>
 </div>
 
 <div id="userModal" class="modal-overlay">
@@ -161,6 +183,8 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
 
 <script src="/src/js/session_interceptor.js"></script>
 <script src="/src/js/manager_users.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<script src="/src/js/manager_users_face.js"></script>
 
 </body>
 </html>
