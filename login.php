@@ -101,14 +101,24 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
 
     </div>
 
-    <!-- PANEL DERECHO MORADO: Logo y botón de toggle -->
+    <!-- PANEL MORADO: Logo y toggle (doble panel para animacion) -->
     <div class="toggle-container">
       <div class="toggle">
-        <div class="toggle-panel toggle-right">
-          <h1 id="toggleTitle">¡Bienvenido a KitchenLink!</h1>
+        <div class="toggle-panel toggle-left">
+          <h1>Checador de Asistencia</h1>
           <img src="/src/images/logos/KitchenLink_logo.png" alt="Logo de KitchenLink"
-            style="max-width: 80%; margin-top: 20px;" />
-          <button type="button" id="btnToggleMode" class="btn-toggle-checador">
+            class="toggle-logo" />
+          <p>Registra tu entrada y salida de forma rapida.</p>
+          <button type="button" class="btn-toggle-checador">
+            <i class="fas fa-sign-in-alt"></i> Volver al Login
+          </button>
+        </div>
+        <div class="toggle-panel toggle-right">
+          <h1>¡Bienvenido a KitchenLink!</h1>
+          <img src="/src/images/logos/KitchenLink_logo.png" alt="Logo de KitchenLink"
+            class="toggle-logo" />
+          <p>Accede con reconocimiento facial o usuario.</p>
+          <button type="button" class="btn-toggle-checador">
             <i class="fas fa-clock"></i> Ir al Checador
           </button>
         </div>

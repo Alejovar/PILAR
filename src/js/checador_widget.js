@@ -32,82 +32,90 @@
   const leftPanel     = document.getElementById('leftPanel');
   const loginSection  = document.getElementById('loginSection');
   const checadorSection = document.getElementById('checadorSection');
-  const btnToggle     = document.getElementById('btnToggleMode');
-  const toggleTitle   = document.getElementById('toggleTitle');
+  const toggleButtons = document.querySelectorAll('.btn-toggle-checador');
 
   // ── HTML DEL CHECADOR ─────────────────────────
   const checadorHTML = `
     <div class="checador-wrapper" id="checadorWrapper">
-      <div class="checador-title"><i class="fas fa-clock" style="color:#7f00ff;margin-right:6px;"></i>Checador de Asistencia</div>
-
-      <!-- MODO FACIAL -->
-      <div id="checadorFacialArea">
-        <div class="checador-video-wrapper" id="checadorVideoWrapper">
-          <video id="checadorVideo" autoplay muted playsinline></video>
-          <canvas id="checadorCanvas"></canvas>
-          <div id="checadorStatus" class="face-status">
-            <i class="fas fa-camera"></i><span>Iniciando cámara...</span>
-          </div>
+      <div class="checador-card">
+        <div class="checador-header">
+          <div class="checador-title"><i class="fas fa-clock"></i>Checador de Asistencia</div>
+          <div class="checador-subtitle">Registra entrada o salida con reconocimiento facial o manual.</div>
         </div>
-        <p class="face-hint">Mira la cámara y presiona ENTRADA o SALIDA</p>
-      </div>
 
-      <!-- MODO MANUAL -->
-      <div id="checadorManualArea" class="checador-manual" style="display:none;">
-        <input type="text" id="chkUser" placeholder="Nombre de usuario" autocomplete="off">
-        <input type="password" id="chkPass" placeholder="Contraseña" autocomplete="off">
-      </div>
-
-      <!-- Botones ENTRADA / SALIDA -->
-      <div class="checador-actions" id="chkBtns">
-        <button class="btn-entrada" id="btnEntrada"><i class="fas fa-sign-in-alt"></i> ENTRADA</button>
-        <button class="btn-salida"  id="btnSalida"><i class="fas fa-sign-out-alt"></i> SALIDA</button>
-      </div>
-
-      <!-- Comentario -->
-      <div class="checador-comment-area">
-        <label class="checador-comment-label">Comentario opcional (ej: olvidé checar salida):</label>
-        <textarea id="chkComment" placeholder="Escribe aquí si necesitas aclarar algo..."></textarea>
-      </div>
-
-      <!-- Resultado -->
-      <div class="checador-result" id="chkResult"></div>
-
-      <!-- Switch facial/manual -->
-      <button class="checador-mode-switch" id="chkModeSwitch">
-        <i class="fas fa-keyboard"></i> Cambiar a usuario/contraseña
-      </button>
-
-      <!-- Mi Historial -->
-      <div style="width:100%;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-          <span style="font-size:12px;font-weight:700;color:#555;">Mi historial reciente:</span>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <input type="date" id="histDateFrom" style="font-size:11px;border:1px solid #ddd;border-radius:6px;padding:3px 6px;">
-            <input type="date" id="histDateTo"   style="font-size:11px;border:1px solid #ddd;border-radius:6px;padding:3px 6px;">
-            <button id="btnHistorial" style="font-size:11px;background:#7f00ff;color:#fff;border:none;padding:3px 10px;border-radius:6px;cursor:pointer;">Ver</button>
+        <div class="checador-body">
+          <!-- MODO FACIAL -->
+          <div id="checadorFacialArea">
+            <div class="checador-video-wrapper" id="checadorVideoWrapper">
+              <video id="checadorVideo" autoplay muted playsinline></video>
+              <canvas id="checadorCanvas"></canvas>
+              <div id="checadorStatus" class="face-status">
+                <i class="fas fa-camera"></i><span>Iniciando cámara...</span>
+              </div>
+            </div>
+            <p class="face-hint">Mira la cámara y presiona ENTRADA o SALIDA</p>
           </div>
-        </div>
-        <div class="checador-historial" id="chkHistorial">
-          <p style="font-size:11px;color:#aaa;text-align:center;">Marca ENTRADA o SALIDA para ver tu historial.</p>
+
+          <!-- MODO MANUAL -->
+          <div id="checadorManualArea" class="checador-manual" style="display:none;">
+            <input type="text" id="chkUser" placeholder="Nombre de usuario" autocomplete="off">
+            <input type="password" id="chkPass" placeholder="Contraseña" autocomplete="off">
+          </div>
+
+          <!-- Botones ENTRADA / SALIDA -->
+          <div class="checador-actions" id="chkBtns">
+            <button class="btn-entrada" id="btnEntrada"><i class="fas fa-sign-in-alt"></i> ENTRADA</button>
+            <button class="btn-salida"  id="btnSalida"><i class="fas fa-sign-out-alt"></i> SALIDA</button>
+          </div>
+
+          <!-- Comentario -->
+          <div class="checador-comment-area">
+            <label class="checador-comment-label">Comentario opcional (ej: olvidé checar salida):</label>
+            <textarea id="chkComment" placeholder="Escribe aquí si necesitas aclarar algo..."></textarea>
+          </div>
+
+          <!-- Resultado -->
+          <div class="checador-result" id="chkResult"></div>
+
+          <!-- Switch facial/manual -->
+          <button class="checador-mode-switch" id="chkModeSwitch">
+            <i class="fas fa-keyboard"></i> Cambiar a usuario/contraseña
+          </button>
+
+          <!-- Mi Historial -->
+          <div class="checador-history">
+            <div class="checador-history-header">
+              <span>Mi historial reciente:</span>
+              <div class="checador-history-actions">
+                <input type="date" id="histDateFrom">
+                <input type="date" id="histDateTo">
+                <button id="btnHistorial">Ver</button>
+              </div>
+            </div>
+            <div class="checador-historial" id="chkHistorial">
+              <p>Marca ENTRADA o SALIDA para ver tu historial.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- TICKET IMPRIMIBLE -->
-    <div id="ticketAsistencia">
-      <div class="ticket-header-att">
-        <h3>KitchenLink</h3>
-        <p style="font-size:11px;">Comprobante de Asistencia</p>
-      </div>
-      <div class="ticket-divider"></div>
-      <div class="ticket-row-att"><span>Empleado:</span><span id="tkNombre">-</span></div>
-      <div class="ticket-row-att"><span>Tipo:</span><span id="tkTipo">-</span></div>
-      <div class="ticket-row-att"><span>Fecha:</span><span id="tkFecha">-</span></div>
-      <div class="ticket-row-att"><span>Hora:</span><span id="tkHora">-</span></div>
-      <div class="ticket-row-att"><span>Método:</span><span id="tkMetodo">-</span></div>
-      <div class="ticket-divider"></div>
-      <p style="font-size:10px;text-align:center;">Conserva este comprobante</p>
+    <div id="ticketAsistencia" class="ticket-container">
+      <header class="ticket-header">
+        <h1>KitchenLink</h1>
+        <p>COMPROBANTE DE ASISTENCIA</p>
+      </header>
+      <div class="summary-separator">---------------------------------</div>
+      <section class="ticket-summary">
+        <div class="total-row"><span>Empleado:</span><span id="tkNombre">-</span></div>
+        <div class="total-row"><span>Tipo:</span><span id="tkTipo">-</span></div>
+        <div class="total-row"><span>Fecha:</span><span id="tkFecha">-</span></div>
+        <div class="total-row"><span>Hora:</span><span id="tkHora">-</span></div>
+        <div class="total-row"><span>Método:</span><span id="tkMetodo">-</span></div>
+      </section>
+      <div class="summary-separator">---------------------------------</div>
+      <footer class="ticket-footer"><p>Conserva este comprobante</p></footer>
     </div>
   `;
 
@@ -351,10 +359,6 @@
     checadorSection.style.display = 'flex';
     checadorSection.innerHTML     = checadorHTML;
 
-    // 4. Actualizar toggle
-    toggleTitle.textContent = '¡Ir al Login!';
-    btnToggle.innerHTML     = '<i class="fas fa-sign-in-alt"></i> Volver al Login';
-
     // 5. Inicializar checador
     initChecador();
   }
@@ -368,9 +372,6 @@
     checadorSection.style.display = 'none';
     loginSection.style.display    = 'block';
 
-    toggleTitle.textContent = '¡Bienvenido a KitchenLink!';
-    btnToggle.innerHTML     = '<i class="fas fa-clock"></i> Ir al Checador';
-
     // Re-arrancar face login
     if (window.FaceLogin) {
       window.FaceLogin.startCamera().then(() => {
@@ -379,10 +380,12 @@
     }
   }
 
-  if (btnToggle) {
-    btnToggle.addEventListener('click', () => {
-      if (isChecadorMode) exitChecadorMode();
-      else enterChecadorMode();
+  if (toggleButtons.length) {
+    toggleButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (isChecadorMode) exitChecadorMode();
+        else enterChecadorMode();
+      });
     });
   }
 
