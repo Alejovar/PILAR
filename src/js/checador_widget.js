@@ -310,8 +310,6 @@
     const ticket = document.getElementById('ticketAsistencia');
     if (ticket) {
       ticket.style.display = 'block';
-      setTimeout(() => { window.print(); }, 300);
-      setTimeout(() => { ticket.style.display = 'none'; }, 2000);
     }
   }
 
