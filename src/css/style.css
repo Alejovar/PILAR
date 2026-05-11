@@ -23,9 +23,9 @@ body{
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
     position: relative;
     overflow: hidden;
-    width: 768px;
+  width: 860px;
     max-width: 100%;
-    min-height: 480px;
+  min-height: 520px;
 }
 
 .container p{
@@ -187,6 +187,7 @@ body{
     flex-direction: column;
     padding: 0 30px;
     text-align: center;
+  gap: 8px;
     top: 0;
     transform: translateX(0);
     transition: all 0.6s ease-in-out;

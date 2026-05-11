@@ -16,7 +16,7 @@
   font-weight: 600;
   letter-spacing: 0.4px;
   cursor: pointer;
-  margin-top: 22px;
+  margin-top: 12px;
   transition: background 0.25s, transform 0.2s;
   display: flex;
   align-items: center;
@@ -367,12 +367,19 @@
 /* Evita que el panel izquierdo desborde el contenedor */
 #leftPanel {
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #loginSection,
 #checadorSection {
   width: 100%;
   box-sizing: border-box;
+}
+
+#loginSection form {
+  text-align: center;
 }
 
 .historial-row {
