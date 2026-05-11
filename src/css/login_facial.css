@@ -27,6 +27,10 @@
   transform: scale(1.03);
 }
 
+.btn-toggle-checador-inline:hover {
+  background-color: #6b21a8;
+}
+
 .toggle-panel {
   padding-bottom: 86px;
   overflow: visible;
@@ -47,6 +51,17 @@
 
 .toggle-panel .btn-toggle-checador:hover {
   transform: translateX(-50%) scale(1.03);
+}
+
+.btn-toggle-checador-inline {
+  background-color: #7f00ff;
+  border-color: transparent;
+  margin-top: 12px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .toggle-logo {

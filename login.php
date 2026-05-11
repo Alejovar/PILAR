@@ -93,6 +93,10 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
 
           <!-- Error facial -->
           <div id="faceLoginError" class="login-error" style="margin-top:8px;"></div>
+
+          <button type="button" class="btn-toggle-checador btn-toggle-checador-inline">
+            <i class="fas fa-clock"></i> Ir al Checador
+          </button>
         </form>
       </div>
 
