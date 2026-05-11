@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (error) {
         console.error("Error en el login:", error);
-        loginError.textContent = "Ocurrió un error en la conexión.";
+        loginError.textContent = "Ocurrió un error en la conexión.";en 
       } finally {
         // --- RESTAURACIÓN CONDICIONAL DEL BOTÓN ---
         // Solo reactivamos el botón si el usuario NO ha sido bloqueado.//

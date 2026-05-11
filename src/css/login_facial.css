@@ -27,13 +27,8 @@
   transform: scale(1.03);
 }
 
-.btn-toggle-checador-inline:hover {
-  background-color: #6b21a8;
-}
-
 .toggle-panel {
   padding-bottom: 86px;
-  overflow: visible;
 }
 
 .toggle-panel .btn-toggle-checador {
@@ -42,51 +37,10 @@
   left: 50%;
   transform: translateX(-50%);
   margin-top: 0;
-  z-index: 2;
-  display: inline-flex !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto;
 }
 
 .toggle-panel .btn-toggle-checador:hover {
   transform: translateX(-50%) scale(1.03);
-}
-
-.btn-toggle-checador-inline {
-  background-color: #7f00ff;
-  border-color: transparent;
-  margin-top: 12px;
-  color: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.left-panel-toggle {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-  z-index: 5;
-}
-
-.btn-toggle-checador-back {
-  background-color: #1f2937;
-  border-color: transparent;
-  color: #fff;
-  display: none;
-}
-
-.container.active .left-panel-toggle .btn-toggle-checador-inline {
-  display: none;
-}
-
-.container.active .left-panel-toggle .btn-toggle-checador-back {
-  display: inline-flex;
 }
 
 .toggle-logo {
@@ -432,7 +386,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
 }
 
 #loginSection,
