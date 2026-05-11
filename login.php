@@ -45,8 +45,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-  <link rel="stylesheet" href="/src/css/style.css" />
-  <link rel="stylesheet" href="/src/css/login_facial.css" />
+  <link rel="stylesheet" href="/src/css/style.css?v=20260511" />
+  <link rel="stylesheet" href="/src/css/login_facial.css?v=20260511" />
   <title>Login | KitchenLink</title>
   <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
 </head>
@@ -129,10 +129,10 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
 
   <!-- face-api.js (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-  <script src="/src/js/session_interceptor.js"></script>
-  <script src="/src/js/face_login.js"></script>
-  <script src="/src/js/checador_widget.js"></script>
-  <script src="/src/js/script.js"></script>
+  <script src="/src/js/session_interceptor.js?v=20260511"></script>
+  <script src="/src/js/face_login.js?v=20260511"></script>
+  <script src="/src/js/checador_widget.js?v=20260511"></script>
+  <script src="/src/js/script.js?v=20260511"></script>
 </body>
 
 </html>
