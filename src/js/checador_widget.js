@@ -73,7 +73,7 @@
 
           <!-- Comentario -->
           <div class="checador-comment-area">
-            <label class="checador-comment-label">Comentario opcional (máx. 60 caracteres):</label>
+            <label class="checador-comment-label">Comentario (opcional):</label>
             <textarea id="chkComment" maxlength="60" placeholder="Escribe aquí si necesitas aclarar algo..."></textarea>
           </div>
 
@@ -99,7 +99,7 @@
               </div>
             </div>
             <div class="checador-historial" id="chkHistorial">
-              <p>Marca ENTRADA o SALIDA para ver tu historial.</p>
+              <p style="font-size:11px;color:#aaa;text-align:center;">Primero deja que la cámara reconozca tu rostro para ver tu historial.</p>
             </div>
           </div>
         </div>
@@ -172,7 +172,7 @@
       : '';
 
     const commentRow = safeComment
-      ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row total-row-note"><span>Nota:</span></div><div class="ticket-comment-text">${escapeHtml(safeComment)}</div>`
+      ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row total-row-note"></div><div class="ticket-comment-text">${escapeHtml(safeComment)}</div>`
       : '';
 
     content.innerHTML = `
