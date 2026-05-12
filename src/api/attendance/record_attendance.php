@@ -119,10 +119,15 @@ try {
     $stmt_ins->execute();
     $record_id = $conn->insert_id;
 
+    if ($stmt_ins->affected_rows !== 1 || $record_id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'No se pudo confirmar el guardado del registro de asistencia']);
+        exit;
+    }
+
     // Devolver datos para el ticket
     echo json_encode([
         'success'    => true,
-        'record_id'  => $record_id,
+        'record_id'  => (int)$record_id,
         'user_id'    => $user_id,
         'user_name'  => $user_name,
         'type'       => $type,

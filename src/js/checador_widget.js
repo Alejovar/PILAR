@@ -29,6 +29,7 @@
   let currentTicketData = null;
   let currentRecognizedUserId = null;
   let lastHistoryLoadedUserId = null;
+  let lastInsertedAttendanceRecord = null;
 
   // ── REFERENCIAS DOM ───────────────────────────
   const container     = document.getElementById('container');
@@ -353,6 +354,10 @@
         showResult(`✓ ${data.type} registrada para ${data.user_name}`, true);
         fillAndPrintTicket(data);
         currentTicketData = JSON.parse(localStorage.getItem('currentAttendanceTicketData') || 'null');
+        currentRecognizedUserId = data.user_id;
+        lastHistoryLoadedUserId = data.user_id;
+        lastInsertedAttendanceRecord = data;
+        prependHistoryRecord(data);
         loadUserHistorial(data.user_id);
         const ticketBtn = document.getElementById('chkTicketBtn');
         if (ticketBtn) {
@@ -422,6 +427,13 @@
         lastMatchId = null;
       }
 
+      if (lastInsertedAttendanceRecord && Number(lastInsertedAttendanceRecord.user_id) === Number(userId)) {
+        const alreadyIncluded = data.records.some(r => Number(r.id) === Number(lastInsertedAttendanceRecord.record_id));
+        if (!alreadyIncluded) {
+          data.records = [lastInsertedAttendanceRecord, ...data.records];
+        }
+      }
+
       el.innerHTML = data.records.slice(0, 15).map(r => {
         const dt  = formatDateTime(r.timestamp);
         const cls = r.type === 'ENTRADA' ? 'badge-entrada' : 'badge-salida';
@@ -478,6 +490,38 @@
     if (modal) { modal.classList.add('active'); modal.setAttribute('aria-hidden','false'); }
   }
 
+  function prependHistoryRecord(record) {
+    const el = document.getElementById('chkHistorial');
+    if (!el || !record) return;
+
+    const dt = formatDateTime(record.timestamp || new Date().toISOString());
+    const cls = record.type === 'ENTRADA' ? 'badge-entrada' : 'badge-salida';
+    const recAttr = encodeURIComponent(JSON.stringify(record));
+    const rowHtml = `
+      <div class="historial-row" data-record="${recAttr}">
+        <span class="${cls}">${record.type || '-'}</span>
+        <span>${dt.fecha} ${dt.hora}</span>
+        <span class="badge-method">${record.method || '-'}</span>
+      </div>`;
+
+    const firstRow = el.querySelector('.historial-row');
+    if (firstRow) firstRow.insertAdjacentHTML('beforebegin', rowHtml);
+    else el.innerHTML = rowHtml;
+
+    const newRow = el.querySelector('.historial-row');
+    if (newRow && !newRow.dataset.bound) {
+      newRow.dataset.bound = '1';
+      newRow.style.cursor = 'pointer';
+      newRow.addEventListener('click', () => {
+        try {
+          const rec = JSON.parse(decodeURIComponent(newRow.dataset.record || 'null'));
+          if (!rec) return;
+          openRecordDetails(rec);
+        } catch (e) { console.warn('historial row parse error', e); }
+      });
+    }
+  }
+
   // ── TOGGLE LOGIN ↔ CHECADOR ───────────────────
   function enterChecadorMode() {
     isChecadorMode = true;
@@ -503,6 +547,7 @@
     stopChecadorCamera();
     currentRecognizedUserId = null;
     lastHistoryLoadedUserId = null;
+    lastInsertedAttendanceRecord = null;
 
     container.classList.remove('active');
     leftPanel?.classList.remove('checador-open');
@@ -627,6 +672,7 @@
     stopChecadorCamera();
     currentRecognizedUserId = null;
     lastHistoryLoadedUserId = null;
+    lastInsertedAttendanceRecord = null;
     document.getElementById('checadorFacialArea').style.display = 'none';
     document.getElementById('checadorManualArea').style.display = 'flex';
     const sw = document.getElementById('chkModeSwitch');
@@ -639,6 +685,7 @@
     document.getElementById('checadorFacialArea').style.display = 'block';
     currentRecognizedUserId = null;
     lastHistoryLoadedUserId = null;
+    lastInsertedAttendanceRecord = null;
     const sw = document.getElementById('chkModeSwitch');
     if (sw) sw.innerHTML = '<i class="fas fa-keyboard"></i> Cambiar a usuario/contraseña';
     const ok = await startChecadorCamera();
