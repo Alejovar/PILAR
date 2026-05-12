@@ -71,8 +71,8 @@
 
           <!-- Comentario -->
           <div class="checador-comment-area">
-            <label class="checador-comment-label">Comentario opcional (ej: olvidé checar salida):</label>
-            <textarea id="chkComment" placeholder="Escribe aquí si necesitas aclarar algo..."></textarea>
+            <label class="checador-comment-label">Comentario opcional (máx. 60 caracteres):</label>
+            <textarea id="chkComment" maxlength="60" placeholder="Escribe aquí si necesitas aclarar algo..."></textarea>
           </div>
 
           <!-- Resultado -->
@@ -111,25 +111,10 @@
           <button type="button" id="closeAttendanceTicket" aria-label="Cerrar ticket"><i class="fas fa-times"></i></button>
         </div>
         <div class="attendance-ticket-body">
-          <div class="attendance-ticket-card">
-            <div class="attendance-ticket-brand">
-              <h4>KitchenLink</h4>
-              <span>ASISTENCIA</span>
-            </div>
-            <div class="attendance-ticket-row"><strong>Empleado</strong><span id="ticketUserName">-</span></div>
-            <div class="attendance-ticket-row"><strong>ID</strong><span id="ticketUserId">-</span></div>
-            <div class="attendance-ticket-row"><strong>Tipo</strong><span id="ticketType">-</span></div>
-            <div class="attendance-ticket-row"><strong>Fecha</strong><span id="ticketDate">-</span></div>
-            <div class="attendance-ticket-row"><strong>Hora entrada</strong><span id="ticketEntryTime">-</span></div>
-            <div class="attendance-ticket-row"><strong>Hora salida</strong><span id="ticketExitTime">-</span></div>
-            <div class="attendance-ticket-row"><strong>Método</strong><span id="ticketMethod">-</span></div>
-            <div class="attendance-ticket-comment" id="ticketCommentBox" style="display:none;"></div>
-          </div>
+          <div class="ticket-container" id="attendanceTicketContent"></div>
         </div>
         <div class="attendance-ticket-actions">
-          <button type="button" id="viewTicketCommentBtn" class="close-btn" style="display:none;">Ver comentario</button>
           <button type="button" id="printAttendanceTicket" class="print-btn">Imprimir</button>
-          <button type="button" id="openAttendanceTicketWindow" class="close-btn">Abrir panel</button>
         </div>
       </div>
     </div>
@@ -169,38 +154,37 @@
   }
 
   function renderAttendanceTicket(data) {
-    const userNameEl = document.getElementById('ticketUserName');
-    const userIdEl = document.getElementById('ticketUserId');
-    const typeEl = document.getElementById('ticketType');
-    const dateEl = document.getElementById('ticketDate');
-    const entryEl = document.getElementById('ticketEntryTime');
-    const exitEl = document.getElementById('ticketExitTime');
-    const methodEl = document.getElementById('ticketMethod');
-    const commentBox = document.getElementById('ticketCommentBox');
-    const commentBtn = document.getElementById('viewTicketCommentBtn');
+    const content = document.getElementById('attendanceTicketContent');
+    if (!content) return;
 
-    if (userNameEl) userNameEl.textContent = data.user_name || '-';
-    if (userIdEl) userIdEl.textContent = data.user_id || '-';
-    if (typeEl) typeEl.textContent = data.type || '-';
-    if (dateEl) dateEl.textContent = data.date || '-';
-    if (entryEl) entryEl.textContent = data.entry_time || '-';
-    if (exitEl) exitEl.textContent = data.exit_time || '-';
-    if (methodEl) methodEl.textContent = data.method || '-';
+    const safeComment = String(data.comment || '').trim().slice(0, 60);
+    const salidaRow = data.type === 'SALIDA'
+      ? `<div class="total-row"><span>Hora salida:</span><span>${escapeHtml(data.exit_time || '-')}</span></div>`
+      : '';
 
-    if (commentBox && commentBtn) {
-      if (data.comment) {
-        commentBtn.style.display = 'inline-flex';
-        commentBtn.onclick = () => {
-          const showing = commentBox.style.display === 'block';
-          commentBox.style.display = showing ? 'none' : 'block';
-          if (!showing) commentBox.textContent = `Comentario: ${data.comment}`;
-        };
-      } else {
-        commentBtn.style.display = 'none';
-        commentBox.style.display = 'none';
-        commentBox.textContent = '';
-      }
-    }
+    const commentRow = safeComment
+      ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row"><span>Nota:</span><span>${escapeHtml(safeComment)}</span></div>`
+      : '';
+
+    content.innerHTML = `
+      <header class="ticket-header">
+        <h1>KitchenLink</h1>
+        <p>COMPROBANTE DE ASISTENCIA</p>
+      </header>
+      <section class="ticket-summary-payments">
+        <div class="summary-separator">--- ASISTENCIA ---</div>
+        <div class="total-row"><span>Empleado:</span><span>${escapeHtml(data.user_name || '-')}</span></div>
+        <div class="total-row"><span>ID:</span><span>${escapeHtml(data.user_id || '-')}</span></div>
+        <div class="total-row"><span>Tipo:</span><span>${escapeHtml(data.type || '-')}</span></div>
+        <div class="total-row"><span>Fecha:</span><span>${escapeHtml(data.date || '-')}</span></div>
+        <div class="total-row"><span>Hora entrada:</span><span>${escapeHtml(data.entry_time || '-')}</span></div>
+        ${salidaRow}
+        ${commentRow}
+        <div class="summary-separator-bold">================</div>
+        <div class="total-row"><span>Método:</span><span>${escapeHtml(data.method || '-')}</span></div>
+      </section>
+      <footer class="ticket-footer"><p>-- Fin del Comprobante --</p></footer>
+    `;
   }
 
   function escapeHtml(value) {
@@ -226,7 +210,7 @@
     if (!video) return false;
     try {
       cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: 320, height: 240 }
+        video: { facingMode: 'user', width: 640, height: 480 }
       });
       video.srcObject = cameraStream;
       await video.play();
@@ -329,7 +313,7 @@
 
   // ── ENVIAR ASISTENCIA ─────────────────────────
   async function sendAttendance({ user_id, method, name, username, password }) {
-    const comment = document.getElementById('chkComment')?.value?.trim() || '';
+    const comment = (document.getElementById('chkComment')?.value || '').trim().slice(0, 60);
     const type    = currentActionType;
 
     const body = { type, method, comment };
@@ -387,7 +371,7 @@
       entry_time: entryDt ? entryDt.hora : dt.hora,
       exit_time: exitDt ? exitDt.hora : '-',
       method: data.method || '-',
-      comment: data.comment || ''
+      comment: String(data.comment || '').trim().slice(0, 60)
     };
 
     currentTicketData = payload;
@@ -424,7 +408,7 @@
       el.innerHTML = data.records.slice(0, 15).map(r => {
         const dt  = formatDateTime(r.timestamp);
         const cls = r.type === 'ENTRADA' ? 'badge-entrada' : 'badge-salida';
-        const com = r.comment ? ` <button type="button" class="comentary-btn" data-comment="${encodeURIComponent(r.comment)}">Ver comentario</button>` : '';
+        const com = r.comment ? ` <button type="button" class="comentary-btn" data-comment="${encodeURIComponent(String(r.comment).slice(0, 60))}" title="Ver comentario"><i class="fas fa-comment-dots"></i></button>` : '';
         return `
           <div class="historial-row">
             <span class="${cls}">${r.type}</span>
@@ -527,18 +511,15 @@
     document.getElementById('chkModeSwitch')?.addEventListener('click', toggleFacialManual);
 
     document.getElementById('btnHistorial')?.addEventListener('click', () => {
-      // Historial sin user_id: necesitamos uno; si está en manual, tomamos del campo
-      const userEl = document.getElementById('chkUser');
-      if (!facialMode && userEl?.value) {
-        // Necesitamos resolver el user_id por username → hacemos login ligero
-        showResult('Escribe usuario y contraseña, luego marca ENTRADA o SALIDA para ver historial.', false);
+      const userId = currentTicketData?.user_id;
+      if (userId) {
+        loadUserHistorial(userId);
       }
     });
 
     document.getElementById('chkTicketBtn')?.addEventListener('click', openAttendanceTicket);
     document.getElementById('closeAttendanceTicket')?.addEventListener('click', closeAttendanceTicket);
     document.getElementById('printAttendanceTicket')?.addEventListener('click', () => window.print());
-    document.getElementById('openAttendanceTicketWindow')?.addEventListener('click', openAttendanceTicket);
     document.getElementById('attendanceTicketModal')?.addEventListener('click', (e) => {
       if (e.target?.id === 'attendanceTicketModal') closeAttendanceTicket();
     });

@@ -107,7 +107,7 @@ if ($type === 'SALIDA') {
 }
 
 // Limitar comentario
-$comment = mb_substr($comment, 0, 500);
+$comment = mb_substr($comment, 0, 60);
 
 try {
     $stmt_ins = $conn->prepare(

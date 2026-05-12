@@ -27,6 +27,15 @@
 
 <script src="/src/js/session_interceptor.js"></script>
 <script>
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const ticketContent = document.getElementById('ticketContent');
         const data = JSON.parse(localStorage.getItem('currentAttendanceTicketData'));
@@ -37,12 +46,13 @@
             return;
         }
 
+        const safeComment = String(data.comment || '').trim().slice(0, 60);
         const salidaRow = data.type === 'SALIDA'
-            ? `<div class="total-row"><span>Hora salida:</span><span>${data.exit_time || '-'}</span></div>`
+            ? `<div class="total-row"><span>Hora salida:</span><span>${escapeHtml(data.exit_time || '-')}</span></div>`
             : '';
 
-        const commentRow = data.comment
-            ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row"><span>Nota:</span><span>${data.comment}</span></div>`
+        const commentRow = safeComment
+            ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row"><span>Nota:</span><span>${escapeHtml(safeComment)}</span></div>`
             : '';
 
         ticketContent.innerHTML = `
@@ -52,15 +62,15 @@
             </header>
             <section class="ticket-summary-payments">
                 <div class="summary-separator">--- ASISTENCIA ---</div>
-                <div class="total-row"><span>Empleado:</span><span>${data.user_name || '-'}</span></div>
-                <div class="total-row"><span>ID:</span><span>${data.user_id || '-'}</span></div>
-                <div class="total-row"><span>Tipo:</span><span>${data.type || '-'}</span></div>
-                <div class="total-row"><span>Fecha:</span><span>${data.date || '-'}</span></div>
-                <div class="total-row"><span>Hora entrada:</span><span>${data.entry_time || '-'}</span></div>
+                <div class="total-row"><span>Empleado:</span><span>${escapeHtml(data.user_name || '-')}</span></div>
+                <div class="total-row"><span>ID:</span><span>${escapeHtml(data.user_id || '-')}</span></div>
+                <div class="total-row"><span>Tipo:</span><span>${escapeHtml(data.type || '-')}</span></div>
+                <div class="total-row"><span>Fecha:</span><span>${escapeHtml(data.date || '-')}</span></div>
+                <div class="total-row"><span>Hora entrada:</span><span>${escapeHtml(data.entry_time || '-')}</span></div>
                 ${salidaRow}
                 ${commentRow}
                 <div class="summary-separator-bold">================</div>
-                <div class="total-row"><span>Método:</span><span>${data.method || '-'}</span></div>
+                <div class="total-row"><span>Método:</span><span>${escapeHtml(data.method || '-')}</span></div>
             </section>
             <footer class="ticket-footer"><p>-- Fin del Comprobante --</p></footer>
         `;
