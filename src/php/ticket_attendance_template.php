@@ -9,13 +9,12 @@
     <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
     <link rel="stylesheet" href="/src/css/cashier.css">
     <style>
-        body.ticket-body { visibility: hidden; }
         @media print {
             .print-controls { display: none !important; }
         }
     </style>
 </head>
-<body class="ticket-body">
+<body>
 
 <div class="ticket-container" id="ticketContent">
     <p>Cargando comprobante...</p>
@@ -35,7 +34,6 @@
 
         if (!data) {
             ticketContent.innerHTML = '<p>Error: No se encontraron datos del comprobante.</p>';
-            document.body.style.visibility = 'visible';
             return;
         }
 
@@ -62,7 +60,6 @@
             <footer class="ticket-footer"><p>-- Fin del Comprobante --</p></footer>
         `;
 
-        document.body.style.visibility = 'visible';
     });
 </script>
 </body>
