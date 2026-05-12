@@ -75,6 +75,8 @@
             <footer class="ticket-footer"><p>-- Fin del Comprobante --</p></footer>
         `;
 
+        setTimeout(() => window.print(), 250);
+
     });
 </script>
 </body>

@@ -146,6 +146,13 @@
     modal.setAttribute('aria-hidden', 'false');
   }
 
+  function openStandaloneAttendanceTicket() {
+    const data = currentTicketData || JSON.parse(localStorage.getItem('currentAttendanceTicketData') || 'null');
+    if (!data) return;
+    localStorage.setItem('currentAttendanceTicketData', JSON.stringify(data));
+    window.open('/src/php/ticket_attendance_template.php', '_blank', 'noopener');
+  }
+
   function closeAttendanceTicket() {
     const modal = document.getElementById('attendanceTicketModal');
     if (!modal) return;
@@ -519,7 +526,7 @@
 
     document.getElementById('chkTicketBtn')?.addEventListener('click', openAttendanceTicket);
     document.getElementById('closeAttendanceTicket')?.addEventListener('click', closeAttendanceTicket);
-    document.getElementById('printAttendanceTicket')?.addEventListener('click', () => window.print());
+    document.getElementById('printAttendanceTicket')?.addEventListener('click', openStandaloneAttendanceTicket);
     document.getElementById('attendanceTicketModal')?.addEventListener('click', (e) => {
       if (e.target?.id === 'attendanceTicketModal') closeAttendanceTicket();
     });
