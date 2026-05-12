@@ -128,6 +128,7 @@ try {
     echo json_encode([
         'success'    => true,
         'record_id'  => (int)$record_id,
+        'id'         => (int)$record_id,
         'user_id'    => $user_id,
         'user_name'  => $user_name,
         'type'       => $type,

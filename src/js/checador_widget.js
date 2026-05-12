@@ -356,8 +356,13 @@
         currentTicketData = JSON.parse(localStorage.getItem('currentAttendanceTicketData') || 'null');
         currentRecognizedUserId = data.user_id;
         lastHistoryLoadedUserId = data.user_id;
-        lastInsertedAttendanceRecord = data;
-        prependHistoryRecord(data);
+        // Normalize server response to client record shape
+        const serverRecord = Object.assign({}, data);
+        if (serverRecord.record_id && !serverRecord.id) serverRecord.id = serverRecord.record_id;
+        lastInsertedAttendanceRecord = serverRecord;
+        // Prepend immediately for instant feedback
+        prependHistoryRecord(serverRecord);
+        // Reload historial to ensure canonical data (will merge/prepend if needed)
         loadUserHistorial(data.user_id);
         const ticketBtn = document.getElementById('chkTicketBtn');
         if (ticketBtn) {
@@ -417,24 +422,31 @@
       const res  = await fetch(url);
       const data = await res.json();
 
-      if (!data.success || data.records.length === 0) {
+      // Normalize response.records and handle case when server returns empty list
+      let records = Array.isArray(data.records) ? data.records.slice() : [];
+
+      // If we have a recently inserted record from this client action, normalize its id
+      if (lastInsertedAttendanceRecord && Number(lastInsertedAttendanceRecord.user_id) === Number(userId)) {
+        if (lastInsertedAttendanceRecord.record_id && !lastInsertedAttendanceRecord.id) {
+          lastInsertedAttendanceRecord.id = lastInsertedAttendanceRecord.record_id;
+        }
+        const alreadyIncluded = records.some(r => Number(r.id) === Number(lastInsertedAttendanceRecord.id || lastInsertedAttendanceRecord.record_id));
+        if (!alreadyIncluded) {
+          records = [lastInsertedAttendanceRecord, ...records];
+        }
+      }
+
+      if (!data.success || records.length === 0) {
         el.innerHTML = '<p style="font-size:11px;color:#aaa;text-align:center;">Sin registros en este período.</p>';
         return;
       }
 
-      const latest = data.records[0];
+      const latest = records[0];
       if (latest && latest.type) {
         lastMatchId = null;
       }
 
-      if (lastInsertedAttendanceRecord && Number(lastInsertedAttendanceRecord.user_id) === Number(userId)) {
-        const alreadyIncluded = data.records.some(r => Number(r.id) === Number(lastInsertedAttendanceRecord.record_id));
-        if (!alreadyIncluded) {
-          data.records = [lastInsertedAttendanceRecord, ...data.records];
-        }
-      }
-
-      el.innerHTML = data.records.slice(0, 15).map(r => {
+      el.innerHTML = records.slice(0, 15).map(r => {
         const dt  = formatDateTime(r.timestamp);
         const cls = r.type === 'ENTRADA' ? 'badge-entrada' : 'badge-salida';
         // store the full record on the row for the detail modal
