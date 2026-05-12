@@ -41,6 +41,10 @@
             ? `<div class="total-row"><span>Hora salida:</span><span>${data.exit_time || '-'}</span></div>`
             : '';
 
+        const commentRow = data.comment
+            ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row"><span>Nota:</span><span>${data.comment}</span></div>`
+            : '';
+
         ticketContent.innerHTML = `
             <header class="ticket-header">
                 <h1>KitchenLink</h1>
@@ -54,6 +58,7 @@
                 <div class="total-row"><span>Fecha:</span><span>${data.date || '-'}</span></div>
                 <div class="total-row"><span>Hora entrada:</span><span>${data.entry_time || '-'}</span></div>
                 ${salidaRow}
+                ${commentRow}
                 <div class="summary-separator-bold">================</div>
                 <div class="total-row"><span>Método:</span><span>${data.method || '-'}</span></div>
             </section>

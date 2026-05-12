@@ -20,6 +20,7 @@
   transition: background 0.25s, transform 0.2s;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 .btn-toggle-checador:hover {
@@ -29,6 +30,12 @@
 
 .toggle-panel {
   padding-bottom: 86px;
+}
+
+.toggle-panel h1 {
+  font-size: clamp(2rem, 3vw, 2.7rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
 }
 
 .toggle-panel .btn-toggle-checador {
@@ -44,13 +51,14 @@
 }
 
 .toggle-logo {
-  max-width: 72%;
+  max-width: 74%;
   margin: 16px 0 10px;
   filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.22));
 }
 
 .toggle-panel p {
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.4;
   margin: 8px 0 4px;
   opacity: 0.9;
 }
@@ -69,8 +77,8 @@
 
 .face-video-wrapper {
   position: relative;
-  width: 240px;
-  height: 180px;
+  width: min(100%, 280px);
+  height: 210px;
   border-radius: 16px;
   overflow: hidden;
   background: #121826;
@@ -154,7 +162,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   overflow-y: auto;
 }
 
@@ -168,7 +176,7 @@
 }
 
 .checador-card {
-  width: min(520px, 100%);
+  width: min(560px, 100%);
   background: #fff;
   border-radius: 18px;
   border: 1px solid #e9e3f5;
@@ -182,7 +190,7 @@
 }
 
 .checador-title {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2c3e50;
   margin-bottom: 4px;
@@ -202,7 +210,7 @@
 }
 
 .checador-subtitle {
-  font-size: 12px;
+  font-size: 13px;
   color: #888;
   margin-bottom: 4px;
 }
@@ -210,8 +218,8 @@
 /* Vídeo del checador */
 .checador-video-wrapper {
   position: relative;
-  width: 260px;
-  height: 190px;
+  width: min(100%, 340px);
+  height: 255px;
   border-radius: 16px;
   overflow: hidden;
   background: #121826;
@@ -251,6 +259,11 @@
   cursor: pointer;
   letter-spacing: 0.3px;
   transition: opacity 0.2s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
 }
 .btn-entrada { background: linear-gradient(135deg, #7f00ff, #9b4dff); color: #fff; }
 .btn-salida  { background: #1f2937; color: #fff; }
@@ -302,7 +315,7 @@
 
 /* Switch facial/manual en checador */
 .checador-mode-switch {
-  font-size: 11px;
+  font-size: 12px;
   color: #7f00ff;
   cursor: pointer;
   background: none;
@@ -337,6 +350,7 @@
   align-items: center;
   gap: 6px;
   margin: 2px auto 6px;
+  justify-content: center;
 }
 
 .checador-ticket-btn:hover {
@@ -399,12 +413,167 @@
   cursor: pointer;
 }
 
+.comentary-btn {
+  background: none;
+  border: none;
+  color: #7f00ff;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 6px;
+  text-decoration: underline;
+}
+
+.attendance-ticket-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 12, 20, 0.62);
+  z-index: 4000;
+  padding: 18px;
+}
+
+.attendance-ticket-modal.active {
+  display: flex;
+}
+
+.attendance-ticket-shell {
+  width: min(92vw, 520px);
+  max-height: 92vh;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.attendance-ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.attendance-ticket-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.attendance-ticket-header button {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.attendance-ticket-body {
+  padding: 18px;
+  overflow: auto;
+}
+
+.attendance-ticket-card {
+  border: 1px dashed #cfd4dc;
+  border-radius: 14px;
+  padding: 18px 16px;
+  background: linear-gradient(180deg, #fff, #fafafa);
+}
+
+.attendance-ticket-brand {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.attendance-ticket-brand h4 {
+  margin: 0 0 3px;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.attendance-ticket-brand span {
+  font-size: 11px;
+  color: #6b7280;
+  letter-spacing: 0.12em;
+}
+
+.attendance-ticket-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #1f2937;
+}
+
+.attendance-ticket-row strong {
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.attendance-ticket-comment {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f8f4ff;
+  color: #4c1d95;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.attendance-ticket-actions {
+  padding: 14px 18px 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #eee;
+  background: #fff;
+}
+
+.attendance-ticket-actions button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.attendance-ticket-actions .print-btn {
+  background: #7f00ff;
+  color: #fff;
+}
+
+.attendance-ticket-actions .close-btn {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+@media print {
+  body * { visibility: hidden !important; }
+  .attendance-ticket-modal, .attendance-ticket-modal * { visibility: visible !important; }
+  .attendance-ticket-modal { position: fixed; inset: 0; background: #fff; padding: 0; }
+  .attendance-ticket-shell { width: 100%; max-height: none; box-shadow: none; border-radius: 0; }
+  .attendance-ticket-header, .attendance-ticket-actions { display: none !important; }
+  .attendance-ticket-body { padding: 0; }
+  .attendance-ticket-card { border: none; border-radius: 0; }
+}
+
 /* Evita que el panel izquierdo desborde el contenedor */
 #leftPanel {
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+#leftPanel.checador-open {
+  align-items: flex-start;
+  justify-content: flex-start;
+  overflow-y: auto;
 }
 
 #loginSection,

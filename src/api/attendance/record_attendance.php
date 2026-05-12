@@ -18,18 +18,6 @@ $method  = strtoupper(trim($data['method']  ?? 'FACIAL')); // FACIAL | MANUAL
 $comment = trim($data['comment'] ?? '');
 // Timestamp consistente para ticket e insercion
 $now = date('Y-m-d H:i:s');
-// Para SALIDA, obtener la ultima ENTRADA registrada
-$entry_timestamp = null;
-if ($type === 'SALIDA') {
-    $stmt_entry = $conn->prepare(
-        "SELECT timestamp FROM attendance_records WHERE user_id = ? AND type = 'ENTRADA' ORDER BY timestamp DESC LIMIT 1"
-    );
-    $stmt_entry->bind_param("i", $user_id);
-    $stmt_entry->execute();
-    $res_entry = $stmt_entry->get_result();
-    $entry_timestamp = $res_entry->num_rows ? $res_entry->fetch_assoc()['timestamp'] : null;
-    $stmt_entry->close();
-}
 
 // Para método MANUAL, necesitamos autenticar con user+password
 if ($method === 'MANUAL') {
@@ -77,6 +65,45 @@ if ($method === 'MANUAL') {
 
 if (!in_array($type, ['ENTRADA', 'SALIDA'])) {
     echo json_encode(['success' => false, 'message' => 'Tipo inválido (ENTRADA o SALIDA)']); exit;
+}
+
+// Validar alternancia: no permitir ENTRADA/ENTRADA ni SALIDA/SALIDA seguidas.
+$last_type = null;
+$last_timestamp = null;
+$stmt_last = $conn->prepare(
+    "SELECT type, timestamp FROM attendance_records WHERE user_id = ? ORDER BY timestamp DESC, id DESC LIMIT 1"
+);
+$stmt_last->bind_param("i", $user_id);
+$stmt_last->execute();
+$res_last = $stmt_last->get_result();
+if ($res_last && $res_last->num_rows === 1) {
+    $last_row = $res_last->fetch_assoc();
+    $last_type = strtoupper($last_row['type'] ?? '');
+    $last_timestamp = $last_row['timestamp'] ?? null;
+}
+$stmt_last->close();
+
+if ($type === 'ENTRADA' && $last_type === 'ENTRADA') {
+    echo json_encode(['success' => false, 'message' => 'Ya tienes una ENTRADA activa. Debes registrar SALIDA antes de volver a checar entrada.']); exit;
+}
+
+if ($type === 'SALIDA') {
+    if ($last_type !== 'ENTRADA') {
+        echo json_encode(['success' => false, 'message' => 'No puedes registrar SALIDA sin una ENTRADA previa activa.']); exit;
+    }
+}
+
+// Para SALIDA, usar la ultima ENTRADA registrada para el ticket
+$entry_timestamp = null;
+if ($type === 'SALIDA') {
+    $stmt_entry = $conn->prepare(
+        "SELECT timestamp FROM attendance_records WHERE user_id = ? AND type = 'ENTRADA' ORDER BY timestamp DESC, id DESC LIMIT 1"
+    );
+    $stmt_entry->bind_param("i", $user_id);
+    $stmt_entry->execute();
+    $res_entry = $stmt_entry->get_result();
+    $entry_timestamp = $res_entry->num_rows ? $res_entry->fetch_assoc()['timestamp'] : null;
+    $stmt_entry->close();
 }
 
 // Limitar comentario

@@ -26,6 +26,7 @@
   let currentActionType = null;  // 'ENTRADA' | 'SALIDA'
   let facialMode      = true;    // true = facial, false = manual
   let modelsLoaded    = false;
+  let currentTicketData = null;
 
   // ── REFERENCIAS DOM ───────────────────────────
   const container     = document.getElementById('container');
@@ -103,6 +104,36 @@
       </div>
     </div>
 
+    <div class="attendance-ticket-modal" id="attendanceTicketModal" aria-hidden="true">
+      <div class="attendance-ticket-shell" role="dialog" aria-modal="true" aria-label="Comprobante de asistencia">
+        <div class="attendance-ticket-header">
+          <h3>Comprobante de Asistencia</h3>
+          <button type="button" id="closeAttendanceTicket" aria-label="Cerrar ticket"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="attendance-ticket-body">
+          <div class="attendance-ticket-card">
+            <div class="attendance-ticket-brand">
+              <h4>KitchenLink</h4>
+              <span>ASISTENCIA</span>
+            </div>
+            <div class="attendance-ticket-row"><strong>Empleado</strong><span id="ticketUserName">-</span></div>
+            <div class="attendance-ticket-row"><strong>ID</strong><span id="ticketUserId">-</span></div>
+            <div class="attendance-ticket-row"><strong>Tipo</strong><span id="ticketType">-</span></div>
+            <div class="attendance-ticket-row"><strong>Fecha</strong><span id="ticketDate">-</span></div>
+            <div class="attendance-ticket-row"><strong>Hora entrada</strong><span id="ticketEntryTime">-</span></div>
+            <div class="attendance-ticket-row"><strong>Hora salida</strong><span id="ticketExitTime">-</span></div>
+            <div class="attendance-ticket-row"><strong>Método</strong><span id="ticketMethod">-</span></div>
+            <div class="attendance-ticket-comment" id="ticketCommentBox" style="display:none;"></div>
+          </div>
+        </div>
+        <div class="attendance-ticket-actions">
+          <button type="button" id="viewTicketCommentBtn" class="close-btn" style="display:none;">Ver comentario</button>
+          <button type="button" id="printAttendanceTicket" class="print-btn">Imprimir</button>
+          <button type="button" id="openAttendanceTicketWindow" class="close-btn">Abrir panel</button>
+        </div>
+      </div>
+    </div>
+
   `;
 
   // ── UTILIDADES ────────────────────────────────
@@ -121,10 +152,64 @@
   }
 
   function openAttendanceTicket() {
-    const win = window.open('/src/php/ticket_attendance_template.php', '_blank');
-    if (!win) {
-      window.appAlert('No se pudo abrir la ventana del ticket. Revisa el bloqueo de popups.');
+    const modal = document.getElementById('attendanceTicketModal');
+    const data = currentTicketData || JSON.parse(localStorage.getItem('currentAttendanceTicketData') || 'null');
+    if (!modal || !data) return;
+
+    renderAttendanceTicket(data);
+    modal.classList.add('active');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeAttendanceTicket() {
+    const modal = document.getElementById('attendanceTicketModal');
+    if (!modal) return;
+    modal.classList.remove('active');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  function renderAttendanceTicket(data) {
+    const userNameEl = document.getElementById('ticketUserName');
+    const userIdEl = document.getElementById('ticketUserId');
+    const typeEl = document.getElementById('ticketType');
+    const dateEl = document.getElementById('ticketDate');
+    const entryEl = document.getElementById('ticketEntryTime');
+    const exitEl = document.getElementById('ticketExitTime');
+    const methodEl = document.getElementById('ticketMethod');
+    const commentBox = document.getElementById('ticketCommentBox');
+    const commentBtn = document.getElementById('viewTicketCommentBtn');
+
+    if (userNameEl) userNameEl.textContent = data.user_name || '-';
+    if (userIdEl) userIdEl.textContent = data.user_id || '-';
+    if (typeEl) typeEl.textContent = data.type || '-';
+    if (dateEl) dateEl.textContent = data.date || '-';
+    if (entryEl) entryEl.textContent = data.entry_time || '-';
+    if (exitEl) exitEl.textContent = data.exit_time || '-';
+    if (methodEl) methodEl.textContent = data.method || '-';
+
+    if (commentBox && commentBtn) {
+      if (data.comment) {
+        commentBtn.style.display = 'inline-flex';
+        commentBtn.onclick = () => {
+          const showing = commentBox.style.display === 'block';
+          commentBox.style.display = showing ? 'none' : 'block';
+          if (!showing) commentBox.textContent = `Comentario: ${data.comment}`;
+        };
+      } else {
+        commentBtn.style.display = 'none';
+        commentBox.style.display = 'none';
+        commentBox.textContent = '';
+      }
     }
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   function formatDateTime(dt) {
@@ -266,6 +351,7 @@
       if (data.success) {
         showResult(`✓ ${data.type} registrada para ${data.user_name}`, true);
         fillAndPrintTicket(data);
+        currentTicketData = JSON.parse(localStorage.getItem('currentAttendanceTicketData') || 'null');
         loadUserHistorial(data.user_id);
         const ticketBtn = document.getElementById('chkTicketBtn');
         if (ticketBtn) {
@@ -300,9 +386,11 @@
       date: dt.fecha,
       entry_time: entryDt ? entryDt.hora : dt.hora,
       exit_time: exitDt ? exitDt.hora : '-',
-      method: data.method || '-'
+      method: data.method || '-',
+      comment: data.comment || ''
     };
 
+    currentTicketData = payload;
     localStorage.setItem('currentAttendanceTicketData', JSON.stringify(payload));
   }
 
@@ -328,10 +416,15 @@
         return;
       }
 
+      const latest = data.records[0];
+      if (latest && latest.type) {
+        lastMatchId = null;
+      }
+
       el.innerHTML = data.records.slice(0, 15).map(r => {
         const dt  = formatDateTime(r.timestamp);
         const cls = r.type === 'ENTRADA' ? 'badge-entrada' : 'badge-salida';
-        const com = r.comment ? ` <i title="${r.comment}" class="fas fa-comment" style="color:#aaa;font-size:10px;"></i>` : '';
+        const com = r.comment ? ` <button type="button" class="comentary-btn" data-comment="${encodeURIComponent(r.comment)}">Ver comentario</button>` : '';
         return `
           <div class="historial-row">
             <span class="${cls}">${r.type}</span>
@@ -339,6 +432,15 @@
             <span class="badge-method">${r.method}${com}</span>
           </div>`;
       }).join('');
+
+      el.querySelectorAll('.comentary-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const comment = decodeURIComponent(btn.dataset.comment || '');
+          if (!comment) return;
+          if (window.appAlert) window.appAlert(comment);
+          else window.alert(comment);
+        });
+      });
     } catch (e) {
       el.innerHTML = '<p style="font-size:11px;color:#e74c3c;">Error al cargar historial.</p>';
     }
@@ -353,6 +455,7 @@
 
     // 2. Animar: el panel morado se va a la izquierda (reutiliza .active de style.css)
     container.classList.add('active');
+    leftPanel?.classList.add('checador-open');
 
     // 3. Ocultar login, mostrar checador
     loginSection.style.display    = 'none';
@@ -368,6 +471,7 @@
     stopChecadorCamera();
 
     container.classList.remove('active');
+    leftPanel?.classList.remove('checador-open');
 
     checadorSection.style.display = 'none';
     loginSection.style.display    = 'block';
@@ -431,6 +535,14 @@
       }
     });
 
+    document.getElementById('chkTicketBtn')?.addEventListener('click', openAttendanceTicket);
+    document.getElementById('closeAttendanceTicket')?.addEventListener('click', closeAttendanceTicket);
+    document.getElementById('printAttendanceTicket')?.addEventListener('click', () => window.print());
+    document.getElementById('openAttendanceTicketWindow')?.addEventListener('click', openAttendanceTicket);
+    document.getElementById('attendanceTicketModal')?.addEventListener('click', (e) => {
+      if (e.target?.id === 'attendanceTicketModal') closeAttendanceTicket();
+    });
+
     // Fechas por defecto (mes actual)
     const today    = new Date().toISOString().split('T')[0];
     const firstDay = today.slice(0, 7) + '-01';
@@ -443,6 +555,13 @@
   // ── LÓGICA ACCIÓN ENTRADA/SALIDA ─────────────
   function handleAction(type) {
     if (isProcessing) return;
+    if (currentTicketData && currentTicketData.type === type) {
+      const msg = type === 'ENTRADA'
+        ? 'Ya existe una ENTRADA activa. Debes registrar SALIDA antes de volver a checar entrada.'
+        : 'Ya existe una SALIDA activa. Debes registrar ENTRADA antes de volver a checar salida.';
+      showResult(msg, false);
+      return;
+    }
     currentActionType = type;
 
     if (facialMode) {
