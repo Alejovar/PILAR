@@ -428,8 +428,8 @@
   background: transparent;
   border: none;
   color: #7f00ff;
-  width: 18px;
-  height: 18px;
+  width: 12px;
+  height: 12px;
   padding: 0;
   margin-left: 6px;
   display: inline-flex;
@@ -440,7 +440,7 @@
 }
 
 .comentary-btn i {
-  font-size: 9px;
+  font-size: 8px;
 }
 
 .comentary-btn:hover {
@@ -536,6 +536,20 @@
 .attendance-ticket-row strong {
   color: #6b7280;
   font-weight: 700;
+}
+
+.total-row-note {
+  padding-bottom: 2px;
+}
+
+.ticket-comment-text {
+  width: 100%;
+  margin: 0 0 2px;
+  color: #4c1d95;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .attendance-ticket-comment {

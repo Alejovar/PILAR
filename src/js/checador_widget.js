@@ -27,6 +27,8 @@
   let facialMode      = true;    // true = facial, false = manual
   let modelsLoaded    = false;
   let currentTicketData = null;
+  let currentRecognizedUserId = null;
+  let lastHistoryLoadedUserId = null;
 
   // ── REFERENCIAS DOM ───────────────────────────
   const container     = document.getElementById('container');
@@ -170,7 +172,7 @@
       : '';
 
     const commentRow = safeComment
-      ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row"><span>Nota:</span><span>${escapeHtml(safeComment)}</span></div>`
+      ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row total-row-note"><span>Nota:</span></div><div class="ticket-comment-text">${escapeHtml(safeComment)}</div>`
       : '';
 
     content.innerHTML = `
@@ -280,6 +282,7 @@
 
       if (!detection) {
         hitCount = 0; lastMatchId = null;
+        currentRecognizedUserId = null;
         setStatus(statusEl, 'camera', 'Buscando rostro...', '');
         wrapper?.classList.remove('scanning', 'success');
         return;
@@ -297,12 +300,19 @@
       const match = findBestMatch(detection.descriptor);
       if (!match) {
         hitCount = 0; lastMatchId = null;
+        currentRecognizedUserId = null;
         setStatus(statusEl, 'user-slash', 'Rostro no reconocido', '');
         wrapper?.classList.add('scanning');
         return;
       }
 
+      currentRecognizedUserId = match.user.id;
       setStatus(statusEl, 'spinner', `Detectado: ${match.user.name}`, 'scanning');
+
+      if (currentRecognizedUserId !== lastHistoryLoadedUserId) {
+        lastHistoryLoadedUserId = currentRecognizedUserId;
+        loadUserHistorial(currentRecognizedUserId);
+      }
 
       if (lastMatchId !== match.user.id) { lastMatchId = match.user.id; hitCount = 1; }
       else hitCount++;
@@ -437,6 +447,14 @@
     }
   }
 
+  function showRecognizedUserHistory() {
+    if (!currentRecognizedUserId) {
+      showResult('Primero deja que la cámara reconozca tu rostro para ver tu historial.', false);
+      return;
+    }
+    loadUserHistorial(currentRecognizedUserId);
+  }
+
   // ── TOGGLE LOGIN ↔ CHECADOR ───────────────────
   function enterChecadorMode() {
     isChecadorMode = true;
@@ -460,6 +478,8 @@
   function exitChecadorMode() {
     isChecadorMode = false;
     stopChecadorCamera();
+    currentRecognizedUserId = null;
+    lastHistoryLoadedUserId = null;
 
     container.classList.remove('active');
     leftPanel?.classList.remove('checador-open');
@@ -518,10 +538,7 @@
     document.getElementById('chkModeSwitch')?.addEventListener('click', toggleFacialManual);
 
     document.getElementById('btnHistorial')?.addEventListener('click', () => {
-      const userId = currentTicketData?.user_id;
-      if (userId) {
-        loadUserHistorial(userId);
-      }
+      showRecognizedUserHistory();
     });
 
     document.getElementById('chkTicketBtn')?.addEventListener('click', openAttendanceTicket);
@@ -580,6 +597,8 @@
   function switchToManual() {
     facialMode = false;
     stopChecadorCamera();
+    currentRecognizedUserId = null;
+    lastHistoryLoadedUserId = null;
     document.getElementById('checadorFacialArea').style.display = 'none';
     document.getElementById('checadorManualArea').style.display = 'flex';
     const sw = document.getElementById('chkModeSwitch');
@@ -590,6 +609,8 @@
     facialMode = true;
     document.getElementById('checadorManualArea').style.display = 'none';
     document.getElementById('checadorFacialArea').style.display = 'block';
+    currentRecognizedUserId = null;
+    lastHistoryLoadedUserId = null;
     const sw = document.getElementById('chkModeSwitch');
     if (sw) sw.innerHTML = '<i class="fas fa-keyboard"></i> Cambiar a usuario/contraseña';
     const ok = await startChecadorCamera();

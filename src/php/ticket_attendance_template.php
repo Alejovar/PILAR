@@ -52,7 +52,7 @@
             : '';
 
         const commentRow = safeComment
-            ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row"><span>Nota:</span><span>${escapeHtml(safeComment)}</span></div>`
+            ? `<div class="summary-separator">--- COMENTARIO ---</div><div class="total-row total-row-note"><span>Nota:</span></div><div class="ticket-comment-text">${escapeHtml(safeComment)}</div>`
             : '';
 
         ticketContent.innerHTML = `

@@ -635,6 +635,22 @@ h1, h3 {
         text-align: right;
     }
 
+    .total-row-note {
+        width: 90%;
+        margin: 0 auto;
+        padding-bottom: 1px;
+    }
+
+    .ticket-comment-text {
+        width: 90%;
+        margin: 0 auto 3px;
+        font-size: 7pt;
+        line-height: 1.35;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        color: #000;
+    }
+
     /* Ajuste para el TOTAL PAGADO (Destacado) */
     .total-row.grand-total span:first-child {
         width: 55%; 
