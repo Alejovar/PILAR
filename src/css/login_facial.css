@@ -375,6 +375,9 @@
   font-size: 11.5px;
 }
 
+.historial-row { padding: 6px 4px; border-bottom: 1px solid #f0f0f0; display:flex; gap:8px; align-items:center; }
+.historial-row:hover { background: #fbf9ff; }
+
 .checador-historial p {
   font-size: 11px;
   color: #9aa0a6;

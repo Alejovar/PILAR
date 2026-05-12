@@ -425,21 +425,25 @@
       el.innerHTML = data.records.slice(0, 15).map(r => {
         const dt  = formatDateTime(r.timestamp);
         const cls = r.type === 'ENTRADA' ? 'badge-entrada' : 'badge-salida';
-        const com = r.comment ? ` <button type="button" class="comentary-btn" data-comment="${encodeURIComponent(String(r.comment).slice(0, 60))}" title="Ver comentario"><i class="fas fa-comment-dots"></i></button>` : '';
+        // store the full record on the row for the detail modal
+        const recAttr = encodeURIComponent(JSON.stringify(r));
         return `
-          <div class="historial-row">
+          <div class="historial-row" data-record="${recAttr}">
             <span class="${cls}">${r.type}</span>
             <span>${dt.fecha} ${dt.hora}</span>
-            <span class="badge-method">${r.method}${com}</span>
+            <span class="badge-method">${r.method}</span>
           </div>`;
       }).join('');
 
-      el.querySelectorAll('.comentary-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const comment = decodeURIComponent(btn.dataset.comment || '');
-          if (!comment) return;
-          if (window.appAlert) window.appAlert(comment);
-          else window.alert(comment);
+      // make each row clickable to show details
+      el.querySelectorAll('.historial-row').forEach(row => {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => {
+          try {
+            const rec = JSON.parse(decodeURIComponent(row.dataset.record || 'null'));
+            if (!rec) return;
+            openRecordDetails(rec);
+          } catch (e) { console.warn('historial row parse error', e); }
         });
       });
     } catch (e) {
@@ -453,6 +457,25 @@
       return;
     }
     loadUserHistorial(currentRecognizedUserId);
+  }
+
+  function openRecordDetails(rec) {
+    // Build payload compatible with renderAttendanceTicket
+    const userName = rec.user_name || currentTicketData?.user_name || (knownUsers.find(u=>u.id==rec.user_id)?.name) || '-';
+    const payload = {
+      user_name: userName,
+      user_id: rec.user_id || currentRecognizedUserId || '-',
+      type: rec.type || '-',
+      timestamp: rec.timestamp || new Date().toISOString(),
+      entry_timestamp: rec.entry_timestamp || (rec.type==='ENTRADA'? rec.timestamp : null),
+      exit_timestamp: rec.exit_timestamp || (rec.type==='SALIDA'? rec.timestamp : null),
+      method: rec.method || '-',
+      comment: String(rec.comment || '').trim().slice(0,60)
+    };
+
+    renderAttendanceTicket(payload);
+    const modal = document.getElementById('attendanceTicketModal');
+    if (modal) { modal.classList.add('active'); modal.setAttribute('aria-hidden','false'); }
   }
 
   // ── TOGGLE LOGIN ↔ CHECADOR ───────────────────
@@ -529,6 +552,11 @@
       switchToManual();
     } else {
       setStatus(statusEl, 'camera', 'Listo. Presiona ENTRADA o SALIDA', '');
+      // Auto-iniciar escaneo facial para cargar historial sin necesidad de marcar ENTRADA/SALIDA
+      if (facialMode && knownUsers && knownUsers.length > 0 && !scanInterval) {
+        hitCount = 0; lastMatchId = null;
+        startScan();
+      }
     }
 
     // ── EVENTOS ────────────────────────────────
