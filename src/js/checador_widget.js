@@ -76,6 +76,9 @@
 
           <!-- Resultado -->
           <div class="checador-result" id="chkResult"></div>
+          <button class="checador-ticket-btn" id="chkTicketBtn" style="display:none;">
+            <i class="fas fa-print"></i> Ver/Imprimir Ticket
+          </button>
 
           <!-- Switch facial/manual -->
           <button class="checador-mode-switch" id="chkModeSwitch">
@@ -115,6 +118,13 @@
     el.textContent = msg;
     el.className   = 'checador-result ' + (isOk ? 'success' : 'error');
     setTimeout(() => { el.className = 'checador-result'; }, 5000);
+  }
+
+  function openAttendanceTicket() {
+    const win = window.open('/src/php/ticket_attendance_template.php', '_blank');
+    if (!win) {
+      window.appAlert('No se pudo abrir la ventana del ticket. Revisa el bloqueo de popups.');
+    }
   }
 
   function formatDateTime(dt) {
@@ -257,6 +267,11 @@
         showResult(`✓ ${data.type} registrada para ${data.user_name}`, true);
         fillAndPrintTicket(data);
         loadUserHistorial(data.user_id);
+        const ticketBtn = document.getElementById('chkTicketBtn');
+        if (ticketBtn) {
+          ticketBtn.style.display = 'inline-flex';
+          ticketBtn.onclick = openAttendanceTicket;
+        }
         // Limpiar comentario
         const cmt = document.getElementById('chkComment');
         if (cmt) cmt.value = '';
@@ -279,7 +294,7 @@
     const exitDt = data.exit_timestamp ? formatDateTime(data.exit_timestamp) : null;
 
     const payload = {
-      user_name: data.user_name || '- ',
+      user_name: data.user_name || '-',
       user_id: data.user_id || '-',
       type: data.type || '-',
       date: dt.fecha,
@@ -289,11 +304,6 @@
     };
 
     localStorage.setItem('currentAttendanceTicketData', JSON.stringify(payload));
-
-    const win = window.open('/src/php/ticket_attendance_template.php', '_blank');
-    if (!win) {
-      window.appAlert('No se pudo abrir la ventana del ticket. Revisa el bloqueo de popups.');
-    }
   }
 
   // ── HISTORIAL ─────────────────────────────────
