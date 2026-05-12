@@ -6,6 +6,8 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 header('Content-Type: application/json');
 
+date_default_timezone_set('America/Mexico_City');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Método no permitido']); exit;

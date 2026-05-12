@@ -7,6 +7,8 @@
 require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
 header('Content-Type: application/json');
 
+date_default_timezone_set('America/Mexico_City');
+
 // Detectar si hay sesión activa de gerente
 session_start();
 $is_manager = isset($_SESSION['rol_id']) && $_SESSION['rol_id'] == 1;
