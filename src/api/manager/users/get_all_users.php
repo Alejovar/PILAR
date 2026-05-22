@@ -13,6 +13,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 1) {
 
 try {
     $sql = "SELECT u.id, u.name, u.user, u.rol_id, u.status, r.rol_name,
+                 u.nss, u.plant, u.tax_rate, u.salary_per_day, u.overtime_rate,
                    IF(u.face_descriptor IS NOT NULL, 1, 0) AS has_face
             FROM users u
             LEFT JOIN roles r ON u.rol_id = r.id

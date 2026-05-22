@@ -41,12 +41,16 @@ try {
 
     $where = "WHERE " . implode(" AND ", $conditions);
 
-    $sql = "SELECT ar.id, ar.user_id, u.name AS user_name, u.user AS username,
-                   r.rol_name,
-                   ar.type, ar.method, ar.timestamp, ar.comment
+        $sql = "SELECT ar.id, ar.user_id, u.name AS user_name, u.user AS username,
+                 u.nss, u.plant, u.salary_per_day, u.tax_rate, u.overtime_rate,
+                 r.rol_name,
+                 ar.type, ar.method, ar.timestamp, ar.comment,
+                 ar.entry_status, ar.minutes_late, ar.worked_minutes, ar.overtime_minutes, ar.permission_id,
+                 ap.reason AS permission_reason
             FROM attendance_records ar
             JOIN users u ON u.id = ar.user_id
             LEFT JOIN roles r ON r.id = u.rol_id
+             LEFT JOIN attendance_permissions ap ON ap.id = ar.permission_id
             $where
             ORDER BY ar.timestamp DESC";
 

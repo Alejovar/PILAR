@@ -4,12 +4,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Definiciones de Roles (IDs según tu DB)
-define('MESERO_ROLE_ID', 2);
-define('COCINA_ROLE_ID', 3);
-define('HOSTESS_ROLE_ID', 4);
-define('BARRA_ROLE_ID', 5);
-define('CASHIER_ROLE_ID', 6);
 define('MANAGER_ROLE_ID', 1);
 
 // 1. Bloqueo de caché
@@ -19,23 +13,13 @@ header("Pragma: no-cache");
 // 2. Lógica de redirección por rol
 if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
     $roleId = $_SESSION['rol_id'];
-    $destination = '';
-    switch ($roleId) {
-        case MESERO_ROLE_ID:    $destination = '/src/php/orders.php'; break;
-        case COCINA_ROLE_ID:    $destination = '/src/php/kitchen_orders.php'; break;
-        case HOSTESS_ROLE_ID:   $destination = '/src/php/reservations.php'; break;
-        case BARRA_ROLE_ID:     $destination = '/src/php/bar_orders.php'; break;
-        case CASHIER_ROLE_ID:   $destination = '/src/php/cashier.php'; break;
-        case MANAGER_ROLE_ID:   $destination = '/src/php/manager_dashboard.php'; break;
-        default:
-            session_unset();
-            session_destroy();
-            break;
-    }
-    if (!empty($destination)) {
-        header('Location: ' . $destination);
-        exit();
-    }
+  if ((int)$roleId === MANAGER_ROLE_ID) {
+    header('Location: /src/php/manager_dashboard.php');
+    exit();
+  }
+
+  header('Location: /checador.php');
+  exit();
 }
 ?>
 <!DOCTYPE html>
@@ -62,7 +46,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
       <div id="loginSection">
         <form id="loginForm" action="/src/php/login_handler.php" method="POST">
           <h1>Iniciar Sesión</h1>
-          <span>Ingresa tu nombre de usuario y contraseña</span>
+          <span>Ingresa con reconocimiento facial para acceder al sistema</span>
 
           <!-- Cámara de reconocimiento facial -->
           <div id="faceLoginArea" class="face-login-area">
@@ -75,9 +59,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
               </div>
             </div>
             <p class="face-hint">Mira la cámara para ingresar automáticamente</p>
-            <button type="button" id="btnSwitchToPassword" class="btn-switch-mode">
-              <i class="fas fa-keyboard"></i> Usar usuario y contraseña
-            </button>
           </div>
 
           <!-- Campos manuales (ocultos por defecto si la cámara funciona) -->
@@ -86,19 +67,17 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
             <input type="password" placeholder="Contraseña" name="password" id="password" />
             <div id="loginError" class="login-error"></div>
             <button type="submit">Iniciar Sesión</button>
-            <button type="button" id="btnSwitchToFace" class="btn-switch-mode" style="margin-top:8px;">
-              <i class="fas fa-face-smile"></i> Usar reconocimiento facial
-            </button>
           </div>
 
           <!-- Error facial -->
           <div id="faceLoginError" class="login-error" style="margin-top:8px;"></div>
 
+          <a href="/checador.php" class="btn-switch-mode" style="text-decoration:none; margin-top:12px;">
+            <i class="fas fa-clock"></i> Abrir checador de asistencia
+          </a>
+
         </form>
       </div>
-
-      <!-- ---- MODO: CHECADOR (se inyecta dinámicamente por JS) ---- -->
-      <div id="checadorSection" style="display:none; width:100%; height:100%;"></div>
 
     </div>
 
@@ -106,22 +85,22 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
     <div class="toggle-container">
       <div class="toggle">
         <div class="toggle-panel toggle-left">
-          <h1>Checador de Asistencia</h1>
+          <h1>Acceso facial</h1>
           <img src="/src/images/logos/KitchenLink_logo.png" alt="Logo de KitchenLink"
             class="toggle-logo" />
-          <p>Registra tu entrada y salida de forma rapida.</p>
-          <button type="button" class="btn-toggle-checador">
-            <i class="fas fa-sign-in-alt"></i> Volver al Login
-          </button>
+          <p>El checador de entrada y salida ahora vive en una pantalla separada, optimizada para móvil.</p>
+          <a href="/checador.php" class="btn-toggle-checador" style="text-decoration:none;">
+            <i class="fas fa-clock"></i> Ir al checador
+          </a>
         </div>
         <div class="toggle-panel toggle-right">
-          <h1>¡Bienvenido a KitchenLink!</h1>
+          <h1>Panel del gerente</h1>
           <img src="/src/images/logos/KitchenLink_logo.png" alt="Logo de KitchenLink"
             class="toggle-logo" />
-          <p>Accede con reconocimiento facial o usuario.</p>
-          <button type="button" class="btn-toggle-checador">
-            <i class="fas fa-clock"></i> Ir al Checador
-          </button>
+          <p>Administra empleados, rostros, permisos y reportes para nómina.</p>
+          <a href="/src/php/manager_dashboard.php" class="btn-toggle-checador" style="text-decoration:none;">
+            <i class="fas fa-user-shield"></i> Abrir dashboard
+          </a>
         </div>
       </div>
     </div>
@@ -131,7 +110,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['rol_id'])) {
   <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
   <script src="/src/js/session_interceptor.js?v=20260511"></script>
   <script src="/src/js/face_login.js?v=20260511"></script>
-  <script src="/src/js/checador_widget.js?v=20260511"></script>
   <script src="/src/js/script.js?v=20260511"></script>
 </body>
 

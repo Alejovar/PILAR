@@ -19,6 +19,11 @@ if (!is_array($data)) {
 $id = $data['id'] ?? null;
 $name = trim($data['name']);
 $user = trim($data['user']);
+$nss = trim($data['nss'] ?? '');
+$plant = trim($data['plant'] ?? '');
+$tax_rate = (float)($data['tax_rate'] ?? 0);
+$salary_per_day = (float)($data['salary_per_day'] ?? 0);
+$overtime_rate = (float)($data['overtime_rate'] ?? 0);
 $role_id = intval($data['role_id']);
 $password = $data['password'];
 
@@ -39,13 +44,13 @@ try {
 
         if (!empty($password)) {
             $hash = password_hash($password, PASSWORD_DEFAULT);
-            $sql = "UPDATE users SET name=?, user=?, rol_id=?, password=? WHERE id=?";
+            $sql = "UPDATE users SET name=?, user=?, nss=?, plant=?, tax_rate=?, salary_per_day=?, overtime_rate=?, rol_id=?, password=? WHERE id=?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssisi", $name, $user, $role_id, $hash, $id);
+            $stmt->bind_param("ssssdddisi", $name, $user, $nss, $plant, $tax_rate, $salary_per_day, $overtime_rate, $role_id, $hash, $id);
         } else {
-            $sql = "UPDATE users SET name=?, user=?, rol_id=? WHERE id=?";
+            $sql = "UPDATE users SET name=?, user=?, nss=?, plant=?, tax_rate=?, salary_per_day=?, overtime_rate=?, rol_id=? WHERE id=?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("ssii", $name, $user, $role_id, $id);
+            $stmt->bind_param("ssssdddii", $name, $user, $nss, $plant, $tax_rate, $salary_per_day, $overtime_rate, $role_id, $id);
         }
         $stmt->execute();
 
@@ -63,10 +68,9 @@ try {
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
         
-        // 💡 CAMBIO: No insertamos 'status', dejamos que la BD ponga 'ACTIVO' por defecto
-        $sql = "INSERT INTO users (name, user, password, rol_id) VALUES (?, ?, ?, ?)";
+        $sql = "INSERT INTO users (name, user, password, nss, plant, tax_rate, salary_per_day, overtime_rate, rol_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssi", $name, $user, $hash, $role_id);
+        $stmt->bind_param("sssssdddi", $name, $user, $hash, $nss, $plant, $tax_rate, $salary_per_day, $overtime_rate, $role_id);
         
         if (!$stmt->execute()) throw new Exception("Error al crear usuario.");
     }

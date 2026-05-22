@@ -52,16 +52,12 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
         <div>
             <h2>Administración</h2>
             <ul>
-                <li><a href="manager_dashboard.php"><i class="fas fa-th-large"></i> Monitoreo de Mesas</a></li>
+                <li><a href="manager_dashboard.php"><i class="fas fa-th-large"></i> Inicio</a></li>
 
                 <li><a href="#" class="active"><i class="fas fa-users-cog"></i> Usuarios</a></li>
-                
-                <li><a href="manager_menu.php"><i class="fas fa-utensils"></i> Menú y Productos</a></li>
-                
-                <li><a href="manager_reports.php"><i class="fas fa-chart-line"></i> Gestión de Reportes</a></li>
 
-                <li><a href="manager_waste.php"><i class="fas fa-trash-alt"></i> Control de Mermas</a></li>
-                <li><a href="manager_checador.php"><i class="fas fa-clock"></i> Checador de Asistencia</a></li>
+                <li><a href="manager_checador.php"><i class="fas fa-chart-line"></i> Reportes</a></li>
+                <li><a href="manager_checador.php"><i class="fas fa-clock"></i> Checador</a></li>
             </ul>
         </div>
         
@@ -92,7 +88,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
             
             <div class="search-wrapper" style="position: relative; flex-grow: 1; max-width: 400px;">
                 <i class="fas fa-search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #888;"></i>
-                <input type="text" id="userSearchInput" placeholder="Buscar por nombre o usuario..." style="width: 100%; padding: 10px 10px 10px 35px; border-radius: 8px; border: 1px solid #ccc;">
+                <input type="text" id="userSearchInput" placeholder="Buscar por nombre, usuario o NSS..." style="width: 100%; padding: 10px 10px 10px 35px; border-radius: 8px; border: 1px solid #ccc;">
             </div>
 
             <button class="action-btn primary-btn" id="btnNewUser" style="background-color: #5a2dfc; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
@@ -105,6 +101,8 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                     <tr>
                         <th>ID</th>
                         <th>Nombre Completo</th>
+                        <th>NSS</th>
+                        <th>Planta</th>
                         <th>Usuario (Login)</th>
                         <th>Rol</th>
                         <th>Estado</th>
@@ -113,7 +111,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                     </tr>
                 </thead>
                 <tbody id="usersTableBody">
-                    <tr><td colspan="7" style="text-align:center; padding: 20px;">Cargando personal...</td></tr>
+                    <tr><td colspan="9" style="text-align:center; padding: 20px;">Cargando personal...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -151,6 +149,16 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                 <label for="userName">Nombre Completo</label>
                 <input type="text" id="userName" required placeholder="Ej: Juan Pérez" autocomplete="off">
             </div>
+
+            <div class="form-group">
+                <label for="userNSS">Número de Seguro Social</label>
+                <input type="text" id="userNSS" placeholder="Ej: 12345678901" autocomplete="off" maxlength="20">
+            </div>
+
+            <div class="form-group">
+                <label for="userPlant">Planta</label>
+                <input type="text" id="userPlant" placeholder="Ej: Planta Norte" autocomplete="off">
+            </div>
             
             <div class="form-group">
                 <label for="userLogin">Usuario (Para iniciar sesión)</label>
@@ -172,6 +180,21 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                     <i class="fas fa-eye" id="togglePasswordBtn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #888;"></i>
                 </div>
                 <small class="form-note" id="passHelpText" style="display:none;">Dejar en blanco para mantener la contraseña actual.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="userSalaryDay">Salario por día</label>
+                <input type="number" step="0.01" min="0" id="userSalaryDay" placeholder="0.00" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="userTaxRate">Impuesto (%)</label>
+                <input type="number" step="0.01" min="0" id="userTaxRate" placeholder="0.00" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="userOvertimeRate">Pago hora extra</label>
+                <input type="number" step="0.01" min="0" id="userOvertimeRate" placeholder="0.00" autocomplete="off">
             </div>
 
             <div class="modal-actions">

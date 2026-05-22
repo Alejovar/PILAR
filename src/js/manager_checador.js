@@ -30,7 +30,8 @@
       data.employees.forEach(e => {
         const opt = document.createElement('option');
         opt.value = e.id;
-        opt.textContent = `${e.name} (${e.rol_name || 'Sin rol'})`;
+        const plantLabel = e.plant ? ` - ${e.plant}` : '';
+        opt.textContent = `${e.name}${plantLabel} (${e.rol_name || 'Sin rol'})`;
         sel.appendChild(opt);
       });
     } catch (e) { console.error('[ManagerChecador] Error cargando empleados:', e); }
@@ -48,7 +49,7 @@
     if (dateTo)   url += `date_to=${encodeURIComponent(dateTo)}&`;
 
     document.getElementById('attendanceTableBody').innerHTML =
-      '<tr><td colspan="8" class="no-records">Cargando...</td></tr>';
+      '<tr><td colspan="14" class="no-records">Cargando...</td></tr>';
 
     try {
       const res  = await fetch(url);
@@ -60,7 +61,7 @@
       updateSummary(allRecords);
     } catch (e) {
       document.getElementById('attendanceTableBody').innerHTML =
-        `<tr><td colspan="8" class="no-records" style="color:#e74c3c;">Error: ${e.message}</td></tr>`;
+        `<tr><td colspan="14" class="no-records" style="color:#e74c3c;">Error: ${e.message}</td></tr>`;
     }
   }
 
@@ -68,7 +69,7 @@
   function renderTable(records) {
     const tbody = document.getElementById('attendanceTableBody');
     if (!records.length) {
-      tbody.innerHTML = '<tr><td colspan="8" class="no-records">Sin registros para los filtros seleccionados.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="14" class="no-records">Sin registros para los filtros seleccionados.</td></tr>';
       return;
     }
 
@@ -77,20 +78,30 @@
       const fecha    = dt.toLocaleDateString('es-MX',  { day:'2-digit', month:'2-digit', year:'numeric' });
       const hora     = dt.toLocaleTimeString('es-MX',  { hour:'2-digit', minute:'2-digit', second:'2-digit' });
       const tipoCls  = r.type === 'ENTRADA' ? 'entrada' : 'salida';
+      const status   = r.entry_status || (r.type === 'SALIDA' ? 'CIERRE' : '—');
+      const lateMin  = Number(r.minutes_late || 0);
+      const overtime = Number(r.overtime_minutes || 0);
       const comment  = r.comment ? `<span title="${escapeHtml(r.comment)}" style="cursor:help;">
                         <i class="fas fa-comment" style="color:#aaa;"></i> ${escapeHtml(r.comment.slice(0, 30))}${r.comment.length > 30 ? '...' : ''}
                        </span>` : '—';
+      const permission = r.permission_reason ? escapeHtml(r.permission_reason) : '—';
 
       return `
         <tr>
           <td>${i + 1}</td>
           <td><strong>${escapeHtml(r.user_name)}</strong><br>
               <small style="color:#aaa;">${escapeHtml(r.username)}</small></td>
+          <td>${escapeHtml(r.nss || '—')}</td>
+          <td>${escapeHtml(r.plant || '—')}</td>
           <td>${escapeHtml(r.rol_name || '—')}</td>
           <td><span class="badge-type ${tipoCls}">${r.type}</span></td>
+          <td><span class="badge-method">${escapeHtml(status)}</span></td>
           <td>${fecha}</td>
           <td>${hora}</td>
           <td><span class="badge-method">${r.method}</span></td>
+          <td>${lateMin ? `${lateMin} min` : '—'}</td>
+          <td>${overtime ? `${overtime} min` : '—'}</td>
+          <td>${permission}</td>
           <td>${comment}</td>
         </tr>`;
     }).join('');
@@ -101,31 +112,44 @@
     const entradas   = records.filter(r => r.type === 'ENTRADA').length;
     const salidas    = records.filter(r => r.type === 'SALIDA').length;
     const empleados  = new Set(records.map(r => r.user_id)).size;
+    const retardos   = records.filter(r => r.entry_status === 'RETARDO').length;
+    const permisos   = records.filter(r => r.entry_status === 'PERMISO').length;
+    const extraMinutes = records.reduce((sum, r) => sum + Number(r.overtime_minutes || 0), 0);
 
     document.getElementById('sumTotal').textContent    = records.length;
     document.getElementById('sumEntradas').textContent  = entradas;
     document.getElementById('sumSalidas').textContent   = salidas;
     document.getElementById('sumEmpleados').textContent = empleados;
+    document.getElementById('sumRetardos').textContent  = retardos;
+    document.getElementById('sumPermisos').textContent   = permisos;
+    document.getElementById('sumHorasExtra').textContent = `${(extraMinutes / 60).toFixed(1)} h`;
   }
 
   // ── EXPORTAR CSV ───────────────────────────────
   function exportCSV() {
     if (!allRecords.length) { alert('No hay registros para exportar.'); return; }
 
-    const headers = ['#','Empleado','Usuario','Rol','Tipo','Fecha','Hora','Método','Comentario'];
+    const headers = ['#','Empleado','Usuario','NSS','Planta','Rol','Tipo','Estado','Fecha','Hora','Método','Retardo (min)','Horas extra (min)','Permiso','Comentario'];
     const rows    = allRecords.map((r, i) => {
       const dt   = new Date(r.timestamp);
       const fecha = dt.toLocaleDateString('es-MX', { day:'2-digit', month:'2-digit', year:'numeric' });
       const hora  = dt.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      const status = r.entry_status || (r.type === 'SALIDA' ? 'CIERRE' : '');
       return [
         i + 1,
         csvEscape(r.user_name),
         csvEscape(r.username),
+        csvEscape(r.nss || ''),
+        csvEscape(r.plant || ''),
         csvEscape(r.rol_name || ''),
         r.type,
+        csvEscape(status),
         fecha,
         hora,
         r.method,
+        r.minutes_late || 0,
+        r.overtime_minutes || 0,
+        csvEscape(r.permission_reason || ''),
         csvEscape(r.comment || '')
       ].join(',');
     });

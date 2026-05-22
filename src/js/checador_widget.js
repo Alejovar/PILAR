@@ -32,11 +32,12 @@
   let lastInsertedAttendanceRecord = null;
 
   // ── REFERENCIAS DOM ───────────────────────────
-  const container     = document.getElementById('container');
-  const leftPanel     = document.getElementById('leftPanel');
-  const loginSection  = document.getElementById('loginSection');
+  const container       = document.getElementById('container');
+  const leftPanel       = document.getElementById('leftPanel');
+  const loginSection    = document.getElementById('loginSection');
   const checadorSection = document.getElementById('checadorSection');
-  const toggleButtons = document.querySelectorAll('.btn-toggle-checador');
+  const toggleButtons   = document.querySelectorAll('.btn-toggle-checador');
+  const standaloneMode  = !loginSection;
 
   // ── HTML DEL CHECADOR ─────────────────────────
   const checadorHTML = `
@@ -536,6 +537,7 @@
 
   // ── TOGGLE LOGIN ↔ CHECADOR ───────────────────
   function enterChecadorMode() {
+    if (standaloneMode) return;
     isChecadorMode = true;
 
     // 1. Detener face login
@@ -555,6 +557,7 @@
   }
 
   function exitChecadorMode() {
+    if (standaloneMode) return;
     isChecadorMode = false;
     stopChecadorCamera();
     currentRecognizedUserId = null;
@@ -575,7 +578,7 @@
     }
   }
 
-  if (toggleButtons.length) {
+  if (!standaloneMode && toggleButtons.length) {
     toggleButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         if (isChecadorMode) exitChecadorMode();
@@ -702,6 +705,14 @@
     if (sw) sw.innerHTML = '<i class="fas fa-keyboard"></i> Cambiar a usuario/contraseña';
     const ok = await startChecadorCamera();
     if (!ok) switchToManual();
+  }
+
+  if (standaloneMode) {
+    if (checadorSection) {
+      checadorSection.style.display = 'flex';
+      checadorSection.innerHTML = checadorHTML;
+    }
+    initChecador();
   }
 
 })();

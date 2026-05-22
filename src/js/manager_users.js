@@ -11,9 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inputs del formulario
     const inpId = document.getElementById('userId');
     const inpName = document.getElementById('userName');
+    const inpNss = document.getElementById('userNSS');
+    const inpPlant = document.getElementById('userPlant');
     const inpUser = document.getElementById('userLogin');
     const inpRole = document.getElementById('userRole');
     const inpPass = document.getElementById('userPassword');
+    const inpSalaryDay = document.getElementById('userSalaryDay');
+    const inpTaxRate = document.getElementById('userTaxRate');
+    const inpOvertimeRate = document.getElementById('userOvertimeRate');
     const passHelp = document.getElementById('passHelpText');
 
     const API_ROUTES = {
@@ -56,13 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. CARGAR USUARIOS
     async function loadUsers() {
-        tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">Cargando...</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Cargando...</td></tr>';
         try {
             const res = await fetch(API_ROUTES.LIST);
             const data = await res.json();
             
             if (!data.success || data.users.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 20px;">No hay usuarios registrados.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px;">No hay usuarios registrados.</td></tr>';
                 return;
             }
 
@@ -83,6 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.innerHTML = `
                     <td>#${u.id}</td>
                     <td><strong>${u.name}</strong></td>
+                    <td>${u.nss || '—'}</td>
+                    <td>${u.plant || '—'}</td>
                     <td>${u.user}</td>
                     <td><span class="role-badge ${roleClass}">${u.rol_name}</span></td>
                     <td>${statusHtml}</td>
@@ -107,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error(error);
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:red;">Error al cargar datos.</td></tr>`;
         }
     }
 
@@ -120,8 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
             modalTitle.textContent = "Editar Empleado";
             inpId.value = user.id;
             inpName.value = user.name;
+            inpNss.value = user.nss || "";
+            inpPlant.value = user.plant || "";
             inpUser.value = user.user;
             inpRole.value = user.rol_id;
+            inpSalaryDay.value = user.salary_per_day || "";
+            inpTaxRate.value = user.tax_rate || "";
+            inpOvertimeRate.value = user.overtime_rate || "";
             inpPass.value = ""; 
             inpPass.placeholder = "(Sin cambios)";
             passHelp.style.display = "block";
@@ -140,9 +152,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const payload = {
             id: inpId.value,
             name: inpName.value,
+            nss: inpNss.value,
+            plant: inpPlant.value,
             user: inpUser.value,
             role_id: inpRole.value,
-            password: inpPass.value
+            password: inpPass.value,
+            salary_per_day: inpSalaryDay.value,
+            tax_rate: inpTaxRate.value,
+            overtime_rate: inpOvertimeRate.value
         };
 
         try {
@@ -201,9 +218,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             Array.from(rows).forEach(row => {
                 const name = row.cells[1]?.textContent.toLowerCase() || '';
-                const user = row.cells[2]?.textContent.toLowerCase() || '';
+                const nss = row.cells[2]?.textContent.toLowerCase() || '';
+                const user = row.cells[4]?.textContent.toLowerCase() || '';
                 
-                if (name.includes(term) || user.includes(term)) {
+                if (name.includes(term) || nss.includes(term) || user.includes(term)) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';

@@ -27,19 +27,16 @@ unit-test-job:
   script:
     - echo "Ejecutando pruebas unitarias básicas..."
     - php -r "if (file_exists('src/php/db_connection.php')) { echo 'Test DB PASSED'; } else { echo 'Test DB FAILED'; exit(1); }"
-    - php -r "if (file_exists('docker/migration_waste.sql')) { echo 'Test Migration Waste PASSED'; } else { echo 'Test Migration Waste FAILED'; exit(1); }"
-    # ── FACIAL: Verificar que el archivo de migración facial existe ──
-    - php -r "if (file_exists('docker/migration_facial_attendance.sql')) { echo 'Test Migration Facial PASSED'; } else { echo 'Test Migration Facial FAILED'; exit(1); }"
+    - php -r "if (file_exists('docker/migration_payroll_attendance.sql')) { echo 'Test Payroll Migration PASSED'; } else { echo 'Test Payroll Migration FAILED'; exit(1); }"
     # ── FACIAL: Verificar que las APIs del checador existen ──
     - php -r "if (file_exists('src/api/attendance/record_attendance.php')) { echo 'Test Attendance API PASSED'; } else { echo 'Test Attendance API FAILED'; exit(1); }"
     - php -r "if (file_exists('src/api/face/get_descriptors.php')) { echo 'Test Face API PASSED'; } else { echo 'Test Face API FAILED'; exit(1); }"
     - |
       echo '<?xml version="1.0" encoding="UTF-8"?>
       <testsuites>
-        <testsuite name="UnitTests" tests="5" failures="0">
+        <testsuite name="UnitTests" tests="4" failures="0">
           <testcase name="DatabaseConnectionFile"/>
-          <testcase name="WasteMigrationFile"/>
-          <testcase name="FacialMigrationFile"/>
+          <testcase name="PayrollMigrationFile"/>
           <testcase name="AttendanceAPI"/>
           <testcase name="FaceAPI"/>
         </testsuite>
@@ -130,15 +127,14 @@ deploy_to_staging:
         echo '🧹 Limpiando disco...'
         docker system prune -af
         df -h
+        cd ~/kitchenlink
+        docker compose down -v --remove-orphans || true
       "
 
     - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/kitchenlink/docker"
     - scp docker-compose.yml                        $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
     - scp docker/init.sql                           $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
-    - scp docker/migration_users_autoincrement.sql  $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_users_autoincrement.sql
-    - scp docker/migration_waste.sql                $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_waste.sql
-    # ── FACIAL: Copiar migración de reconocimiento facial y checador ──
-    - scp docker/migration_facial_attendance.sql    $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_facial_attendance.sql
+    - scp docker/migration_payroll_attendance.sql   $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_payroll_attendance.sql
 
     - |
       ssh $VM_USER@$STAGING_VM_IP "
@@ -161,26 +157,12 @@ deploy_to_staging:
           sleep 1
         done
 
-        # ── SPRINT 1: Migración de mermas ──
-        echo '🗄️ Ejecutando migración de mermas...'
+        # ── PAYROLL: Migración de nómina y asistencia ──
+        echo '🗄️ Ejecutando migración de nómina/asistencia...'
         docker exec -i kitchenlink-db mysql \
           -uroot -p'${STAGING_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/migration_waste.sql
-        echo '✅ Migración de mermas OK.'
-
-        # ── FIX: users.id AUTO_INCREMENT ──
-        echo '🗄️ Ejecutando migración users.id AUTO_INCREMENT...'
-        docker exec -i kitchenlink-db mysql \
-          -uroot -p'${STAGING_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/migration_users_autoincrement.sql
-        echo '✅ Migración users.id AUTO_INCREMENT OK.'
-
-        # ── FACIAL: Migración de reconocimiento facial y checador ──
-        echo '🗄️ Ejecutando migración facial/checador...'
-        docker exec -i kitchenlink-db mysql \
-          -uroot -p'${STAGING_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/migration_facial_attendance.sql
-        echo '✅ Migración facial/checador OK.'
+          < ~/kitchenlink/docker/migration_payroll_attendance.sql
+        echo '✅ Migración de nómina/asistencia OK.'
 
         # ── FIX: Validar usuario de Vault en MySQL ──
         echo '🔍 Validando que el usuario de Vault existe en MySQL...'
@@ -241,6 +223,8 @@ deploy_to_production:
         echo '🧹 Limpiando disco...'
         docker system prune -af
         df -h
+        cd ~/kitchenlink
+        docker compose down -v --remove-orphans || true
       "
 
     - ssh $VM_USER@$VM_IP_ADDRESS "mkdir -p ~/kitchenlink/docker"
@@ -248,8 +232,8 @@ deploy_to_production:
     - scp docker/init.sql                           $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/init.sql
     - scp docker/migration_users_autoincrement.sql  $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_users_autoincrement.sql
     - scp docker/migration_waste.sql                $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_waste.sql
-    # ── FACIAL: Copiar migración de reconocimiento facial y checador ──
     - scp docker/migration_facial_attendance.sql    $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_facial_attendance.sql
+    - scp docker/migration_payroll_attendance.sql   $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_payroll_attendance.sql
 
     - |
       ssh $VM_USER@$VM_IP_ADDRESS "
@@ -262,6 +246,7 @@ deploy_to_production:
 
         docker login -u '${CI_REGISTRY_USER}' -p '${CI_REGISTRY_PASSWORD}' ${CI_REGISTRY}
         docker pull ${CI_REGISTRY_IMAGE}:latest
+        docker compose down -v --remove-orphans || true
         docker compose up -d --no-build
 
         # ── Esperar MySQL ──
@@ -292,6 +277,13 @@ deploy_to_production:
           -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
           < ~/kitchenlink/docker/migration_facial_attendance.sql
         echo '✅ Migración facial/checador OK.'
+
+        # ── PAYROLL: Migración de nómina y asistencia ──
+        echo '🗄️ Ejecutando migración de nómina/asistencia...'
+        docker exec -i kitchenlink-db mysql \
+          -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
+          < ~/kitchenlink/docker/migration_payroll_attendance.sql
+        echo '✅ Migración de nómina/asistencia OK.'
 
         # ── FIX: Validar usuario de Vault en MySQL ──
         echo '🔍 Validando que el usuario de Vault existe en MySQL...'

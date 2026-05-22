@@ -31,11 +31,13 @@ unit-test-job:
   script:
     - echo "Ejecutando Pruebas Unitarias..."
     - php -r "if (file_exists('src/php/db_connection.php')) { echo 'Test DB PASSED'; } else { echo 'Test DB FAILED'; exit(1); }"
+    - php -r "if (file_exists('docker/migration_payroll_attendance.sql')) { echo 'Test Migration Payroll PASSED'; } else { echo 'Test Migration Payroll FAILED'; exit(1); }"
     - |
       echo '<?xml version="1.0" encoding="UTF-8"?>
       <testsuites>
-        <testsuite name="UnitTests" tests="1" failures="0">
+        <testsuite name="UnitTests" tests="2" failures="0">
           <testcase name="DatabaseConnectionFile"/>
+        <testcase name="PayrollMigrationFile"/>
         </testsuite>
       </testsuites>' > junit.xml
   artifacts:

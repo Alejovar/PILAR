@@ -7,9 +7,22 @@
     <meta charset="UTF-8">
     <title>Comprobante de Asistencia</title>
     <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    <link rel="stylesheet" href="/src/css/cashier.css">
     <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 24px; background: #f4f7fb; color: #1f2937; }
+        .ticket-container { max-width: 420px; margin: 0 auto; background: #fff; border-radius: 18px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.08); }
+        .ticket-header { text-align: center; margin-bottom: 18px; }
+        .ticket-header h1 { margin: 0; font-size: 28px; }
+        .ticket-header p { margin: 6px 0 0; font-size: 12px; letter-spacing: 1px; }
+        .summary-separator, .summary-separator-bold { text-align: center; margin: 14px 0; font-weight: 700; }
+        .total-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed #e5e7eb; }
+        .total-row span:last-child { text-align: right; }
+        .ticket-comment-text { margin-top: 8px; padding: 10px 12px; background: #f8fafc; border-radius: 10px; font-size: 13px; }
+        .ticket-footer { text-align: center; margin-top: 18px; font-size: 12px; color: #6b7280; }
+        .print-controls { text-align: center; margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .print-controls button { padding: 10px 18px; font-size: 15px; border: 0; border-radius: 10px; cursor: pointer; background: #5a2dfc; color: #fff; }
         @media print {
+            body { background: #fff; padding: 0; }
+            .ticket-container { box-shadow: none; border-radius: 0; max-width: none; }
             .print-controls { display: none !important; }
         }
     </style>

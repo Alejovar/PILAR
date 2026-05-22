@@ -12,7 +12,7 @@ if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != 1) {
 }
 
 try {
-    $sql = "SELECT u.id, u.name, u.user, r.rol_name
+    $sql = "SELECT u.id, u.name, u.user, u.nss, u.plant, r.rol_name
             FROM users u
             LEFT JOIN roles r ON r.id = u.rol_id
             WHERE u.status = 'ACTIVO'

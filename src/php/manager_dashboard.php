@@ -1,133 +1,140 @@
 <?php
-// /src/php/manager_dashboard.php - Panel Principal del Gerente
-
-// 1. Incluye el check_session universal.
 require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 
-// --- LÓGICA DE SEGURIDAD CRÍTICA ---
-define('MANAGER_ROLE_ID', 1); // 1 = Gerente
+define('MANAGER_ROLE_ID', 1);
 
-// 🔑 Verificación Crítica: Si el rol NO es Gerente (1), se deniega el acceso.
 if (!isset($_SESSION['rol_id']) || $_SESSION['rol_id'] != MANAGER_ROLE_ID) {
-    
-    // 💥 CORRECCIÓN CRÍTICA: Destrucción Total (PHP + Token de DB)
-    
-    // 1. Borrar el token de la base de datos
     if (isset($conn) && isset($_SESSION['user_id'])) {
         try {
             $clean_stmt = $conn->prepare("UPDATE users SET session_token = NULL WHERE id = ?");
             $clean_stmt->bind_param("i", $_SESSION['user_id']);
             $clean_stmt->execute();
             $clean_stmt->close();
-        } catch (\Throwable $e) {
-            // Manejo silencioso de error
-        }
+        } catch (Throwable $e) {}
     }
-    
-    // 2. Destruir la sesión PHP
+
     if (session_status() === PHP_SESSION_ACTIVE) {
         session_unset();
         session_destroy();
     }
-    
-    header('Location: /index.php?error=acceso_denegado_gerente');
+
+    header('Location: /login.php');
     exit();
 }
 
-// Variables de Personalización
-$userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente'); 
+$userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Gerente | KitchenLink</title>
-    <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
-    
-    <link rel="stylesheet" href="/src/css/orders.css">
-    <link rel="stylesheet" href="/src/css/modal_advanced_options.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <script>
-        window.isManagerMode = true;
-        window.currentUserRole = <?php echo $_SESSION['rol_id']; ?>;
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Administración | KitchenLink</title>
+  <link rel="icon" href="/src/images/logos/KitchenLink_logo.png" type="image/png" sizes="32x32">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Montserrat', sans-serif; background: linear-gradient(135deg, #f8f5ff 0%, #eef4ff 100%); color: #1f2937; }
+    .shell { min-height: 100vh; display: grid; grid-template-columns: 280px 1fr; }
+    .sidebar { background: rgba(255,255,255,0.78); backdrop-filter: blur(16px); border-right: 1px solid rgba(127,0,255,0.08); padding: 24px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+    .sidebar h2 { margin: 0 0 18px; font-size: 18px; }
+    .nav { display: grid; gap: 10px; }
+    .nav a { text-decoration: none; color: #374151; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,0.7); border: 1px solid rgba(127,0,255,0.08); font-weight: 600; display: flex; gap: 10px; align-items: center; }
+    .nav a.active { background: linear-gradient(135deg, #7f00ff, #a855f7); color: #fff; border-color: transparent; }
+    .user-card { margin-top: 18px; padding-top: 18px; border-top: 1px solid rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .user-meta { min-width: 0; }
+    .user-meta strong { display:block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .logout { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; text-decoration: none; color: #dc2626; background: rgba(220,38,38,0.08); }
+    .main { padding: 26px; }
+    .hero { background: rgba(255,255,255,0.8); border: 1px solid rgba(127,0,255,0.08); box-shadow: 0 20px 40px rgba(25, 15, 60, 0.06); border-radius: 24px; padding: 28px; display: grid; gap: 16px; }
+    .hero-top { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+    .eyebrow { color: #7f00ff; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .hero h1 { margin: 6px 0 8px; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; }
+    .hero p { margin: 0; color: #4b5563; max-width: 62ch; }
+    .clock { font-size: 16px; font-weight: 800; color: #7f00ff; background: rgba(127,0,255,0.08); padding: 10px 14px; border-radius: 999px; white-space: nowrap; }
+    .grid { margin-top: 22px; display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .card { grid-column: span 4; background: rgba(255,255,255,0.86); border: 1px solid rgba(127,0,255,0.08); border-radius: 22px; padding: 20px; box-shadow: 0 14px 30px rgba(25, 15, 60, 0.05); text-decoration: none; color: inherit; display: block; }
+    .card i { font-size: 28px; color: #7f00ff; }
+    .card h3 { margin: 14px 0 8px; font-size: 18px; }
+    .card p { margin: 0; color: #6b7280; line-height: 1.5; }
+    .wide { grid-column: span 8; }
+    .meta-strip { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .pill { background: rgba(127,0,255,0.08); color: #5b21b6; border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: 700; }
+    @media (max-width: 980px) { .shell { grid-template-columns: 1fr; } .sidebar { border-right: 0; border-bottom: 1px solid rgba(127,0,255,0.08); } .card, .wide { grid-column: span 12; } }
+  </style>
 </head>
 <body>
-
-<div class="main-container">
+  <div class="shell">
     <aside class="sidebar">
-        <div>
-            <h2>Administración</h2>
-            <ul>
-                <li><a href="#" class="active"><i class="fas fa-th-large"></i> Monitoreo de Mesas</a></li>
-                
-                <li><a href="manager_users.php"><i class="fas fa-users-cog"></i> Usuarios</a></li>
-                
-                <li><a href="manager_menu.php"><i class="fas fa-utensils"></i> Menú y Productos</a></li>
-                
-                <li><a href="manager_reports.php"><i class="fas fa-chart-line"></i> Gestión de Reportes</a></li>
+      <div>
+        <h2>Administración</h2>
+        <nav class="nav">
+          <a href="#" class="active"><i class="fas fa-th-large"></i> Inicio</a>
+          <a href="manager_users.php"><i class="fas fa-users-cog"></i> Usuarios</a>
+          <a href="manager_checador.php"><i class="fas fa-clock"></i> Reportes de asistencia</a>
+          <a href="/checador.php"><i class="fas fa-mobile-alt"></i> Checador móvil</a>
+        </nav>
+      </div>
 
-                <li><a href="manager_waste.php"><i class="fas fa-trash-alt"></i> Control de Mermas</a></li>
-                
-                <li><a href="manager_checador.php"><i class="fas fa-clock"></i> Checador de Asistencia</a></li>
-            </ul>
+      <div class="user-card">
+        <div class="user-meta">
+          <strong><?php echo $userName; ?></strong>
+          <small>Panel del gerente</small>
         </div>
-        
-       <div class="user-info">
-            <div class="user-details">
-                <i class="fas fa-user-tie user-avatar"></i>
-                
-                <div class="user-text-container">
-                    <div class="user-name-text"><?php echo $userName; ?></div>
-                    <div class="session-status-text">Gerente General</div>
-                </div>
-            </div>
-            
-            <a href="/src/php/logout.php" class="logout-btn" title="Cerrar Sesión">
-                <i class="fas fa-sign-out-alt"></i>
-            </a>
-        </div>
+        <a href="/src/php/logout.php" class="logout" title="Cerrar sesión"><i class="fas fa-sign-out-alt"></i></a>
+      </div>
     </aside>
 
-    <main class="content">
-        <div id="liveClockContainer"></div>
-
-        <h1>Visión Global de Mesas</h1>
-        
-        <section class="table-status-container">
-            <h3>Mapa del Restaurante</h3>
-            
-            <div class="table-grid" id="tableGridContainer">
-                <p id="loadingMessage" style="padding: 20px; color: gray;">Cargando mapa del restaurante...</p>
+    <main class="main">
+      <section class="hero">
+        <div class="hero-top">
+          <div>
+            <div class="eyebrow">KitchenLink Administración</div>
+            <h1>Usuarios, permisos y nómina</h1>
+            <p>Este panel centraliza el alta de personal, rostros, permisos especiales y la consulta de entradas y salidas para exportar a Excel o al ERP externo con NSS como identificador principal.</p>
+            <div class="meta-strip">
+              <span class="pill">NSS como ID</span>
+              <span class="pill">Plantas múltiples</span>
+              <span class="pill">Retardo 8:01</span>
+              <span class="pill">Falta 8:15</span>
             </div>
-            
-            <button class="fab" id="fab" title="Abrir Nueva Mesa">
-                <i class="fas fa-plus"></i>
-            </button>
-        </section>
-        
-        <div class="footer-actions">
-            <div class="control-buttons">
-                <button class="action-btn primary-btn" id="btn-edit-order" disabled>Editar Mesa</button>
-                <button class="action-btn primary-btn" id="btn-advanced-options" disabled>Opciones avanzadas</button>
-            </div>
+          </div>
+          <div id="liveClockContainer" class="clock">--:--:--</div>
         </div>
+      </section>
+
+      <section class="grid">
+        <a class="card wide" href="manager_users.php">
+          <i class="fas fa-user-plus"></i>
+          <h3>Registrar empleados y rostros</h3>
+          <p>Da de alta personal con NSS, planta, salario por día, impuestos y captura facial desde una sola pantalla.</p>
+        </a>
+
+        <a class="card" href="manager_checador.php">
+          <i class="fas fa-file-export"></i>
+          <h3>Reportes de asistencia</h3>
+          <p>Filtra por usuario, fechas y exporta la asistencia con retardo, permisos y horas extra.</p>
+        </a>
+
+        <a class="card" href="/checador.php">
+          <i class="fas fa-mobile-screen-button"></i>
+          <h3>Checador móvil</h3>
+          <p>Abre la versión separada para entrada y salida, optimizada para usuarios en dispositivo móvil.</p>
+        </a>
+      </section>
     </main>
-</div> 
+  </div>
 
-<?php include 'modal_create_table.php'; ?> 
-
-<?php 
-    // Incluimos los modales de opciones avanzadas
-    include $_SERVER['DOCUMENT_ROOT'] . '/src/components/advanced_options_modals.php';
-?>
-
-<div id="notification-container"></div> 
-
-<script src="/src/js/session_interceptor.js"></script>
-<script type="module" src="/src/js/orders.js"></script>
+  <script>
+    (function updateClock() {
+      const el = document.getElementById('liveClockContainer');
+      if (el) {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+      setTimeout(updateClock, 1000);
+    })();
+  </script>
 </body>
 </html>

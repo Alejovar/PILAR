@@ -46,12 +46,55 @@ CREATE TABLE IF NOT EXISTS users (
     user VARCHAR(25) NOT NULL,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
+    nss VARCHAR(20) DEFAULT NULL,
+    plant VARCHAR(100) DEFAULT NULL,
+    tax_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00,
+    salary_per_day DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    overtime_rate DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    shift_start_time TIME NOT NULL DEFAULT '08:00:00',
+    late_after_minutes INT NOT NULL DEFAULT 1,
+    absence_after_minutes INT NOT NULL DEFAULT 15,
     rol_id INT,
     session_token VARCHAR(255) NULL DEFAULT NULL,
     status ENUM('ACTIVO', 'INACTIVO') NOT NULL DEFAULT 'ACTIVO',
     CONSTRAINT pk_users PRIMARY KEY (id),
     CONSTRAINT uq_user UNIQUE (user),
+    CONSTRAINT uq_users_nss UNIQUE (nss),
     CONSTRAINT fk_users_roles FOREIGN KEY (rol_id) REFERENCES roles(id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS attendance_permissions (
+    id INT AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    valid_from DATE NOT NULL,
+    valid_to DATE NOT NULL,
+    reason VARCHAR(255) DEFAULT NULL,
+    granted_by INT DEFAULT NULL,
+    active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT pk_attendance_permissions PRIMARY KEY (id),
+    CONSTRAINT fk_permissions_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_permissions_granted_by FOREIGN KEY (granted_by) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_permission_range (user_id, valid_from, valid_to)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS attendance_records (
+    id INT AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    type ENUM('ENTRADA', 'SALIDA') NOT NULL,
+    method ENUM('FACIAL', 'MANUAL') NOT NULL DEFAULT 'FACIAL',
+    timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    comment VARCHAR(500) DEFAULT NULL,
+    entry_status ENUM('NORMAL', 'RETARDO', 'PERMISO') DEFAULT NULL,
+    minutes_late INT NOT NULL DEFAULT 0,
+    worked_minutes INT DEFAULT NULL,
+    overtime_minutes INT NOT NULL DEFAULT 0,
+    permission_id INT DEFAULT NULL,
+    CONSTRAINT pk_attendance_records PRIMARY KEY (id),
+    CONSTRAINT fk_attendance_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_attendance_permission FOREIGN KEY (permission_id) REFERENCES attendance_permissions(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    INDEX idx_attendance_user_date (user_id, timestamp),
+    INDEX idx_attendance_type_date (type, timestamp)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ========= TABLA DE MESAS =========

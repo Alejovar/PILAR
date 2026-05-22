@@ -74,12 +74,10 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
         <div>
             <h2>Administración</h2>
             <ul>
-                <li><a href="manager_dashboard.php"><i class="fas fa-th-large"></i> Monitoreo de Mesas</a></li>
+                <li><a href="manager_dashboard.php"><i class="fas fa-th-large"></i> Inicio</a></li>
                 <li><a href="manager_users.php"><i class="fas fa-users-cog"></i> Usuarios</a></li>
-                <li><a href="manager_menu.php"><i class="fas fa-utensils"></i> Menú y Productos</a></li>
-                <li><a href="manager_reports.php"><i class="fas fa-chart-line"></i> Gestión de Reportes</a></li>
-                <li><a href="manager_waste.php"><i class="fas fa-trash-alt"></i> Control de Mermas</a></li>
-                <li><a href="manager_checador.php" class="active"><i class="fas fa-clock"></i> Checador de Asistencia</a></li>
+                <li><a href="manager_checador.php" class="active"><i class="fas fa-chart-line"></i> Reportes de asistencia</a></li>
+                <li><a href="/checador.php"><i class="fas fa-mobile-alt"></i> Checador móvil</a></li>
             </ul>
         </div>
         <div class="user-info">
@@ -141,6 +139,18 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                 <span class="label">Empleados distintos</span>
                 <span class="value" id="sumEmpleados">—</span>
             </div>
+            <div class="summary-card">
+                <span class="label">Retardos</span>
+                <span class="value" id="sumRetardos">—</span>
+            </div>
+            <div class="summary-card">
+                <span class="label">Permisos usados</span>
+                <span class="value" id="sumPermisos">—</span>
+            </div>
+            <div class="summary-card">
+                <span class="label">Horas extra</span>
+                <span class="value" id="sumHorasExtra">—</span>
+            </div>
         </div>
 
         <!-- TABLA -->
@@ -150,16 +160,22 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Gerente');
                     <tr>
                         <th>#</th>
                         <th>Empleado</th>
+                        <th>NSS</th>
+                        <th>Planta</th>
                         <th>Rol</th>
                         <th>Tipo</th>
+                        <th>Estado</th>
                         <th>Fecha</th>
                         <th>Hora</th>
                         <th>Método</th>
+                        <th>Retardo</th>
+                        <th>Horas extra</th>
+                        <th>Permiso</th>
                         <th>Comentario</th>
                     </tr>
                 </thead>
                 <tbody id="attendanceTableBody">
-                    <tr><td colspan="8" class="no-records">Aplica los filtros para ver registros.</td></tr>
+                    <tr><td colspan="14" class="no-records">Aplica los filtros para ver registros.</td></tr>
                 </tbody>
             </table>
         </div>

@@ -161,22 +161,8 @@ switch ($rol_id) { // Usamos la variable $rol_id
     case 1: // Gerente
         $redirect_url = "/src/php/manager_dashboard.php";
         break;
-    case 2: // Mesero
-        $redirect_url = "/src/php/orders.php";
-        break;
-    case 3: // Cocina
-        $redirect_url = "/src/php/kitchen_orders.php";
-        break;
-    case 4: // Hostess
-        $redirect_url = "/src/php/reservations.php";
-        break;
-    case 5: // Barra
-        $redirect_url = "/src/php/bar_orders.php";
-        break;
-    case 6: // Caja
-        // (La redirección a cashier.php es correcta, porque
-        // el cashier.js se encargará de re-redirigir a sales_history.php si es necesario)
-        $redirect_url = "/src/php/cashier.php";
+    default:
+        $redirect_url = "/checador.php";
         break;
 }
 

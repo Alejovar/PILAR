@@ -74,12 +74,12 @@ session_write_close();
 // Redirección por rol
 $redirect_url = "/dashboard.php";
 switch ($rol_id) {
-    case 1: $redirect_url = "/src/php/manager_dashboard.php"; break;
-    case 2: $redirect_url = "/src/php/orders.php"; break;
-    case 3: $redirect_url = "/src/php/kitchen_orders.php"; break;
-    case 4: $redirect_url = "/src/php/reservations.php"; break;
-    case 5: $redirect_url = "/src/php/bar_orders.php"; break;
-    case 6: $redirect_url = "/src/php/cashier.php"; break;
+    case 1:
+        $redirect_url = "/src/php/manager_dashboard.php";
+        break;
+    default:
+        $redirect_url = "/checador.php";
+        break;
 }
 
 echo json_encode([
