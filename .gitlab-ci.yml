@@ -157,6 +157,17 @@ deploy_to_staging:
           sleep 1
         done
 
+        echo '⏳ Esperando que la tabla users exista...'
+        for i in \$(seq 1 60); do
+          TABLE_READY=\$(docker exec kitchenlink-db mysql \
+            -uroot -p'${STAGING_DB_ROOT_PASSWORD}' \
+            -Nse "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users';" 2>/dev/null || true)
+          if [ "\$TABLE_READY" = "1" ]; then
+            break
+          fi
+          sleep 2
+        done
+
         # ── PAYROLL: Migración de nómina y asistencia ──
         echo '🗄️ Ejecutando migración de nómina/asistencia...'
         docker exec -i kitchenlink-db mysql \
@@ -255,6 +266,17 @@ deploy_to_production:
           docker exec kitchenlink-db mysqladmin ping -h localhost \
             -uroot -p'${PROD_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
+        done
+
+        echo '⏳ Esperando que la tabla users exista...'
+        for i in \$(seq 1 60); do
+          TABLE_READY=\$(docker exec kitchenlink-db mysql \
+            -uroot -p'${PROD_DB_ROOT_PASSWORD}' \
+            -Nse "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users';" 2>/dev/null || true)
+          if [ "\$TABLE_READY" = "1" ]; then
+            break
+          fi
+          sleep 2
         done
 
         # ── SPRINT 1: Migración de mermas ──
