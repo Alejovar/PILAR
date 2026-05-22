@@ -151,20 +151,23 @@ deploy_to_staging:
 
         # ── Esperar MySQL ──
         echo '⏳ Esperando que MySQL esté disponible...'
-        for i in \$(seq 1 30); do
+        i=0
+        while [ "\$i" -lt 30 ]; do
           docker exec kitchenlink-db mysqladmin ping -h localhost \
             -uroot -p'${STAGING_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
+          i=\$((i + 1))
         done
 
         echo '⏳ Esperando que la tabla users exista...'
-        for i in \$(seq 1 60); do
-          TABLE_READY=\$(docker exec kitchenlink-db mysql \
+        i=0
+        while [ "\$i" -lt 60 ]; do
+          if docker exec kitchenlink-db mysql \
             -uroot -p'${STAGING_DB_ROOT_PASSWORD}' \
-            -Nse "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users';" 2>/dev/null || true)
-          if [ "\$TABLE_READY" = "1" ]; then
+            -Nse \"SELECT 1 FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users' LIMIT 1;\" 2>/dev/null | grep -qx '1'; then
             break
           fi
+          i=\$((i + 1))
           sleep 2
         done
 
@@ -262,20 +265,23 @@ deploy_to_production:
 
         # ── Esperar MySQL ──
         echo '⏳ Esperando que MySQL esté disponible...'
-        for i in \$(seq 1 30); do
+        i=0
+        while [ "\$i" -lt 30 ]; do
           docker exec kitchenlink-db mysqladmin ping -h localhost \
             -uroot -p'${PROD_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
+          i=\$((i + 1))
         done
 
         echo '⏳ Esperando que la tabla users exista...'
-        for i in \$(seq 1 60); do
-          TABLE_READY=\$(docker exec kitchenlink-db mysql \
+        i=0
+        while [ "\$i" -lt 60 ]; do
+          if docker exec kitchenlink-db mysql \
             -uroot -p'${PROD_DB_ROOT_PASSWORD}' \
-            -Nse "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users';" 2>/dev/null || true)
-          if [ "\$TABLE_READY" = "1" ]; then
+            -Nse \"SELECT 1 FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users' LIMIT 1;\" 2>/dev/null | grep -qx '1'; then
             break
           fi
+          i=\$((i + 1))
           sleep 2
         done
 
