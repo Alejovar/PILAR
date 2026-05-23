@@ -1,17 +1,15 @@
 services:
-  # ── Base de datos MySQL ──
   db:
     image: mysql:8.0
     container_name: kitchenlink-db
     restart: unless-stopped
 
-    # Puerto expuesto para Vault
     ports:
       - "3306:3306"
 
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: roceel_db
+      MYSQL_DATABASE: KitchenLink
       MYSQL_USER: ${DB_USER:-roceel_user}
       MYSQL_PASSWORD: ${DB_PASSWORD}
 
@@ -26,7 +24,6 @@ services:
       retries: 20
       start_period: 120s
 
-  # ── Aplicación PHP-FPM + Nginx ──
   app:
     image: ${APP_IMAGE:-roceel-app}
     build: .
@@ -40,7 +37,7 @@ services:
       DB_HOST: db
       DB_USER: ${DB_USER:-roceel_user}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: roceel_db
+      DB_NAME: KitchenLink
 
     depends_on:
       db:
