@@ -40,6 +40,20 @@ if (!$user || !$user['activo']) {
 }
 
 if (!password_verify($password, $user['password_hash'])) {
+    // Compatibilidad con usuarios antiguos almacenados sin hash
+    if (!hash_equals((string)$user['password_hash'], (string)$password)) {
+        echo json_encode(['ok'=>false,'msg'=>'Credenciales inválidas.']);
+        exit();
+    }
+
+    $newHash = password_hash($password, PASSWORD_BCRYPT);
+    $updateStmt = $conn->prepare("UPDATE usuarios SET password_hash = ? WHERE id = ?");
+    $updateStmt->bind_param('si', $newHash, $user['id']);
+    $updateStmt->execute();
+    $updateStmt->close();
+}
+
+if (!password_verify($password, $user['password_hash']) && !hash_equals((string)$user['password_hash'], (string)$password)) {
     echo json_encode(['ok'=>false,'msg'=>'Credenciales inválidas.']);
     exit();
 }
