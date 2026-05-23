@@ -2,19 +2,23 @@ services:
   # ── Base de datos MySQL ──
   db:
     image: mysql:8.0
-    container_name: roceel-db
+    container_name: kitchenlink-db
     restart: unless-stopped
-    # Puerto expuesto para que Vault pueda conectarse desde afuera
+
+    # Puerto expuesto para Vault
     ports:
       - "3306:3306"
+
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE:      roceel_db
-      MYSQL_USER:          ${DB_USER:-roceel_user}
-      MYSQL_PASSWORD:      ${DB_PASSWORD}
+      MYSQL_DATABASE: roceel_db
+      MYSQL_USER: ${DB_USER:-roceel_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+
     volumes:
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - db_data:/var/lib/mysql
+
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
       interval: 10s
@@ -26,15 +30,18 @@ services:
   app:
     image: ${APP_IMAGE:-roceel-app}
     build: .
-    container_name: roceel-app
+    container_name: kitchenlink-app
     restart: unless-stopped
+
     ports:
       - "80:80"
+
     environment:
-      DB_HOST:     db
-      DB_USER:     ${DB_USER:-roceel_user}
+      DB_HOST: db
+      DB_USER: ${DB_USER:-roceel_user}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME:     roceel_db
+      DB_NAME: roceel_db
+
     depends_on:
       db:
         condition: service_healthy
