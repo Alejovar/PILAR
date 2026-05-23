@@ -18,3 +18,10 @@ if (empty($_SESSION['user_id'])) {
     header('Location: /login.php');
     exit();
 }
+
+// ── Inyectar script anti-flash de tema ANTES del primer <head> ──
+// Sin tocar ninguna página individual.
+ob_start(function ($buffer) {
+    $script = '<script>!function(){try{var t=localStorage.getItem("roceel_theme");"light"===t&&document.documentElement.setAttribute("data-theme","light")}catch(e){}}();</script>';
+    return preg_replace('/<head(\s[^>]*)?>/', '$0' . $script, $buffer, 1);
+});

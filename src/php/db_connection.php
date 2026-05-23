@@ -9,6 +9,8 @@ define('DB_PASS', getenv('DB_PASSWORD') ?: '');
 define('DB_NAME', getenv('DB_NAME') ?: 'KitchenLink');
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+    $conn->query("SET time_zone = '-05:00'");
+
 
 if ($conn->connect_error) {
     http_response_code(503);
