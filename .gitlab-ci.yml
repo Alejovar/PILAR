@@ -27,7 +27,7 @@ security-job:
   script:
     - echo "Buscando archivos sensibles expuestos..."
     - |
-      if find . -maxdepth 1 -name "*.env" -o -name "*.sql" | grep -q .; then
+      if find . -maxdepth 1 \( -name "*.env" -o -name "*.sql" \) | grep -q .; then
         echo "❌ ERROR: Archivos sensibles (.env o .sql) detectados en la raíz!"
         exit 1
       else

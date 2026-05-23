@@ -18,7 +18,8 @@ roceel/
 ├── checador.php                 ← Checador PÚBLICO (sin login, responsivo)
 ├── dashboard.php                ← Panel de control
 ├── index.php                    ← Redirige a login
-├── schema_roceel.sql            ← Schema completo con datos de prueba
+├── docker/
+│   └── schema_roceel.sql        ← Schema completo con datos de prueba
 ├── docker-compose.yml
 ├── Dockerfile
 ├── src/
@@ -147,7 +148,7 @@ Solo se marcan como **extra** las horas que exceden las 90 de la catorcena compl
 
 - **Username**: `admin`  
 - **Password**: `Admin1234`  
-- Cambiar el hash en `schema_roceel.sql` antes de producción:
+- Cambiar el hash en `docker/schema_roceel.sql` antes de producción:
 
 ```php
 echo password_hash('TuContraseña', PASSWORD_BCRYPT);
