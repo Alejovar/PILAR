@@ -300,9 +300,11 @@ function renderPlantas(list) {
     return;
   }
   tbody.innerHTML = list.map(p => {
-    const tieneCoords = p.latitud !== null && p.longitud !== null;
+    const lat = Number(p.latitud);
+    const lng = Number(p.longitud);
+    const tieneCoords = Number.isFinite(lat) && Number.isFinite(lng);
     const coordsHtml = tieneCoords
-      ? `<span class="coords-badge has-coords"><i class="fas fa-circle-check"></i>${p.latitud.toFixed(4)}, ${p.longitud.toFixed(4)}</span>`
+      ? `<span class="coords-badge has-coords"><i class="fas fa-circle-check"></i>${lat.toFixed(4)}, ${lng.toFixed(4)}</span>`
       : `<span class="coords-badge"><i class="fas fa-circle-xmark"></i>Sin configurar</span>`;
     const radioHtml  = tieneCoords ? `<span class="badge badge-yellow">${p.radio_permitido ?? 100} m</span>` : '—';
     return `

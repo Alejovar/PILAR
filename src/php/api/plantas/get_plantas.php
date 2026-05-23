@@ -6,7 +6,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session_api.ph
 function get_plantas_log(string $m) { error_log('[get_plantas] '.$m); }
 
 // Intentar leer plantas
-$sql = "SELECT id, codigo, nombre, ubicacion, activa, created_at FROM plantas ORDER BY created_at DESC";
+$sql = "SELECT id, codigo, nombre, ubicacion, activa, latitud, longitud, radio_permitido, created_at FROM plantas ORDER BY created_at DESC";
 $res = $conn->query($sql);
 if (!$res) {
     get_plantas_log('Query failed: ' . $conn->error);
