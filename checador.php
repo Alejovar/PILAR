@@ -49,7 +49,7 @@
     .scan-status.error  { color: var(--danger); }
     .scan-status.loading{ color: var(--primary); }
 
-    /* Botón de acción del evento detectado */
+    /* ── Panel del empleado detectado ── */
     .action-panel {
       padding:0 24px 20px;
       display:none;
@@ -132,6 +132,49 @@
       border-radius:999px; transition:width 0.4s ease;
       width:0%;
     }
+
+    /* ── Geo badge (indicador de estado GPS) ── */
+    .geo-badge {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:11px; font-weight:700;
+      padding:4px 10px; border-radius:999px;
+      margin-top:10px;
+    }
+    .geo-badge.idle     { background:rgba(100,116,139,0.15); color:var(--text-muted); }
+    .geo-badge.loading  { background:rgba(245,196,0,0.12);   color:var(--primary); }
+    .geo-badge.ok       { background:rgba(34,197,94,0.12);   color:var(--accent); }
+    .geo-badge.error    { background:rgba(239,68,68,0.12);   color:var(--danger); }
+    .geo-badge i { font-size:10px; }
+    #geoBadgeWrap { text-align:center; padding:4px 0 8px; }
+
+    /* ── Overlay de geo-error ── */
+    .geo-error-overlay {
+      position:fixed; inset:0; z-index:300;
+      background:rgba(0,0,0,0.75);
+      display:flex; align-items:center; justify-content:center;
+      backdrop-filter:blur(4px);
+      opacity:0; pointer-events:none;
+      transition:opacity 0.25s;
+    }
+    .geo-error-overlay.open { opacity:1; pointer-events:all; }
+    .geo-error-box {
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:32px 28px;
+      max-width:320px; width:90%;
+      text-align:center;
+    }
+    .geo-error-icon { font-size:2.8rem; margin-bottom:14px; }
+    .geo-error-box h3 { font-size:17px; font-weight:800; margin-bottom:8px; }
+    .geo-error-box p  { font-size:13px; color:var(--text-muted); line-height:1.55; }
+    .geo-error-btns   { display:flex; gap:10px; margin-top:20px; }
+    .geo-error-btns button {
+      flex:1; padding:11px; border-radius:10px;
+      font-family:inherit; font-size:13px; font-weight:700; cursor:pointer;
+    }
+    .geo-btn-retry  { background:var(--primary); color:#000; border:none; }
+    .geo-btn-cancel { background:var(--surface-2); color:var(--text-muted); border:1px solid var(--border); }
   </style>
 </head>
 <body>
@@ -167,9 +210,16 @@
         <div class="scan-ring" id="scanRing"></div>
       </div>
       <div class="scan-status" id="scanStatus">Apunta tu rostro a la cámara...</div>
+
+      <!-- Indicador GPS -->
+      <div id="geoBadgeWrap">
+        <span class="geo-badge idle" id="geoBadge">
+          <i class="fas fa-location-dot"></i> GPS inactivo
+        </span>
+      </div>
     </div>
 
-    <!-- Estado del día (se muestra cuando se detecta alguien) -->
+    <!-- Estado del día -->
     <div class="hoy-panel" id="hoyPanel" style="display:none;">
       <div class="hoy-row"><span class="lbl"><i class="fas fa-sign-in-alt"></i> Entrada</span>      <span class="val g" id="hoyEntrada">—</span></div>
       <div class="hoy-row"><span class="lbl"><i class="fas fa-utensils"></i> Salida comida</span>    <span class="val y" id="hoySalidaCom">—</span></div>
@@ -221,23 +271,41 @@
   </div>
 </div>
 
-<!-- face-api.js desde los modelos locales -->
+<!-- Geo-error overlay -->
+<div class="geo-error-overlay" id="geoErrorOverlay">
+  <div class="geo-error-box">
+    <div class="geo-error-icon" id="geoErrorIcon">📍</div>
+    <h3 id="geoErrorTitle">Fuera de rango</h3>
+    <p id="geoErrorMsg">No se pudo validar tu ubicación.</p>
+    <div class="geo-error-btns">
+      <button class="geo-btn-retry"  id="geoRetryBtn"><i class="fas fa-rotate-right"></i> Reintentar</button>
+      <button class="geo-btn-cancel" id="geoCancelBtn">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
 <script>
 /* ============================================================
-   ROCEEL — Checador Facial
-   Usa face-api.js con modelos TinyFaceDetector + FaceLandmark68Tiny
-   + FaceRecognition. Matching local en el browser.
+   ROCEEL — Checador Facial con Geolocalización
+   Flujo: Reconocimiento facial → GPS → Validación → Registro
    ============================================================ */
 
 const MODELS_URL     = '/src/face-models';
 const API_DESC       = '/src/php/api/face/get_descriptors.php';
 const API_ESTADO     = '/src/php/api/asistencia/estado_hoy.php';
 const API_REGISTRAR  = '/src/php/api/asistencia/registrar.php';
-const MATCH_THRESHOLD = 0.45;   // distancia máxima para reconocer (0=igual, 1=diferente)
-const SCAN_INTERVAL   = 900;    // ms entre frames de detección
-const CONFIRM_LOCK    = 1800;   // ms mínimo entre detecciones automáticas
+const MATCH_THRESHOLD = 0.45;
+const SCAN_INTERVAL   = 900;
+const CONFIRM_LOCK    = 1800;
+
+// Opciones de geolocalización — alta precisión, timeout razonable
+const GEO_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout:            10000,   // 10 s
+  maximumAge:         0,        // siempre fresco, no cache
+};
 
 let faceMatcher    = null;
 let knownEmpleados = [];
@@ -248,17 +316,103 @@ let lastDetect     = 0;
 let videoStream    = null;
 let detectLoop     = null;
 
+// Coordenadas GPS actuales del dispositivo
+let geoActual      = null;  // { lat, lng } | null
+
 // ── Reloj ──
 (function tick() {
   document.getElementById('liveClock').textContent =
-    new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  setTimeout(tick,1000);
+    new Date().toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  setTimeout(tick, 1000);
 })();
+
+// ══════════════════════════════════════════════════════════
+// GEOLOCALIZACIÓN
+// Obtiene la posición actual del dispositivo.
+// Retorna { lat, lng } o lanza un error descriptivo.
+// ══════════════════════════════════════════════════════════
+
+/**
+ * Verifica si el navegador soporta la Geolocation API.
+ */
+function geoSoportada() {
+  return 'geolocation' in navigator;
+}
+
+/**
+ * Obtiene la posición actual como Promise.
+ * Usa watchPosition internamente para mayor velocidad en mobile.
+ */
+function obtenerPosicion() {
+  return new Promise((resolve, reject) => {
+    if (!geoSoportada()) {
+      reject(new Error('Tu navegador no soporta geolocalización.'));
+      return;
+    }
+
+    // Intentar con getCurrentPosition; falla silenciosa en algunos browsers
+    // → fallback a watchPosition que es más confiable
+    let resuelto = false;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        if (resuelto) return;
+        resuelto = true;
+        navigator.geolocation.clearWatch(watchId);
+        resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+      },
+      (err) => {
+        if (resuelto) return;
+        resuelto = true;
+        navigator.geolocation.clearWatch(watchId);
+        reject(mapGeoError(err));
+      },
+      GEO_OPTIONS
+    );
+
+    // Safety timeout propio por si watchPosition no dispara el error a tiempo
+    setTimeout(() => {
+      if (!resuelto) {
+        resuelto = true;
+        navigator.geolocation.clearWatch(watchId);
+        reject(new Error('Tiempo agotado al obtener tu ubicación (10 s). Verifica tu GPS.'));
+      }
+    }, GEO_OPTIONS.timeout + 500);
+  });
+}
+
+/** Convierte el código de error de la API a texto legible */
+function mapGeoError(err) {
+  const msgs = {
+    1: 'Permiso de ubicación denegado. Permite el acceso en la configuración del navegador.',
+    2: 'No se pudo determinar tu posición. Verifica que el GPS esté activo.',
+    3: 'Tiempo agotado al obtener ubicación. Intenta de nuevo.',
+  };
+  return new Error(msgs[err.code] || `Error de geolocalización (código ${err.code}).`);
+}
+
+/** Actualiza el badge de estado del GPS en la UI */
+function setGeoBadge(estado, texto) {
+  const el = document.getElementById('geoBadge');
+  el.className = `geo-badge ${estado}`;
+  const icons = {
+    idle:    'fa-location-dot',
+    loading: 'fa-spinner fa-spin',
+    ok:      'fa-circle-check',
+    error:   'fa-triangle-exclamation',
+  };
+  el.innerHTML = `<i class="fas ${icons[estado] || 'fa-location-dot'}"></i> ${texto}`;
+}
 
 // ══════════════════════════════════════════════════════════
 // INICIO: cargar modelos → cámara → descriptores
 // ══════════════════════════════════════════════════════════
 async function init() {
+  // Verificar soporte GPS antes de arrancar
+  if (!geoSoportada()) {
+    setGeoBadge('error', 'GPS no disponible en este dispositivo');
+  }
+
   setProgress(5, 'Cargando detector de caras...');
   try {
     await faceapi.nets.tinyFaceDetector.loadFromUri(MODELS_URL);
@@ -270,7 +424,7 @@ async function init() {
     await cargarDescriptores();
     setProgress(100, '¡Listo!');
     await iniciarCamara();
-  } catch(err) {
+  } catch (err) {
     console.error(err);
     document.getElementById('loadingMsg').textContent = '❌ Error al cargar modelos: ' + err.message;
     document.getElementById('loadingMsg').style.color = 'var(--danger)';
@@ -288,30 +442,26 @@ async function cargarDescriptores() {
   if (!d.ok || !d.empleados.length) return;
 
   knownEmpleados = d.empleados;
-
   const labeled = d.empleados.map(e => {
     const desc = new Float32Array(e.descriptor);
     return new faceapi.LabeledFaceDescriptors(String(e.id), [desc]);
   });
-
   faceMatcher = new faceapi.FaceMatcher(labeled, MATCH_THRESHOLD);
 }
 
 async function iniciarCamara() {
   try {
     videoStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'user', width: {ideal:640}, height:{ideal:480} },
-      audio: false
+      video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
+      audio: false,
     });
     const video = document.getElementById('video');
     video.srcObject = videoStream;
     await video.play();
 
-    // Mostrar sección cámara
     document.getElementById('secLoading').style.display = 'none';
     document.getElementById('secCamera').style.display  = 'block';
 
-    // Ajustar canvas al video
     video.addEventListener('loadedmetadata', () => {
       const canvas = document.getElementById('overlay');
       canvas.width  = video.videoWidth;
@@ -319,7 +469,7 @@ async function iniciarCamara() {
     });
 
     iniciarDeteccion();
-  } catch(err) {
+  } catch (err) {
     document.getElementById('loadingMsg').textContent =
       '❌ No se pudo acceder a la cámara. Permite el permiso e intenta de nuevo.';
     document.getElementById('loadingMsg').style.color = 'var(--danger)';
@@ -330,7 +480,9 @@ async function iniciarCamara() {
 // DETECCIÓN CONTINUA
 // ══════════════════════════════════════════════════════════
 function iniciarDeteccion() {
-  scanning = true;
+  scanning   = true;
+  geoActual  = null;
+  setGeoBadge('idle', 'GPS inactivo');
   detectLoop = setInterval(detectarRostro, SCAN_INTERVAL);
 }
 
@@ -349,8 +501,7 @@ async function detectarRostro() {
 
   if (video.readyState < 2) return;
 
-  const options = new faceapi.TinyFaceDetectorOptions({ inputSize:224, scoreThreshold:0.5 });
-
+  const options    = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
   const detections = await faceapi
     .detectAllFaces(video, options)
     .withFaceLandmarks(true)
@@ -360,10 +511,6 @@ async function detectarRostro() {
     setScanStatus('Apunta tu rostro a la cámara...', '');
     return;
   }
-
-  // Dibujar resultados en canvas
-  const displaySize = { width: canvas.width, height: canvas.height };
-  const resized = faceapi.resizeResults(detections, displaySize);
 
   // Buscar mejor match
   let bestMatch = null, bestDist = 1;
@@ -380,7 +527,6 @@ async function detectarRostro() {
     return;
   }
 
-  // Evitar disparar múltiples veces para el mismo frame
   const now = Date.now();
   if (now - lastDetect < CONFIRM_LOCK) return;
   lastDetect = now;
@@ -390,22 +536,72 @@ async function detectarRostro() {
   if (!emp) return;
 
   setScanStatus(`✅ Reconocido: ${emp.nombre}`, 'found');
+
+  // ── Detección exitosa → detener escaneo → iniciar GPS ──
+  detenerDeteccion();
   await mostrarEmpleado(emp, bestMatch.match.distance);
 }
 
+// ══════════════════════════════════════════════════════════
+// FLUJO POSTERIOR AL RECONOCIMIENTO FACIAL
+// ══════════════════════════════════════════════════════════
 async function mostrarEmpleado(emp, score) {
-  detenerDeteccion();
   empleadoActual = emp;
 
   document.getElementById('detNombre').textContent = emp.nombre;
-  document.getElementById('detMeta').textContent   = `NSS: ${emp.numero_empleado}  ·  score: ${(1-score).toFixed(2)}`;
+  document.getElementById('detMeta').textContent   =
+    `NSS: ${emp.numero_empleado}  ·  score: ${(1 - score).toFixed(2)}`;
 
   // Cargar estado del día
   await cargarEstadoHoy(emp.id);
 
   document.getElementById('hoyPanel').style.display = 'block';
   document.getElementById('actionPanel').classList.add('show');
+
+  // Iniciar captura GPS simultáneamente
+  iniciarGPS();
 }
+
+/**
+ * Inicia la captura de posición GPS.
+ * Se ejecuta en segundo plano; actualiza geoActual cuando resuelve.
+ * Los botones de checada quedan habilitados después de que GPS resuelve.
+ */
+async function iniciarGPS() {
+  if (!geoSoportada()) {
+    setGeoBadge('error', 'Navegador sin GPS');
+    // Sin GPS → deshabilitar botones ya que la planta puede requerir validación
+    setScanStatus('⚠️ Geolocalización no disponible en este navegador.', 'error');
+    return;
+  }
+
+  setGeoBadge('loading', 'Obteniendo ubicación...');
+  setScanStatus('📡 Obteniendo tu ubicación GPS...', 'loading');
+
+  try {
+    const pos = await obtenerPosicion();
+    geoActual  = pos;
+    setGeoBadge('ok', `GPS activo (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)})`);
+    setScanStatus(`✅ Reconocido: ${empleadoActual?.nombre}`, 'found');
+
+    // Habilitar botones de evento (respetando la lógica de secuencia)
+    habilitarBotonesSegunEstado();
+  } catch (err) {
+    geoActual = null;
+    setGeoBadge('error', 'Error de GPS');
+    mostrarGeoError(
+      '❌',
+      'No se pudo obtener tu ubicación',
+      err.message,
+      false  // no es error de rango, es error de permisos/hw
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// ESTADO DEL DÍA
+// ══════════════════════════════════════════════════════════
+let _estadoHoy = null;  // Cache del estado para re-habilitar botones post-GPS
 
 async function cargarEstadoHoy(empId) {
   try {
@@ -413,24 +609,27 @@ async function cargarEstadoHoy(empId) {
     const d = await r.json();
     if (!d.ok) return;
 
-    const h   = d.registros;
-    const fmt = ts => ts ? new Date(ts).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}) : '—';
+    _estadoHoy = d.registros;
+    const h    = d.registros;
+    const fmt  = ts => ts
+      ? new Date(ts).toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' })
+      : '—';
 
     document.getElementById('hoyEntrada').textContent    = fmt(h.entrada);
     document.getElementById('hoySalidaCom').textContent  = fmt(h.salida_comida);
     document.getElementById('hoyRegresoCom').textContent = fmt(h.regreso_comida);
     document.getElementById('hoySalida').textContent     = fmt(h.salida);
 
-    // Habilitar botones según secuencia
+    // Los botones se habilitan definitivamente en habilitarBotonesSegunEstado()
+    // tras recibir el GPS; por ahora solo aplicar clases "done"
+    ['btnEntrada','btnSalidaComida','btnRegresoComida','btnSalida'].forEach(id => {
+      document.getElementById(id).disabled = true;  // bloqueados hasta GPS
+    });
+
     const e  = document.getElementById('btnEntrada');
     const sc = document.getElementById('btnSalidaComida');
     const rc = document.getElementById('btnRegresoComida');
     const s  = document.getElementById('btnSalida');
-
-    e .disabled = !!h.entrada;
-    sc.disabled = !h.entrada || !!h.salida_comida;
-    rc.disabled = !h.salida_comida || !!h.regreso_comida;
-    s .disabled = !h.regreso_comida || !!h.salida;
 
     if (h.entrada)        { e .classList.add('done'); }
     if (h.salida_comida)  { sc.classList.add('done'); }
@@ -440,22 +639,37 @@ async function cargarEstadoHoy(empId) {
   } catch { /* silencioso */ }
 }
 
+/** Habilita botones respetando secuencia y el estado GPS */
+function habilitarBotonesSegunEstado() {
+  if (!_estadoHoy) return;
+  const h  = _estadoHoy;
+  const e  = document.getElementById('btnEntrada');
+  const sc = document.getElementById('btnSalidaComida');
+  const rc = document.getElementById('btnRegresoComida');
+  const s  = document.getElementById('btnSalida');
+
+  e .disabled = !!h.entrada;
+  sc.disabled = !h.entrada || !!h.salida_comida;
+  rc.disabled = !h.salida_comida || !!h.regreso_comida;
+  s .disabled = !h.regreso_comida || !!h.salida;
+}
+
 // ══════════════════════════════════════════════════════════
 // BOTONES DE EVENTO
 // ══════════════════════════════════════════════════════════
 const LABELS = {
-  entrada:       { icon:'🟢', title:'Registrar entrada',  msg:'¿Confirmas tu entrada?' },
-  salida_comida: { icon:'🍽️', title:'Salida a comida',    msg:'¿Confirmas la salida a comida?' },
-  regreso_comida:{ icon:'🔄', title:'Regreso de comida',  msg:'¿Confirmas tu regreso?' },
-  salida:        { icon:'🔴', title:'Registrar salida',   msg:'¿Confirmas tu salida por hoy?' },
+  entrada:        { icon:'🟢', title:'Registrar entrada',  msg:'¿Confirmas tu entrada?' },
+  salida_comida:  { icon:'🍽️', title:'Salida a comida',    msg:'¿Confirmas la salida a comida?' },
+  regreso_comida: { icon:'🔄', title:'Regreso de comida',  msg:'¿Confirmas tu regreso?' },
+  salida:         { icon:'🔴', title:'Registrar salida',   msg:'¿Confirmas tu salida por hoy?' },
 };
 
 ['btnEntrada','btnSalidaComida','btnRegresoComida','btnSalida'].forEach(id => {
-  document.getElementById(id).addEventListener('click', function() {
+  document.getElementById(id).addEventListener('click', function () {
     if (this.disabled || !empleadoActual) return;
     pendingTipo = this.dataset.tipo;
     const l = LABELS[pendingTipo] || {};
-    document.getElementById('confirmIcon').textContent  = l.icon || '🕐';
+    document.getElementById('confirmIcon').textContent  = l.icon  || '🕐';
     document.getElementById('confirmTitle').textContent = l.title || 'Confirmar';
     document.getElementById('confirmMsg').textContent   = l.msg   || '¿Confirmar?';
     document.getElementById('confirmOverlay').classList.add('open');
@@ -470,32 +684,124 @@ document.getElementById('confirmNo').addEventListener('click', () => {
 document.getElementById('confirmYes').addEventListener('click', async () => {
   document.getElementById('confirmOverlay').classList.remove('open');
   if (!pendingTipo || !empleadoActual) return;
+  await registrarChecada(pendingTipo);
+  pendingTipo = null;
+});
+
+// ══════════════════════════════════════════════════════════
+// REGISTRO CON VALIDACIÓN GEOGRÁFICA
+// ══════════════════════════════════════════════════════════
+async function registrarChecada(tipo) {
+  // Si no hay GPS todavía, intentar obtenerlo una vez más
+  if (!geoActual && geoSoportada()) {
+    setGeoBadge('loading', 'Obteniendo ubicación...');
+    setScanStatus('📡 Verificando ubicación GPS...', 'loading');
+    try {
+      geoActual = await obtenerPosicion();
+      setGeoBadge('ok', `GPS activo`);
+    } catch (err) {
+      mostrarGeoError('❌', 'Sin acceso a GPS', err.message, false);
+      setScanStatus(`✅ Reconocido: ${empleadoActual?.nombre}`, 'found');
+      return;
+    }
+  }
+
+  setScanStatus('🔄 Registrando...', 'loading');
 
   try {
+    const body = {
+      empleado_id: empleadoActual.id,
+      planta_id:   empleadoActual.planta_id,
+      tipo_evento: tipo,
+      face_score:  null,
+    };
+
+    // Adjuntar coordenadas si están disponibles
+    if (geoActual) {
+      body.latitud  = geoActual.lat;
+      body.longitud = geoActual.lng;
+    }
+
     const r = await fetch(API_REGISTRAR, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        empleado_id: empleadoActual.id,
-        planta_id:   empleadoActual.planta_id,
-        tipo_evento: pendingTipo,
-      })
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
     });
     const d = await r.json();
+
     if (d.ok) {
-      const l = LABELS[pendingTipo] || {};
+      // Éxito
+      const l = LABELS[tipo] || {};
       document.getElementById('successTitle').textContent = l.title || '¡Listo!';
-      document.getElementById('successMsg').textContent   = 'Registrado: ' + new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+      document.getElementById('successMsg').textContent   =
+        'Registrado: ' + new Date().toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
       document.getElementById('successOverlay').classList.add('open');
       setTimeout(() => document.getElementById('successOverlay').classList.remove('open'), 2400);
       await cargarEstadoHoy(empleadoActual.id);
+      habilitarBotonesSegunEstado();
+      setScanStatus(`✅ Reconocido: ${empleadoActual.nombre}`, 'found');
+
+    } else if (d.geo_error) {
+      // Error de distancia/GPS devuelto por el backend
+      mostrarGeoError(
+        '📍',
+        'Fuera de rango',
+        d.msg || 'No estás dentro del área permitida.',
+        true  // es error de distancia → ofrecer reintentar GPS
+      );
+      setScanStatus(`✅ Reconocido: ${empleadoActual.nombre}`, 'found');
+
     } else {
       setScanStatus('⚠️ ' + (d.msg || 'Error al registrar.'), 'error');
     }
   } catch {
     setScanStatus('❌ Error de red.', 'error');
   }
-  pendingTipo = null;
+}
+
+// ══════════════════════════════════════════════════════════
+// GEO-ERROR OVERLAY
+// ══════════════════════════════════════════════════════════
+let _geoRetryTipo = null;  // tipo de evento que se intenta al reintentar
+
+function mostrarGeoError(icono, titulo, msg, esRangoError) {
+  document.getElementById('geoErrorIcon').textContent  = icono;
+  document.getElementById('geoErrorTitle').textContent = titulo;
+  document.getElementById('geoErrorMsg').textContent   = msg;
+  _geoRetryTipo = esRangoError ? pendingTipo : null;
+  document.getElementById('geoErrorOverlay').classList.add('open');
+}
+
+document.getElementById('geoCancelBtn').addEventListener('click', () => {
+  document.getElementById('geoErrorOverlay').classList.remove('open');
+  _geoRetryTipo = null;
+});
+
+document.getElementById('geoRetryBtn').addEventListener('click', async () => {
+  document.getElementById('geoErrorOverlay').classList.remove('open');
+
+  // Reintentar obtener GPS
+  geoActual = null;
+  setGeoBadge('loading', 'Reintentando GPS...');
+  setScanStatus('📡 Reintentando ubicación GPS...', 'loading');
+
+  try {
+    geoActual = await obtenerPosicion();
+    setGeoBadge('ok', `GPS activo`);
+
+    if (_geoRetryTipo) {
+      // Había un evento pendiente → reintentarlo automáticamente
+      await registrarChecada(_geoRetryTipo);
+    } else {
+      setScanStatus(`✅ Reconocido: ${empleadoActual?.nombre}`, 'found');
+    }
+  } catch (err) {
+    geoActual = null;
+    setGeoBadge('error', 'Error de GPS');
+    mostrarGeoError('❌', 'No se pudo obtener ubicación', err.message, false);
+    setScanStatus(`✅ Reconocido: ${empleadoActual?.nombre}`, 'found');
+  }
+  _geoRetryTipo = null;
 });
 
 // ── Nuevo escaneo ──
@@ -505,28 +811,30 @@ function resetScan() {
   empleadoActual = null;
   pendingTipo    = null;
   lastDetect     = 0;
+  geoActual      = null;
+  _estadoHoy     = null;
+  _geoRetryTipo  = null;
 
-  // Limpiar UI
   document.getElementById('actionPanel').classList.remove('show');
   document.getElementById('hoyPanel').style.display = 'none';
   document.getElementById('overlay').getContext('2d').clearRect(
-    0,0,
+    0, 0,
     document.getElementById('overlay').width,
     document.getElementById('overlay').height
   );
   ['btnEntrada','btnSalidaComida','btnRegresoComida','btnSalida'].forEach(id => {
     const el = document.getElementById(id);
     el.disabled = true;
-    el.classList.remove('done','active');
+    el.classList.remove('done', 'active');
   });
   setScanStatus('Apunta tu rostro a la cámara...', '');
   iniciarDeteccion();
 }
 
-function setScanStatus(msg, type='') {
+function setScanStatus(msg, type = '') {
   const el = document.getElementById('scanStatus');
   el.textContent = msg;
-  el.className   = 'scan-status' + (type ? ' '+type : '');
+  el.className   = 'scan-status' + (type ? ' ' + type : '');
 }
 
 // ══════════════════════════════════════════════════════════
