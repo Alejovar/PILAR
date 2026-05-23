@@ -3,22 +3,22 @@
 header('Content-Type: application/json');
 require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session_api.php';
 
-$sql = "
-    SELECT id, nombre, codigo,
-           CONCAT(COALESCE(latitud,''),' ',COALESCE(longitud,'')) AS coords,
-           -- En schema_final ubicacion es latitud+longitud; añadimos campo adicional si se agrega
-           '' AS ubicacion,
+$rows = $conn->query("
+    SELECT id, nombre, codigo, ubicacion,
+           latitud, longitud, radio_permitido,
            activa, created_at
-    FROM  plantas
-    ORDER BY nombre ASC
-";
+    FROM   plantas
+    ORDER  BY nombre ASC
+")->fetch_all(MYSQLI_ASSOC);
 
-// Soporte campo ubicacion si existe en la BD (se añade en schema extendido)
-$cols = [];
-$res = $conn->query("SHOW COLUMNS FROM plantas LIKE 'ubicacion'");
-if ($res && $res->num_rows) {
-    $sql = "SELECT id, nombre, codigo, ubicacion, activa, created_at FROM plantas ORDER BY nombre ASC";
+// Castear tipos para JSON
+foreach ($rows as &$r) {
+    $r['id']              = intval($r['id']);
+    $r['activa']          = (bool)$r['activa'];
+    $r['radio_permitido'] = intval($r['radio_permitido'] ?? 100);
+    $r['latitud']         = $r['latitud']  !== null ? floatval($r['latitud'])  : null;
+    $r['longitud']        = $r['longitud'] !== null ? floatval($r['longitud']) : null;
 }
+unset($r);
 
-$rows = $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
-echo json_encode(['ok'=>true,'plantas'=>$rows]);
+echo json_encode(['ok' => true, 'plantas' => $rows]);
