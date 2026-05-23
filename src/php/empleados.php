@@ -237,6 +237,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
 const API_E  = '/src/php/api/empleados/';
 const API_AP = '/src/php/api/areas_puestos/';
 const API_PL = '/src/php/api/plantas/';
+const API_PL_LIST = API_PL + 'plantas.php?action=list';
 
 let allEmpleados = [], allAreas = [], allPuestos = [], allPlantas = [];
 
@@ -263,13 +264,17 @@ async function loadAreas() {
   }
 }
 async function loadPlantas() {
-  const r = await fetch(API_PL + 'get_plantas.php');
-  const d = await r.json();
-  if (d.ok) {
-    allPlantas = d.plantas.filter(p => p.activa);
-    const sel  = document.getElementById('empPlanta');
-    sel.innerHTML = '<option value="">— Seleccionar —</option>' +
-      allPlantas.map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
+  try {
+    const r = await fetch(API_PL_LIST);
+    const d = await r.json();
+    if (d.ok) {
+      allPlantas = d.plantas.filter(p => p.activa);
+      const sel  = document.getElementById('empPlanta');
+      sel.innerHTML = '<option value="">— Seleccionar —</option>' +
+        allPlantas.map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
+    }
+  } catch (err) {
+    console.error('Error cargando plantas:', err);
   }
 }
 

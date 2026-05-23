@@ -105,13 +105,14 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
 
 <script>
 const API_P = '/src/php/api/plantas/';
+const API_P_LIST = API_P + 'plantas.php?action=list';
 
 let allPlantas = [];
 
 // ---- Load ----
 async function loadPlantas() {
   try {
-    const r = await fetch(API_P + 'get_plantas.php');
+    const r = await fetch(API_P_LIST);
     const d = await r.json();
     if (d.ok) { allPlantas = d.plantas; renderPlantas(allPlantas); }
     else toast('Error cargando plantas.','error');

@@ -1,5 +1,20 @@
 <?php
 // /src/php/plantas.php
+if (isset($_GET['action']) && $_GET['action'] === 'list') {
+  header('Content-Type: application/json');
+  require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session_api.php';
+
+  $sql = "SELECT id, codigo, nombre, ubicacion, activa, created_at FROM plantas ORDER BY created_at DESC";
+  $res = $conn->query($sql);
+  if (!$res) {
+    echo json_encode(['ok'=>false,'msg'=>'Error al obtener plantas.']);
+    exit();
+  }
+
+  echo json_encode(['ok'=>true,'plantas'=>$res->fetch_all(MYSQLI_ASSOC)]);
+  exit();
+}
+
 require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/security/check_session.php';
 if ($_SESSION['rol'] !== 'admin') { header('Location: /login.php'); exit(); }
 $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
@@ -286,7 +301,7 @@ let coordsActuales = { lat: null, lng: null };
 // ══════════════════════════════════════════════════════════
 async function loadPlantas() {
   try {
-    const r = await fetch(API_P + 'get_plantas.php');
+    const r = await fetch(API_P + 'plantas.php?action=list');
     const d = await r.json();
     if (d.ok) { allPlantas = d.plantas; renderPlantas(allPlantas); }
     else toast('Error cargando plantas.', 'error');
