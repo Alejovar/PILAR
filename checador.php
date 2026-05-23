@@ -181,7 +181,7 @@
 
 <!-- Header -->
 <header class="checker-header">
-  <div class="checker-logo">R</div>
+  <img src="./src/css/imagen/Logo-Roceel.jpg" alt="Logo ROCEEL" class="checker-logo" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
   <div>
     <div class="checker-brand">ROCEEL</div>
     <div class="checker-brand-sub">Checador Facial</div>

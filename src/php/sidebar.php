@@ -15,7 +15,7 @@ $nav = [
 <aside class="sidebar">
   <div>
     <div class="sidebar-brand">
-      <div class="brand-icon">R</div>
+      <img src="/src/css/imagen/Logo-Roceel.jpg" alt="Logo ROCEEL" class="brand-icon" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
       <div>
         <div class="brand-name">ROCEEL</div>
         <div class="brand-sub">Servicios Especializados</div>
