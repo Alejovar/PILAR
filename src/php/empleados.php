@@ -398,13 +398,27 @@ document.getElementById('formEmpleado').addEventListener('submit', async e => {
     const r = await fetch(API_E + 'save_empleado.php', {
       method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
     });
-    const d = await r.json();
+    const raw = await r.text();
+    let d;
+    try {
+      d = raw ? JSON.parse(raw) : {};
+    } catch (parseError) {
+      console.error('Respuesta inválida de save_empleado.php:', raw);
+      toast('Respuesta inválida del servidor.', 'error');
+      return;
+    }
+
+    if (!r.ok) {
+      toast(d.msg || `Error del servidor (${r.status}).`, 'error');
+      return;
+    }
+
     if (d.ok) {
       toast(body.id ? 'Empleado actualizado.' : 'Empleado registrado.','success');
       modalEmp.classList.remove('open');
       loadEmpleados();
     } else toast(d.msg||'Error al guardar.','error');
-  } catch { toast('Error de red.','error'); }
+  } catch (error) { toast('Error de red: ' + error.message,'error'); }
 });
 
 // ======================= MODAL ÁREAS/PUESTOS ========================
