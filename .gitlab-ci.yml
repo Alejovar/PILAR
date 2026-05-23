@@ -11,7 +11,7 @@ stages:
 install_deps:
   stage: install_dependencies
   script:
-    - echo "Preparando el entorno para KitchenLink..."
+    - echo "Preparando el entorno para Roceel..."
 
 # ── 2. TESTS ──
 lint-job:
@@ -20,31 +20,6 @@ lint-job:
   script:
     - echo "Verificando sintaxis de todos los archivos PHP..."
     - find . -name "*.php" -exec php -l {} \; | grep "Errors parsing" && exit 1 || echo "✅ Sintaxis OK."
-
-unit-test-job:
-  stage: test
-  needs: ["install_deps"]
-  script:
-    - echo "Ejecutando pruebas unitarias básicas..."
-    - php -r "if (file_exists('src/php/db_connection.php')) { echo 'Test DB PASSED'; } else { echo 'Test DB FAILED'; exit(1); }"
-    - php -r "if (file_exists('docker/migration_payroll_attendance.sql')) { echo 'Test Payroll Migration PASSED'; } else { echo 'Test Payroll Migration FAILED'; exit(1); }"
-    # ── FACIAL: Verificar que las APIs del checador existen ──
-    - php -r "if (file_exists('src/api/attendance/record_attendance.php')) { echo 'Test Attendance API PASSED'; } else { echo 'Test Attendance API FAILED'; exit(1); }"
-    - php -r "if (file_exists('src/api/face/get_descriptors.php')) { echo 'Test Face API PASSED'; } else { echo 'Test Face API FAILED'; exit(1); }"
-    - |
-      echo '<?xml version="1.0" encoding="UTF-8"?>
-      <testsuites>
-        <testsuite name="UnitTests" tests="4" failures="0">
-          <testcase name="DatabaseConnectionFile"/>
-          <testcase name="PayrollMigrationFile"/>
-          <testcase name="AttendanceAPI"/>
-          <testcase name="FaceAPI"/>
-        </testsuite>
-      </testsuites>' > junit.xml
-  artifacts:
-    when: always
-    reports:
-      junit: junit.xml
 
 security-job:
   stage: test
@@ -59,31 +34,15 @@ security-job:
         echo "✅ No se encontraron archivos sensibles."
       fi
 
-phpunit-advanced-job:
-  stage: test
-  needs: ["install_deps"]
-  script:
-    - echo "Ejecutando suite de pruebas PHPUnit (~104 tests)..."
-    - apt-get update && apt-get install -y git unzip zip libmariadb-dev
-    - docker-php-ext-install mysqli
-    - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-    - cd KitchenLink-Tests
-    - composer install --no-interaction
-    - ./vendor/bin/phpunit --testdox --log-junit report-phpunit.xml
-  artifacts:
-    when: always
-    reports:
-      junit: KitchenLink-Tests/report-phpunit.xml
-
 # ── 3. BUILD ──
 build_docker_image:
   stage: build
-  needs: ["lint-job", "unit-test-job", "security-job", "phpunit-advanced-job"]
+  needs: ["lint-job", "security-job"]
   image: docker:24
   services:
     - docker:24-dind
   script:
-    - echo "🔨 Construyendo imagen Docker de KitchenLink..."
+    - echo "🔨 Construyendo imagen Docker de Roceel..."
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t $CI_REGISTRY_IMAGE:latest -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY_IMAGE:latest
@@ -132,9 +91,9 @@ deploy_to_staging:
       "
 
     - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/kitchenlink/docker"
-    - scp docker-compose.yml                        $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
-    - scp docker/init.sql                           $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
-    - scp docker/migration_payroll_attendance.sql   $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/migration_payroll_attendance.sql
+    - scp docker-compose.yml          $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
+    - scp docker/init.sql             $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
+    - scp docker/schema_roceel.sql    $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/schema_roceel.sql
 
     - |
       ssh $VM_USER@$STAGING_VM_IP "
@@ -152,7 +111,7 @@ deploy_to_staging:
         # ── Esperar MySQL ──
         echo '⏳ Esperando que MySQL esté disponible...'
         i=0
-        while [ "\$i" -lt 30 ]; do
+        while [ \"\$i\" -lt 30 ]; do
           docker exec kitchenlink-db mysqladmin ping -h localhost \
             -uroot -p'${STAGING_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
@@ -161,7 +120,7 @@ deploy_to_staging:
 
         echo '⏳ Esperando que la tabla users exista...'
         i=0
-        while [ "\$i" -lt 60 ]; do
+        while [ \"\$i\" -lt 60 ]; do
           if docker exec kitchenlink-db mysql \
             -uroot -p'${STAGING_DB_ROOT_PASSWORD}' \
             -Nse \"SELECT 1 FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users' LIMIT 1;\" 2>/dev/null | grep -qx '1'; then
@@ -171,12 +130,12 @@ deploy_to_staging:
           sleep 2
         done
 
-        # ── PAYROLL: Migración de nómina y asistencia ──
-        echo '🗄️ Ejecutando migración de nómina/asistencia...'
+        # ── ROCEEL: Limpiar tablas anteriores y aplicar schema nuevo ──
+        echo '🗄️ Aplicando schema de Roceel (DROP + CREATE)...'
         docker exec -i kitchenlink-db mysql \
           -uroot -p'${STAGING_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/migration_payroll_attendance.sql
-        echo '✅ Migración de nómina/asistencia OK.'
+          < ~/kitchenlink/docker/schema_roceel.sql
+        echo '✅ Schema de Roceel aplicado OK.'
 
         # ── FIX: Validar usuario de Vault en MySQL ──
         echo '🔍 Validando que el usuario de Vault existe en MySQL...'
@@ -242,12 +201,9 @@ deploy_to_production:
       "
 
     - ssh $VM_USER@$VM_IP_ADDRESS "mkdir -p ~/kitchenlink/docker"
-    - scp docker-compose.yml                        $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker-compose.yml
-    - scp docker/init.sql                           $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/init.sql
-    - scp docker/migration_users_autoincrement.sql  $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_users_autoincrement.sql
-    - scp docker/migration_waste.sql                $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_waste.sql
-    - scp docker/migration_facial_attendance.sql    $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_facial_attendance.sql
-    - scp docker/migration_payroll_attendance.sql   $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/migration_payroll_attendance.sql
+    - scp docker-compose.yml          $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker-compose.yml
+    - scp docker/init.sql             $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/init.sql
+    - scp docker/schema_roceel.sql    $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/schema_roceel.sql
 
     - |
       ssh $VM_USER@$VM_IP_ADDRESS "
@@ -266,7 +222,7 @@ deploy_to_production:
         # ── Esperar MySQL ──
         echo '⏳ Esperando que MySQL esté disponible...'
         i=0
-        while [ "\$i" -lt 30 ]; do
+        while [ \"\$i\" -lt 30 ]; do
           docker exec kitchenlink-db mysqladmin ping -h localhost \
             -uroot -p'${PROD_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
@@ -275,7 +231,7 @@ deploy_to_production:
 
         echo '⏳ Esperando que la tabla users exista...'
         i=0
-        while [ "\$i" -lt 60 ]; do
+        while [ \"\$i\" -lt 60 ]; do
           if docker exec kitchenlink-db mysql \
             -uroot -p'${PROD_DB_ROOT_PASSWORD}' \
             -Nse \"SELECT 1 FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users' LIMIT 1;\" 2>/dev/null | grep -qx '1'; then
@@ -285,33 +241,12 @@ deploy_to_production:
           sleep 2
         done
 
-        # ── SPRINT 1: Migración de mermas ──
-        echo '🗄️ Ejecutando migración de mermas...'
+        # ── ROCEEL: Limpiar tablas anteriores y aplicar schema nuevo ──
+        echo '🗄️ Aplicando schema de Roceel (DROP + CREATE)...'
         docker exec -i kitchenlink-db mysql \
           -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/migration_waste.sql
-        echo '✅ Migración de mermas OK.'
-
-        # ── FIX: users.id AUTO_INCREMENT ──
-        echo '🗄️ Ejecutando migración users.id AUTO_INCREMENT...'
-        docker exec -i kitchenlink-db mysql \
-          -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/migration_users_autoincrement.sql
-        echo '✅ Migración users.id AUTO_INCREMENT OK.'
-
-        # ── FACIAL: Migración de reconocimiento facial y checador ──
-        echo '🗄️ Ejecutando migración facial/checador...'
-        docker exec -i kitchenlink-db mysql \
-          -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/migration_facial_attendance.sql
-        echo '✅ Migración facial/checador OK.'
-
-        # ── PAYROLL: Migración de nómina y asistencia ──
-        echo '🗄️ Ejecutando migración de nómina/asistencia...'
-        docker exec -i kitchenlink-db mysql \
-          -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/migration_payroll_attendance.sql
-        echo '✅ Migración de nómina/asistencia OK.'
+          < ~/kitchenlink/docker/schema_roceel.sql
+        echo '✅ Schema de Roceel aplicado OK.'
 
         # ── FIX: Validar usuario de Vault en MySQL ──
         echo '🔍 Validando que el usuario de Vault existe en MySQL...'

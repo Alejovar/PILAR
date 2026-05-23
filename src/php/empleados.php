@@ -198,6 +198,39 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
   </div>
 </div>
 
+<!-- ============================================================ -->
+<!-- MODAL: Captura Facial                                        -->
+<!-- ============================================================ -->
+<div class="modal-overlay" id="modalFace">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <div>
+        <h2>Registrar rostro</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:2px;" id="faceModalNombre">—</p>
+      </div>
+      <button class="close-btn" id="closeFaceModal"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div style="position:relative;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;">
+      <video id="faceVideo" autoplay muted playsinline style="width:100%;display:block;border-radius:12px;"></video>
+    </div>
+
+    <p id="faceStatus" style="text-align:center;font-size:13px;font-weight:600;margin-bottom:14px;color:var(--text-muted);">
+      Iniciando cámara...
+    </p>
+
+    <div class="modal-actions" style="padding-top:0;border-top:none;justify-content:center;gap:10px;">
+      <button class="btn btn-danger btn-sm" id="btnEliminarRostro">
+        <i class="fas fa-trash"></i> Eliminar rostro
+      </button>
+      <button class="btn btn-primary" id="btnCapturarRostro">
+        <i class="fas fa-camera"></i> Capturar rostro
+      </button>
+      <button class="btn btn-ghost" id="cancelFaceModal">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
@@ -266,9 +299,12 @@ function renderEmpleados() {
       <td>${esc(e.puesto_nombre||'—')}</td>
       <td>${esc(e.planta_nombre||'—')}</td>
       <td>${e.activo ? '<span class="badge badge-green">Activo</span>' : '<span class="badge badge-gray">Inactivo</span>'}</td>
-      <td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" onclick="editEmpleado(${e.id})">
           <i class="fas fa-pen"></i> Editar
+        </button>
+        <button class="btn btn-sm" style="background:rgba(245,196,0,0.1);color:var(--primary);border:1px solid rgba(245,196,0,0.25);" onclick="abrirFace(${e.id},'${esc(e.nombre)} ${esc(e.apellido_paterno)}')" title="Registrar rostro">
+          <i class="fas fa-camera"></i>
         </button>
       </td>
     </tr>
@@ -430,6 +466,112 @@ document.getElementById('formPuesto').addEventListener('submit', async e => {
 });
 
 // ======================= UTILS ========================
+// ======================= FACIAL ========================
+let faceStream = null, faceEmpId = null;
+
+function abrirFace(empId, nombre) {
+  faceEmpId = empId;
+  document.getElementById('faceModalNombre').textContent = nombre;
+  document.getElementById('faceStatus').textContent = 'Iniciando cámara...';
+  document.getElementById('faceStatus').style.color = 'var(--text-muted)';
+  document.getElementById('modalFace').classList.add('open');
+  iniciarCamFace();
+}
+
+async function iniciarCamFace() {
+  try {
+    faceStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:'user'}, audio:false });
+    const v = document.getElementById('faceVideo');
+    v.srcObject = faceStream;
+    await v.play();
+    document.getElementById('faceStatus').textContent = 'Coloca tu rostro frente a la cámara y captura.';
+  } catch(e) {
+    document.getElementById('faceStatus').textContent = 'No se pudo acceder a la cámara.';
+    document.getElementById('faceStatus').style.color = 'var(--danger)';
+  }
+}
+
+function cerrarFaceModal() {
+  document.getElementById('modalFace').classList.remove('open');
+  if (faceStream) { faceStream.getTracks().forEach(t => t.stop()); faceStream = null; }
+  faceEmpId = null;
+}
+
+document.getElementById('closeFaceModal').addEventListener('click', cerrarFaceModal);
+document.getElementById('cancelFaceModal').addEventListener('click', cerrarFaceModal);
+
+document.getElementById('btnCapturarRostro').addEventListener('click', async () => {
+  if (!faceEmpId) return;
+  const btn = document.getElementById('btnCapturarRostro');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+  document.getElementById('faceStatus').textContent = 'Detectando rostro...';
+
+  try {
+    // Cargar face-api.js dinámicamente si no está cargado
+    if (typeof faceapi === 'undefined') {
+      await loadScript('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js');
+      await faceapi.nets.tinyFaceDetector.loadFromUri('/src/face-models');
+      await faceapi.nets.faceLandmark68TinyNet.loadFromUri('/src/face-models');
+      await faceapi.nets.faceRecognitionNet.loadFromUri('/src/face-models');
+    }
+
+    const video  = document.getElementById('faceVideo');
+    const opts   = new faceapi.TinyFaceDetectorOptions({inputSize:224, scoreThreshold:0.5});
+    const result = await faceapi.detectSingleFace(video, opts).withFaceLandmarks(true).withFaceDescriptor();
+
+    if (!result) {
+      document.getElementById('faceStatus').textContent = '❌ No se detectó ningún rostro. Intenta de nuevo.';
+      document.getElementById('faceStatus').style.color = 'var(--danger)';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-camera"></i> Capturar rostro';
+      return;
+    }
+
+    const descriptor = Array.from(result.descriptor);
+    const r = await fetch('/src/php/api/face/save_face.php', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ empleado_id: faceEmpId, descriptor })
+    });
+    const d = await r.json();
+
+    if (d.ok) {
+      document.getElementById('faceStatus').textContent = '✅ Rostro registrado exitosamente.';
+      document.getElementById('faceStatus').style.color = 'var(--accent)';
+      toast('Rostro registrado.','success');
+      setTimeout(cerrarFaceModal, 1800);
+    } else {
+      document.getElementById('faceStatus').textContent = '❌ ' + (d.msg||'Error.');
+      document.getElementById('faceStatus').style.color = 'var(--danger)';
+    }
+  } catch(e) {
+    document.getElementById('faceStatus').textContent = '❌ Error: ' + e.message;
+    document.getElementById('faceStatus').style.color = 'var(--danger)';
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<i class="fas fa-camera"></i> Capturar rostro';
+});
+
+document.getElementById('btnEliminarRostro').addEventListener('click', async () => {
+  if (!faceEmpId || !confirm('¿Eliminar el descriptor facial de este empleado?')) return;
+  const r = await fetch('/src/php/api/face/save_face.php', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ empleado_id: faceEmpId, descriptor: '' })
+  });
+  const d = await r.json();
+  if (d.ok) { toast('Rostro eliminado.','success'); cerrarFaceModal(); }
+  else toast(d.msg||'Error.','error');
+});
+
+function loadScript(src) {
+  return new Promise((res,rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
 function esc(s) { const d=document.createElement('div'); d.textContent=s??''; return d.innerHTML; }
 function toast(msg, type='success') {
   const c = document.getElementById('toastContainer');

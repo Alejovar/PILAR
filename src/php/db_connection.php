@@ -1,25 +1,18 @@
 <?php
-if (!isset($conn)) {
-    $servername = getenv('DB_HOST') ?: 'db';
-    $username_db = getenv('DB_USER');
-    $password_db = getenv('DB_PASSWORD');
-    $dbname      = getenv('DB_NAME') ?: 'KitchenLink';
+// /src/php/db_connection.php
+// La BD sigue siendo KitchenLink (mismo contenedor/servidor que antes).
+// Las variables vienen del .env que escribe el pipeline via Vault.
 
-    // Intentamos la conexión de forma silenciosa para que no mande Warnings--
-    $conn = @new mysqli($servername, $username_db, $password_db, $dbname);
+define('DB_HOST', getenv('DB_HOST') ?: 'db');
+define('DB_USER', getenv('DB_USER') ?: 'KitchenLink');
+define('DB_PASS', getenv('DB_PASSWORD') ?: '');
+define('DB_NAME', getenv('DB_NAME') ?: 'KitchenLink');
 
-    if ($conn->connect_error) {
-        // En lugar de die(), mandamos un JSON que el JS sí entienda
-        header('Content-Type: application/json');
-        echo json_encode([
-            "status" => "error",
-            "message" => "Error de conexión: " . $conn->connect_error,
-            "debug_user" => $username_db // Esto te dirá si Vault mandó el usuario bien
-        ]);
-        exit;
-    }
+$conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
-    $conn->query("SET time_zone = '-05:00'");
-    $conn->set_charset("utf8mb4");
+if ($conn->connect_error) {
+    http_response_code(503);
+    die(json_encode(['ok' => false, 'msg' => 'Error de conexión a la base de datos.']));
 }
-?>
+
+$conn->set_charset('utf8mb4');

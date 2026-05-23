@@ -1,0 +1,12 @@
+Options -Indexes
+RewriteEngine On
+
+# Redirigir raíz al login
+RewriteRule ^$ /login.php [L,R=302]
+
+# Bloquear acceso directo a carpetas sensibles
+RewriteRule ^src/php/security/ - [F,L]
+
+# Servir archivos estáticos directamente
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d

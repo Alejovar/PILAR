@@ -1,44 +1,40 @@
 services:
-  # ── Base de datos MySQL 
+  # ── Base de datos MySQL ──
   db:
     image: mysql:8.0
-    container_name: kitchenlink-db
+    container_name: roceel-db
     restart: unless-stopped
-    # ESTO ES LO QUE PERMITE QUE VAULT SE CONECTE DESDE AFUERA:
+    # Puerto expuesto para que Vault pueda conectarse desde afuera
     ports:
       - "3306:3306"
     environment:
-      # IMPORTANTE: Vault usará el ROOT_PASSWORD para entrar y crear los usuarios temporales
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: KitchenLink
-      # Usuario por defecto para el primer arranque
-      MYSQL_USER: ${DB_USER:-KitchenLink}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE:      roceel_db
+      MYSQL_USER:          ${DB_USER:-roceel_user}
+      MYSQL_PASSWORD:      ${DB_PASSWORD}
     volumes:
       - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
       - db_data:/var/lib/mysql
     healthcheck:
-      # El healthcheck ahora usa el usuario dinámico para validar la conexión
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 20
       start_period: 120s
 
-  # ── Aplicación PHP + Nginx 
+  # ── Aplicación PHP-FPM + Nginx ──
   app:
-    image: ${APP_IMAGE:-kitchenlink-app}
+    image: ${APP_IMAGE:-roceel-app}
     build: .
-    container_name: kitchenlink-app
+    container_name: roceel-app
     restart: unless-stopped
     ports:
       - "80:80"
     environment:
-      DB_HOST: db           
-      # Aquí es donde ocurre la magia: PHP recibirá el usuario de Vault
-      DB_USER: ${DB_USER:-KitchenLink}
+      DB_HOST:     db
+      DB_USER:     ${DB_USER:-roceel_user}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: KitchenLink
+      DB_NAME:     roceel_db
     depends_on:
       db:
         condition: service_healthy
