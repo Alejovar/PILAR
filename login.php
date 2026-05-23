@@ -73,14 +73,9 @@ if (!empty($_SESSION['user_id'])) {
       z-index: 1;
     }
     .hero-logo {
-      width: 52px; height: 52px;
-      background: var(--primary);
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      font-weight: 900;
-      font-size: 22px;
-      color: #0f1117;
+      width: 75px;
+      height: 75px;
+      object-fit: contain;
       flex-shrink: 0;
     }
     .hero-brand-name { font-size: 20px; font-weight: 900; color: var(--primary); }
@@ -239,7 +234,7 @@ if (!empty($_SESSION['user_id'])) {
 <!-- HERO LEFT -->
 <div class="hero">
   <div class="hero-brand">
-    <div class="hero-logo">R</div>
+    <img src="./src/css/imagen/Logo-Roceel.jpg" alt="Logo ROCEEL" class="hero-logo">
     <div>
       <div class="hero-brand-name">ROCEEL</div>
       <div class="hero-brand-sub">Servicios Especializados</div>
