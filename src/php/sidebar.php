@@ -14,11 +14,8 @@ $nav = [
 ?>
 <aside class="sidebar">
   <div>
-
     <div class="sidebar-brand">
-      
-      <img src="./css/imagen/Logo_Roceel.png" alt="Logo ROCEEL" class="brand-logo">
-
+      <div class="brand-icon">R</div>
       <div>
         <div class="brand-name">ROCEEL</div>
         <div class="brand-sub">Servicios Especializados</div>
@@ -37,14 +34,58 @@ $nav = [
     </nav>
   </div>
 
-  <div class="sidebar-user">
-    <div class="sidebar-user-avatar"><i class="fas fa-user-tie"></i></div>
-    <div>
-      <div class="sidebar-user-name"><?= $userName ?></div>
-      <div class="sidebar-user-role">Administrador</div>
+  <div class="sidebar-footer">
+    <!-- Toggle de tema -->
+    <button class="theme-toggle-btn" id="themeToggleBtn" title="Cambiar tema">
+      <i class="fas fa-sun"  id="themeIconSun"  style="display:none;"></i>
+      <i class="fas fa-moon" id="themeIconMoon"></i>
+      <span id="themeToggleLabel">Tema claro</span>
+    </button>
+
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar"><i class="fas fa-user-tie"></i></div>
+      <div>
+        <div class="sidebar-user-name"><?= $userName ?></div>
+        <div class="sidebar-user-role">Administrador</div>
+      </div>
+      <a href="/src/php/logout.php" class="logout-btn" title="Cerrar sesión">
+        <i class="fas fa-sign-out-alt"></i>
+      </a>
     </div>
-    <a href="/src/php/logout.php" class="logout-btn" title="Cerrar sesión">
-      <i class="fas fa-sign-out-alt"></i>
-    </a>
   </div>
 </aside>
+
+<script>
+(function () {
+  const btn       = document.getElementById('themeToggleBtn');
+  const iconSun   = document.getElementById('themeIconSun');
+  const iconMoon  = document.getElementById('themeIconMoon');
+  const label     = document.getElementById('themeToggleLabel');
+  const STORAGE_KEY = 'roceel_theme';
+
+  function aplicarTema(tema) {
+    if (tema === 'light') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      iconSun.style.display  = 'block';
+      iconMoon.style.display = 'none';
+      label.textContent      = 'Tema oscuro';
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      iconSun.style.display  = 'none';
+      iconMoon.style.display = 'block';
+      label.textContent      = 'Tema claro';
+    }
+  }
+
+  // Aplicar preferencia guardada al cargar
+  const guardado = localStorage.getItem(STORAGE_KEY) || 'dark';
+  aplicarTema(guardado);
+
+  btn.addEventListener('click', function () {
+    const actual = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const nuevo  = actual === 'light' ? 'dark' : 'light';
+    localStorage.setItem(STORAGE_KEY, nuevo);
+    aplicarTema(nuevo);
+  });
+})();
+</script>
