@@ -12,6 +12,83 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
   <title>Empleados | ROCEEL</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/src/css/roceel.css">
+  <style>
+    /* ── Feature flag toggle ── */
+    .liveness-flag-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      flex-shrink: 0;
+    }
+    .liveness-flag-wrap .flag-label {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .flag-label strong {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+      white-space: nowrap;
+    }
+    .flag-label span {
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    /* Switch */
+    .switch {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .switch-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--surface-2);
+      border: 1px solid var(--border-light);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .switch-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px; height: 16px;
+      left: 3px; top: 3px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .switch input:checked + .switch-slider {
+      background: var(--primary-glow);
+      border-color: rgba(245,196,0,0.4);
+    }
+    .switch input:checked + .switch-slider::before {
+      transform: translateX(20px);
+      background: var(--primary);
+    }
+    /* Badge de estado */
+    .flag-status-badge {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .flag-status-badge.on  { background: var(--primary-glow); color: var(--primary); }
+    .flag-status-badge.off { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+
+    @media (max-width: 640px) {
+      .liveness-flag-wrap { width: 100%; justify-content: space-between; }
+    }
+  </style>
 </head>
 <body>
 <div class="shell">
@@ -24,7 +101,21 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
         <h1 class="page-title">Empleados</h1>
         <p class="page-sub">Gestión de personal, áreas y puestos.</p>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+
+        <!-- ── Feature flag: Liveness Detection ── -->
+        <div class="liveness-flag-wrap">
+          <div class="flag-label">
+            <strong><i class="fas fa-shield-halved" style="color:var(--primary);margin-right:4px;"></i>Anti-spoofing</strong>
+            <span>Parpadeo + giro de cabeza</span>
+          </div>
+          <label class="switch" title="Activar/desactivar liveness detection en el checador">
+            <input type="checkbox" id="livenessToggle">
+            <span class="switch-slider"></span>
+          </label>
+          <span class="flag-status-badge" id="livenessBadge">OFF</span>
+        </div>
+
         <button class="btn btn-ghost" id="btnGestionAreas">
           <i class="fas fa-sitemap"></i> Áreas y puestos
         </button>
@@ -76,9 +167,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
   </main>
 </div>
 
-<!-- ============================================================ -->
-<!-- MODAL: Nuevo / Editar Empleado                               -->
-<!-- ============================================================ -->
+<!-- MODAL: Nuevo / Editar Empleado -->
 <div class="modal-overlay" id="modalEmpleado">
   <div class="modal-box wide">
     <div class="modal-header">
@@ -88,7 +177,6 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
     <form id="formEmpleado">
       <input type="hidden" id="empId">
       <div class="form-grid">
-        <!-- Datos personales -->
         <div class="form-group">
           <label>Nombre</label>
           <input class="form-input" type="text" id="empNombre" required placeholder="Juan">
@@ -117,7 +205,6 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
           <label>Email</label>
           <input class="form-input" type="email" id="empEmail" placeholder="juan.garcia@roceel.com">
         </div>
-        <!-- Posición -->
         <div class="form-group">
           <label>Área</label>
           <select class="form-select" id="empArea" required>
@@ -152,18 +239,14 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
   </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- MODAL: Áreas y Puestos                                       -->
-<!-- ============================================================ -->
+<!-- MODAL: Áreas y Puestos -->
 <div class="modal-overlay" id="modalAreas">
   <div class="modal-box wide">
     <div class="modal-header">
       <h2>Áreas y Puestos</h2>
       <button class="close-btn" id="closeModalAreas"><i class="fas fa-times"></i></button>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-      <!-- Áreas -->
       <div>
         <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;color:var(--primary);">
           <i class="fas fa-sitemap"></i> Áreas
@@ -174,7 +257,6 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
         </form>
         <div id="listaAreas" style="display:grid;gap:6px;max-height:280px;overflow-y:auto;"></div>
       </div>
-      <!-- Puestos -->
       <div>
         <h3 style="font-size:14px;font-weight:800;margin-bottom:12px;color:var(--accent);">
           <i class="fas fa-briefcase"></i> Puestos
@@ -191,16 +273,13 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
         <div id="listaPuestos" style="display:grid;gap:6px;max-height:240px;overflow-y:auto;"></div>
       </div>
     </div>
-
     <div class="modal-actions">
       <button class="btn btn-ghost" id="cancelModalAreas">Cerrar</button>
     </div>
   </div>
 </div>
 
-<!-- ============================================================ -->
-<!-- MODAL: Captura Facial                                        -->
-<!-- ============================================================ -->
+<!-- MODAL: Captura Facial -->
 <div class="modal-overlay" id="modalFace">
   <div class="modal-box" style="max-width:420px;">
     <div class="modal-header">
@@ -210,22 +289,15 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
       </div>
       <button class="close-btn" id="closeFaceModal"><i class="fas fa-times"></i></button>
     </div>
-
     <div style="position:relative;background:#000;border-radius:12px;overflow:hidden;margin-bottom:14px;">
-      <video id="faceVideo" autoplay muted playsinline style="width:100%;display:block;border-radius:12px;"></video>
+      <video id="faceVideo" autoplay muted playsinline style="width:100%;display:block;border-radius:12px;transform:scaleX(-1);"></video>
     </div>
-
     <p id="faceStatus" style="text-align:center;font-size:13px;font-weight:600;margin-bottom:14px;color:var(--text-muted);">
       Iniciando cámara...
     </p>
-
     <div class="modal-actions" style="padding-top:0;border-top:none;justify-content:center;gap:10px;">
-      <button class="btn btn-danger btn-sm" id="btnEliminarRostro">
-        <i class="fas fa-trash"></i> Eliminar rostro
-      </button>
-      <button class="btn btn-primary" id="btnCapturarRostro">
-        <i class="fas fa-camera"></i> Capturar rostro
-      </button>
+      <button class="btn btn-danger btn-sm" id="btnEliminarRostro"><i class="fas fa-trash"></i> Eliminar rostro</button>
+      <button class="btn btn-primary" id="btnCapturarRostro"><i class="fas fa-camera"></i> Capturar rostro</button>
       <button class="btn btn-ghost" id="cancelFaceModal">Cancelar</button>
     </div>
   </div>
@@ -234,14 +306,47 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-const API_E  = '/src/php/api/empleados/';
-const API_AP = '/src/php/api/areas_puestos/';
-const API_PL = '/src/php/api/plantas/';
+const API_E      = '/src/php/api/empleados/';
+const API_AP     = '/src/php/api/areas_puestos/';
+const API_PL     = '/src/php/api/plantas/';
 const API_PL_LIST = API_PL + 'plantas.php?action=list';
+const LIVENESS_KEY = 'roceel_liveness'; // localStorage key compartida con checador.php
 
 let allEmpleados = [], allAreas = [], allPuestos = [], allPlantas = [];
 
-// ======================= LOAD ========================
+// ══════════════════════════════════════════════════════════
+// FEATURE FLAG — Liveness Detection
+// ══════════════════════════════════════════════════════════
+const livenessToggle = document.getElementById('livenessToggle');
+const livenessBadge  = document.getElementById('livenessBadge');
+
+function leerLiveness() {
+  return localStorage.getItem(LIVENESS_KEY) === 'on';
+}
+
+function aplicarLiveness(activo) {
+  livenessToggle.checked      = activo;
+  livenessBadge.textContent   = activo ? 'ON' : 'OFF';
+  livenessBadge.className     = 'flag-status-badge ' + (activo ? 'on' : 'off');
+  localStorage.setItem(LIVENESS_KEY, activo ? 'on' : 'off');
+}
+
+// Inicializar con el valor guardado
+aplicarLiveness(leerLiveness());
+
+livenessToggle.addEventListener('change', () => {
+  aplicarLiveness(livenessToggle.checked);
+  toast(
+    livenessToggle.checked
+      ? '🛡️ Anti-spoofing activado en el checador.'
+      : '⚠️ Anti-spoofing desactivado.',
+    livenessToggle.checked ? 'success' : 'error'
+  );
+});
+
+// ══════════════════════════════════════════════════════════
+// LOAD
+// ══════════════════════════════════════════════════════════
 async function init() {
   await Promise.all([loadAreas(), loadPlantas()]);
   loadEmpleados();
@@ -273,12 +378,12 @@ async function loadPlantas() {
       sel.innerHTML = '<option value="">— Seleccionar —</option>' +
         allPlantas.map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
     }
-  } catch (err) {
-    console.error('Error cargando plantas:', err);
-  }
+  } catch(err) { console.error('Error cargando plantas:', err); }
 }
 
-// ======================= RENDER EMPLEADOS ========================
+// ══════════════════════════════════════════════════════════
+// RENDER EMPLEADOS
+// ══════════════════════════════════════════════════════════
 function renderEmpleados() {
   const q  = document.getElementById('searchEmp').value.toLowerCase();
   const fa = document.getElementById('filtroArea').value;
@@ -305,10 +410,9 @@ function renderEmpleados() {
       <td>${esc(e.planta_nombre||'—')}</td>
       <td>${e.activo ? '<span class="badge badge-green">Activo</span>' : '<span class="badge badge-gray">Inactivo</span>'}</td>
       <td style="display:flex;gap:6px;flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="editEmpleado(${e.id})">
-          <i class="fas fa-pen"></i> Editar
-        </button>
-        <button class="btn btn-sm" style="background:rgba(245,196,0,0.1);color:var(--primary);border:1px solid rgba(245,196,0,0.25);" onclick="abrirFace(${e.id},'${esc(e.nombre)} ${esc(e.apellido_paterno)}')" title="Registrar rostro">
+        <button class="btn btn-ghost btn-sm" onclick="editEmpleado(${e.id})"><i class="fas fa-pen"></i> Editar</button>
+        <button class="btn btn-sm" style="background:rgba(245,196,0,0.1);color:var(--primary);border:1px solid rgba(245,196,0,0.25);"
+                onclick="abrirFace(${e.id},'${esc(e.nombre)} ${esc(e.apellido_paterno)}')" title="Registrar rostro">
           <i class="fas fa-camera"></i>
         </button>
       </td>
@@ -316,29 +420,22 @@ function renderEmpleados() {
   `).join('');
 }
 
-// ======================= FILTROS ========================
 ['searchEmp','filtroArea','filtroPuesto','filtroEstado'].forEach(id =>
   document.getElementById(id).addEventListener('input', renderEmpleados)
 );
 
 function populateAreaSelects() {
-  // Filtro área
   const fa = document.getElementById('filtroArea');
   fa.innerHTML = '<option value="">Todas las áreas</option>' +
     allAreas.map(a => `<option value="${a.id}">${esc(a.nombre)}</option>`).join('');
-
-  // Select área modal empleado
   const ea = document.getElementById('empArea');
   ea.innerHTML = '<option value="">— Seleccionar —</option>' +
     allAreas.map(a => `<option value="${a.id}">${esc(a.nombre)}</option>`).join('');
-
-  // Select área para puesto
   const ap = document.getElementById('areaParaPuesto');
   ap.innerHTML = '<option value="">Área del puesto...</option>' +
     allAreas.map(a => `<option value="${a.id}">${esc(a.nombre)}</option>`).join('');
 }
 
-// Cuando cambia área en modal empleado → filtrar puestos
 document.getElementById('empArea').addEventListener('change', function() {
   const aid = this.value;
   const sel = document.getElementById('empPuesto');
@@ -346,13 +443,14 @@ document.getElementById('empArea').addEventListener('change', function() {
   sel.innerHTML = pts.length
     ? '<option value="">— Seleccionar —</option>' + pts.map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('')
     : '<option value="">Sin puestos en esta área</option>';
-  // Filtro puesto
   const fp = document.getElementById('filtroPuesto');
   fp.innerHTML = '<option value="">Todos los puestos</option>' +
     allPuestos.filter(p => !aid || String(p.area_id) === aid).map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
 });
 
-// ======================= MODAL EMPLEADO ========================
+// ══════════════════════════════════════════════════════════
+// MODAL EMPLEADO
+// ══════════════════════════════════════════════════════════
 const modalEmp = document.getElementById('modalEmpleado');
 document.getElementById('btnNuevoEmp').addEventListener('click', () => {
   document.getElementById('modalEmpTitulo').textContent = 'Registrar empleado';
@@ -368,65 +466,54 @@ function editEmpleado(id) {
   const e = allEmpleados.find(x => x.id == id);
   if (!e) return;
   document.getElementById('modalEmpTitulo').textContent = 'Editar empleado';
-  document.getElementById('empId').value           = e.id;
-  document.getElementById('empNombre').value       = e.nombre;
-  document.getElementById('empApellidoPat').value  = e.apellido_paterno;
-  document.getElementById('empApellidoMat').value  = e.apellido_materno || '';
-  document.getElementById('empNSS').value          = e.numero_empleado;
-  document.getElementById('empRFC').value          = e.rfc || '';
-  document.getElementById('empCURP').value         = e.curp || '';
-  document.getElementById('empEmail').value        = e.email || '';
-  document.getElementById('empArea').value         = e.area_id || '';
+  document.getElementById('empId').value          = e.id;
+  document.getElementById('empNombre').value      = e.nombre;
+  document.getElementById('empApellidoPat').value = e.apellido_paterno;
+  document.getElementById('empApellidoMat').value = e.apellido_materno || '';
+  document.getElementById('empNSS').value         = e.numero_empleado;
+  document.getElementById('empRFC').value         = e.rfc || '';
+  document.getElementById('empCURP').value        = e.curp || '';
+  document.getElementById('empEmail').value       = e.email || '';
+  document.getElementById('empArea').value        = e.area_id || '';
   document.getElementById('empArea').dispatchEvent(new Event('change'));
   setTimeout(() => { document.getElementById('empPuesto').value = e.puesto_id || ''; }, 50);
-  document.getElementById('empPlanta').value       = e.planta_id || '';
-  document.getElementById('empActivo').value       = e.activo ? '1' : '0';
+  document.getElementById('empPlanta').value      = e.planta_id || '';
+  document.getElementById('empActivo').value      = e.activo ? '1' : '0';
   modalEmp.classList.add('open');
 }
 
 document.getElementById('formEmpleado').addEventListener('submit', async e => {
   e.preventDefault();
   const body = {
-    id:              document.getElementById('empId').value || null,
-    nombre:          document.getElementById('empNombre').value.trim(),
-    apellido_paterno:document.getElementById('empApellidoPat').value.trim(),
-    apellido_materno:document.getElementById('empApellidoMat').value.trim(),
-    numero_empleado: document.getElementById('empNSS').value.trim(),
-    rfc:             document.getElementById('empRFC').value.trim().toUpperCase(),
-    curp:            document.getElementById('empCURP').value.trim().toUpperCase(),
-    email:           document.getElementById('empEmail').value.trim(),
-    puesto_id:       document.getElementById('empPuesto').value,
-    planta_id:       document.getElementById('empPlanta').value,
-    activo:          document.getElementById('empActivo').value === '1',
+    id:               document.getElementById('empId').value || null,
+    nombre:           document.getElementById('empNombre').value.trim(),
+    apellido_paterno: document.getElementById('empApellidoPat').value.trim(),
+    apellido_materno: document.getElementById('empApellidoMat').value.trim(),
+    numero_empleado:  document.getElementById('empNSS').value.trim(),
+    rfc:              document.getElementById('empRFC').value.trim().toUpperCase(),
+    curp:             document.getElementById('empCURP').value.trim().toUpperCase(),
+    email:            document.getElementById('empEmail').value.trim(),
+    puesto_id:        document.getElementById('empPuesto').value,
+    planta_id:        document.getElementById('empPlanta').value,
+    activo:           document.getElementById('empActivo').value === '1',
   };
   try {
-    const r = await fetch(API_E + 'save_empleado.php', {
+    const r   = await fetch(API_E + 'save_empleado.php', {
       method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)
     });
     const raw = await r.text();
     let d;
-    try {
-      d = raw ? JSON.parse(raw) : {};
-    } catch (parseError) {
-      console.error('Respuesta inválida de save_empleado.php:', raw);
-      toast('Respuesta inválida del servidor.', 'error');
-      return;
-    }
-
-    if (!r.ok) {
-      toast(d.msg || `Error del servidor (${r.status}).`, 'error');
-      return;
-    }
-
-    if (d.ok) {
-      toast(body.id ? 'Empleado actualizado.' : 'Empleado registrado.','success');
-      modalEmp.classList.remove('open');
-      loadEmpleados();
-    } else toast(d.msg||'Error al guardar.','error');
-  } catch (error) { toast('Error de red: ' + error.message,'error'); }
+    try { d = raw ? JSON.parse(raw) : {}; }
+    catch { toast('Respuesta inválida del servidor.','error'); return; }
+    if (!r.ok)  { toast(d.msg || `Error del servidor (${r.status}).`,'error'); return; }
+    if (d.ok)   { toast(body.id ? 'Empleado actualizado.' : 'Empleado registrado.','success'); modalEmp.classList.remove('open'); loadEmpleados(); }
+    else          toast(d.msg||'Error al guardar.','error');
+  } catch(err) { toast('Error de red: ' + err.message,'error'); }
 });
 
-// ======================= MODAL ÁREAS/PUESTOS ========================
+// ══════════════════════════════════════════════════════════
+// MODAL ÁREAS/PUESTOS
+// ══════════════════════════════════════════════════════════
 const modalAreas = document.getElementById('modalAreas');
 document.getElementById('btnGestionAreas').addEventListener('click', () => modalAreas.classList.add('open'));
 ['closeModalAreas','cancelModalAreas'].forEach(id =>
@@ -461,11 +548,8 @@ document.getElementById('formArea').addEventListener('submit', async e => {
     method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nombre})
   });
   const d = await r.json();
-  if (d.ok) {
-    toast('Área creada.','success');
-    document.getElementById('nuevaArea').value = '';
-    await loadAreas();
-  } else toast(d.msg||'Error.','error');
+  if (d.ok) { toast('Área creada.','success'); document.getElementById('nuevaArea').value = ''; await loadAreas(); }
+  else toast(d.msg||'Error.','error');
 });
 
 document.getElementById('formPuesto').addEventListener('submit', async e => {
@@ -477,22 +561,20 @@ document.getElementById('formPuesto').addEventListener('submit', async e => {
     method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({nombre, area_id})
   });
   const d = await r.json();
-  if (d.ok) {
-    toast('Puesto creado.','success');
-    document.getElementById('nuevoPuesto').value = '';
-    await loadAreas();
-  } else toast(d.msg||'Error.','error');
+  if (d.ok) { toast('Puesto creado.','success'); document.getElementById('nuevoPuesto').value = ''; await loadAreas(); }
+  else toast(d.msg||'Error.','error');
 });
 
-// ======================= UTILS ========================
-// ======================= FACIAL ========================
+// ══════════════════════════════════════════════════════════
+// MODAL CAPTURA FACIAL
+// ══════════════════════════════════════════════════════════
 let faceStream = null, faceEmpId = null;
 
 function abrirFace(empId, nombre) {
   faceEmpId = empId;
   document.getElementById('faceModalNombre').textContent = nombre;
-  document.getElementById('faceStatus').textContent = 'Iniciando cámara...';
-  document.getElementById('faceStatus').style.color = 'var(--text-muted)';
+  document.getElementById('faceStatus').textContent      = 'Iniciando cámara...';
+  document.getElementById('faceStatus').style.color      = 'var(--text-muted)';
   document.getElementById('modalFace').classList.add('open');
   iniciarCamFace();
 }
@@ -504,7 +586,7 @@ async function iniciarCamFace() {
     v.srcObject = faceStream;
     await v.play();
     document.getElementById('faceStatus').textContent = 'Coloca tu rostro frente a la cámara y captura.';
-  } catch(e) {
+  } catch {
     document.getElementById('faceStatus').textContent = 'No se pudo acceder a la cámara.';
     document.getElementById('faceStatus').style.color = 'var(--danger)';
   }
@@ -525,35 +607,28 @@ document.getElementById('btnCapturarRostro').addEventListener('click', async () 
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
   document.getElementById('faceStatus').textContent = 'Detectando rostro...';
-
   try {
-    // Cargar face-api.js dinámicamente si no está cargado
     if (typeof faceapi === 'undefined') {
       await loadScript('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js');
       await faceapi.nets.tinyFaceDetector.loadFromUri('/src/face-models');
       await faceapi.nets.faceLandmark68TinyNet.loadFromUri('/src/face-models');
       await faceapi.nets.faceRecognitionNet.loadFromUri('/src/face-models');
     }
-
     const video  = document.getElementById('faceVideo');
     const opts   = new faceapi.TinyFaceDetectorOptions({inputSize:224, scoreThreshold:0.5});
     const result = await faceapi.detectSingleFace(video, opts).withFaceLandmarks(true).withFaceDescriptor();
-
     if (!result) {
       document.getElementById('faceStatus').textContent = '❌ No se detectó ningún rostro. Intenta de nuevo.';
       document.getElementById('faceStatus').style.color = 'var(--danger)';
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-camera"></i> Capturar rostro';
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-camera"></i> Capturar rostro';
       return;
     }
-
     const descriptor = Array.from(result.descriptor);
     const r = await fetch('/src/php/api/face/save_face.php', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ empleado_id: faceEmpId, descriptor })
     });
     const d = await r.json();
-
     if (d.ok) {
       document.getElementById('faceStatus').textContent = '✅ Rostro registrado exitosamente.';
       document.getElementById('faceStatus').style.color = 'var(--accent)';
@@ -567,7 +642,6 @@ document.getElementById('btnCapturarRostro').addEventListener('click', async () 
     document.getElementById('faceStatus').textContent = '❌ Error: ' + e.message;
     document.getElementById('faceStatus').style.color = 'var(--danger)';
   }
-
   btn.disabled = false;
   btn.innerHTML = '<i class="fas fa-camera"></i> Capturar rostro';
 });

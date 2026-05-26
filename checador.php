@@ -11,7 +11,7 @@
       position:relative; width:100%; max-width:340px;
       margin:0 auto; border-radius:16px; overflow:hidden; background:#000;
     }
-    .cam-wrap video { width:100%; display:block; border-radius:16px; transform: scaleX(-1); }
+    .cam-wrap video  { width:100%; display:block; border-radius:16px; }
     .cam-wrap canvas {
       position:absolute; top:0; left:0;
       width:100%; height:100%; pointer-events:none;
@@ -163,7 +163,13 @@
     <div class="checker-brand">ROCEEL</div>
     <div class="checker-brand-sub">Checador Facial</div>
   </div>
-  <div class="checker-clock" id="liveClock">--:--:--</div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+    <div class="checker-clock" id="liveClock">--:--:--</div>
+    <span id="livenessModeTag" style="
+      font-size:9px;font-weight:800;letter-spacing:0.06em;
+      padding:2px 8px;border-radius:999px;white-space:nowrap;
+    "></span>
+  </div>
 </header>
 
 <div class="checker-card" id="mainCard">
@@ -285,8 +291,12 @@ const MATCH_THRESHOLD = 0.45;
 const SCAN_INTERVAL   = 120;   // ms — más rápido para liveness fluido
 const CONFIRM_LOCK    = 2000;
 
+// ── Feature flag — lo controla el admin desde empleados.php ──
+const LIVENESS_KEY     = 'roceel_liveness';
+const LIVENESS_ENABLED = localStorage.getItem(LIVENESS_KEY) === 'on';
+
 // ── Liveness config ──
-const EAR_BLINK_THRESHOLD = 0.25;  // EAR menor a esto = ojo cerrado
+const EAR_BLINK_THRESHOLD = 0.25;  // ajustado para faceLandmark68TinyNet
 const BLINKS_REQUIRED     = 2;     // parpadeos necesarios
 const CHALLENGE_TIMEOUT   = 8000;  // ms para completar el challenge
 const HEAD_TURN_THRESHOLD = 12;    // grados de rotación aceptada como "giró"
@@ -325,6 +335,21 @@ let blockedUntil   = parseInt(sessionStorage.getItem('rl_until')    || '0');
   document.getElementById('liveClock').textContent =
     new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
   setTimeout(tick,1000);
+})();
+
+// Mostrar badge de modo en el header
+(function() {
+  const tag = document.getElementById('livenessModeTag');
+  if (!tag) return;
+  if (LIVENESS_ENABLED) {
+    tag.textContent = '🛡️ MODO SEGURO';
+    tag.style.background = 'rgba(34,197,94,0.15)';
+    tag.style.color      = '#22c55e';
+  } else {
+    tag.textContent = '⚡ MODO ESTÁNDAR';
+    tag.style.background = 'rgba(245,196,0,0.12)';
+    tag.style.color      = '#f5c400';
+  }
 })();
 
 // ══════════════════════════════════════════════════════════
@@ -727,7 +752,13 @@ async function detectarRostro() {
 
   setScanStatus(`🔍 Verificando identidad...`, 'loading');
 
-  // ── Detección exitosa → iniciar liveness ──
+  // ── Feature flag: si liveness está OFF → pasar directo ──
+  if (!LIVENESS_ENABLED) {
+    const emp = knownEmpleados.find(e => e.id === empId);
+    if (emp) await mostrarEmpleado(emp, bestMatch.match.distance);
+    return;
+  }
+
   livenessState = 'starting';
   iniciarLiveness(empId, bestMatch.match.distance);
 }
@@ -862,3 +893,5 @@ init();
 </script>
 </body>
 </html>
+
+
