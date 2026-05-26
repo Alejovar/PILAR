@@ -474,8 +474,8 @@ function mostrarChallengeBlink() {
 function mostrarChallengeHead() {
   // Elegir dirección aleatoria
   const dirs = [
-  { key:'left',  icon:'➡️', text:'Gira la cabeza a la IZQUIERDA' },
-  { key:'right', icon:'⬅️', text:'Gira la cabeza a la DERECHA' },
+  { key:'left',  icon:'➡️', text:'Gira la cabeza a la DERECHA' },
+  { key:'right', icon:'⬅️', text:'Gira la cabeza a la IZQUIERDA' },
   ];
   headChallenge = { ...dirs[Math.floor(Math.random() * dirs.length)], holdStart: null };
 
