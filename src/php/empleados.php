@@ -217,11 +217,18 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
             <option value="">— Seleccionar área primero —</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Planta</label>
-          <select class="form-select" id="empPlanta" required>
-            <option value="">— Seleccionar —</option>
-          </select>
+        <div class="form-group span-2">
+          <label>Plantas asignadas <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;">(la primera marcada es la principal)</span></label>
+          <div id="empPlantasWrap" style="
+            background:var(--surface); border:1px solid var(--border-light);
+            border-radius:var(--radius-sm); padding:10px 12px;
+            max-height:160px; overflow-y:auto; display:grid; gap:6px;
+          ">
+            <span style="color:var(--text-muted);font-size:12px;">Cargando plantas...</span>
+          </div>
+          <span id="empPlantasError" style="color:var(--danger);font-size:11px;display:none;">
+            Selecciona al menos una planta.
+          </span>
         </div>
         <div class="form-group">
           <label>Estado</label>
@@ -374,11 +381,61 @@ async function loadPlantas() {
     const d = await r.json();
     if (d.ok) {
       allPlantas = d.plantas.filter(p => p.activa);
-      const sel  = document.getElementById('empPlanta');
-      sel.innerHTML = '<option value="">— Seleccionar —</option>' +
-        allPlantas.map(p => `<option value="${p.id}">${esc(p.nombre)}</option>`).join('');
+      renderPlantasCheckboxes([]);
     }
   } catch(err) { console.error('Error cargando plantas:', err); }
+}
+
+function renderPlantasCheckboxes(selectedIds) {
+  const wrap = document.getElementById('empPlantasWrap');
+  if (!allPlantas.length) {
+    wrap.innerHTML = '<span style="color:var(--text-muted);font-size:12px;">No hay plantas activas.</span>';
+    return;
+  }
+  wrap.innerHTML = allPlantas.map((p) => {
+    const checked  = selectedIds.includes(p.id) ? 'checked' : '';
+    const esPrinc  = selectedIds[0] === p.id;
+    return `
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0;font-size:13px;font-weight:600;">
+        <input type="checkbox" class="planta-chk" value="${p.id}" ${checked}
+               style="accent-color:var(--primary);width:15px;height:15px;cursor:pointer;"
+               onchange="actualizarPrincipalBadge()">
+        <span>${esc(p.nombre)}</span>
+        <span class="principal-badge" id="badge-${p.id}"
+              style="display:${esPrinc?'inline-flex':'none'};
+                     align-items:center;gap:3px;font-size:10px;font-weight:700;
+                     background:var(--primary-glow);color:var(--primary);
+                     border:1px solid rgba(245,196,0,0.3);border-radius:999px;padding:1px 7px;">
+          ★ Principal
+        </span>
+      </label>`;
+  }).join('');
+  actualizarPrincipalBadge();
+}
+
+function actualizarPrincipalBadge() {
+  const checks = [...document.querySelectorAll('.planta-chk:checked')];
+  allPlantas.forEach(p => {
+    const badge = document.getElementById('badge-' + p.id);
+    if (badge) badge.style.display = 'none';
+  });
+  if (checks.length) {
+    const badge = document.getElementById('badge-' + checks[0].value);
+    if (badge) badge.style.display = 'inline-flex';
+  }
+}
+
+function getPlantasSeleccionadas() {
+  return [...document.querySelectorAll('.planta-chk:checked')].map(c => parseInt(c.value));
+}
+
+function renderPlantasBadges(plantas) {
+  if (!plantas || !plantas.length) return '<span style="color:var(--text-muted);">—</span>';
+  return plantas.map(p =>
+    `<span class="badge ${p.es_principal ? 'badge-yellow' : 'badge-gray'}" style="margin:1px 2px;" title="${p.es_principal ? 'Principal' : ''}">
+       ${p.es_principal ? '★ ' : ''}${esc(p.nombre)}
+     </span>`
+  ).join('');
 }
 
 // ══════════════════════════════════════════════════════════
@@ -407,7 +464,7 @@ function renderEmpleados() {
       <td style="font-weight:600;">${esc(e.nombre)} ${esc(e.apellido_paterno)} ${esc(e.apellido_materno||'')}</td>
       <td>${esc(e.area_nombre||'—')}</td>
       <td>${esc(e.puesto_nombre||'—')}</td>
-      <td>${esc(e.planta_nombre||'—')}</td>
+      <td>${renderPlantasBadges(e.plantas || [])}</td>
       <td>${e.activo ? '<span class="badge badge-green">Activo</span>' : '<span class="badge badge-gray">Inactivo</span>'}</td>
       <td style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn btn-ghost btn-sm" onclick="editEmpleado(${e.id})"><i class="fas fa-pen"></i> Editar</button>
@@ -456,6 +513,7 @@ document.getElementById('btnNuevoEmp').addEventListener('click', () => {
   document.getElementById('modalEmpTitulo').textContent = 'Registrar empleado';
   document.getElementById('formEmpleado').reset();
   document.getElementById('empId').value = '';
+  renderPlantasCheckboxes([]);
   modalEmp.classList.add('open');
 });
 ['closeModalEmp','cancelModalEmp'].forEach(id =>
@@ -477,13 +535,23 @@ function editEmpleado(id) {
   document.getElementById('empArea').value        = e.area_id || '';
   document.getElementById('empArea').dispatchEvent(new Event('change'));
   setTimeout(() => { document.getElementById('empPuesto').value = e.puesto_id || ''; }, 50);
-  document.getElementById('empPlanta').value      = e.planta_id || '';
+  const plantasIds = (e.plantas || []).map(p => p.id);
+  renderPlantasCheckboxes(plantasIds);
   document.getElementById('empActivo').value      = e.activo ? '1' : '0';
   modalEmp.classList.add('open');
 }
 
 document.getElementById('formEmpleado').addEventListener('submit', async e => {
   e.preventDefault();
+  const plantasIds = getPlantasSeleccionadas();
+  const errEl = document.getElementById('empPlantasError');
+  if (!plantasIds.length) {
+    errEl.style.display = 'block';
+    document.getElementById('empPlantasWrap').scrollIntoView({ behavior:'smooth', block:'center' });
+    return;
+  }
+  errEl.style.display = 'none';
+
   const body = {
     id:               document.getElementById('empId').value || null,
     nombre:           document.getElementById('empNombre').value.trim(),
@@ -494,7 +562,7 @@ document.getElementById('formEmpleado').addEventListener('submit', async e => {
     curp:             document.getElementById('empCURP').value.trim().toUpperCase(),
     email:            document.getElementById('empEmail').value.trim(),
     puesto_id:        document.getElementById('empPuesto').value,
-    planta_id:        document.getElementById('empPlanta').value,
+    plantas_ids:      plantasIds,
     activo:           document.getElementById('empActivo').value === '1',
   };
   try {

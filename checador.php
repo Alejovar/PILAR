@@ -11,7 +11,7 @@
       position:relative; width:100%; max-width:340px;
       margin:0 auto; border-radius:16px; overflow:hidden; background:#000;
     }
-    .cam-wrap video  { width:100%; display:block; border-radius:16px; }
+    .cam-wrap video { width:100%; display:block; border-radius:16px; transform: scaleX(-1); }
     .cam-wrap canvas {
       position:absolute; top:0; left:0;
       width:100%; height:100%; pointer-events:none;

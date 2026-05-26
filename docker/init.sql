@@ -102,6 +102,24 @@ CREATE TABLE IF NOT EXISTS registros_asistencia (
     INDEX idx_fecha     (fecha_hora)
 );
 
+
+-- ============================================================
+-- EMPLEADO_PLANTAS (many-to-many)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS empleado_plantas (
+    empleado_id  INT UNSIGNED NOT NULL,
+    planta_id    INT UNSIGNED NOT NULL,
+    es_principal BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at   TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (empleado_id, planta_id),
+    FOREIGN KEY (empleado_id) REFERENCES empleados(id) ON DELETE CASCADE,
+    FOREIGN KEY (planta_id)   REFERENCES plantas(id)   ON DELETE CASCADE
+);
+
+-- Migrar planta_id actual → registro principal en la pivote
+INSERT IGNORE INTO empleado_plantas (empleado_id, planta_id, es_principal)
+SELECT id, planta_id, TRUE FROM empleados WHERE planta_id IS NOT NULL;
+
 -- ============================================================
 -- DATOS SEMILLA
 -- ============================================================
