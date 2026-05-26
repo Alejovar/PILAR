@@ -548,6 +548,9 @@ function procesarBlink(landmarks) {
   const earR  = calcEAR(rightEye);
   const earL  = calcEAR(leftEye);
   const ear   = (earR + earL) / 2;
+
+  console.log('EAR:', ear.toFixed(3), '| closed:', ear < EAR_BLINK_THRESHOLD);
+
   const closed = ear < EAR_BLINK_THRESHOLD;
 
   if (closed && !eyeWasClosed) {
