@@ -1,3 +1,22 @@
+<?php
+// /checador.php
+require_once $_SERVER['DOCUMENT_ROOT'] . '/src/php/db_connection.php';
+
+function getLivenessConfig(): string {
+    global $conn;
+    // Crear tabla si no existe aún
+    $conn->query("
+        CREATE TABLE IF NOT EXISTS sistema_config (
+            clave      VARCHAR(50)  NOT NULL PRIMARY KEY,
+            valor      VARCHAR(255) NOT NULL,
+            updated_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+    $r = $conn->query("SELECT valor FROM sistema_config WHERE clave = 'liveness' LIMIT 1");
+    $row = $r ? $r->fetch_assoc() : null;
+    return ($row && $row['valor'] === 'on') ? 'true' : 'false';
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,7 +30,7 @@
       position:relative; width:100%; max-width:340px;
       margin:0 auto; border-radius:16px; overflow:hidden; background:#000;
     }
-    .cam-wrap video { width:100%; display:block; border-radius:16px; transform: scaleX(-1); }
+    .cam-wrap video  { width:100%; display:block; border-radius:16px; }
     .cam-wrap canvas {
       position:absolute; top:0; left:0;
       width:100%; height:100%; pointer-events:none;
@@ -291,9 +310,8 @@ const MATCH_THRESHOLD = 0.45;
 const SCAN_INTERVAL   = 120;   // ms — más rápido para liveness fluido
 const CONFIRM_LOCK    = 2000;
 
-// ── Feature flag — lo controla el admin desde empleados.php ──
-const LIVENESS_KEY     = 'roceel_liveness';
-const LIVENESS_ENABLED = localStorage.getItem(LIVENESS_KEY) === 'on';
+// ── Feature flag — leído desde BD al cargar la página ──
+const LIVENESS_ENABLED = <?= getLivenessConfig() ?>;
 
 // ── Liveness config ──
 const EAR_BLINK_THRESHOLD = 0.25;  // ajustado para faceLandmark68TinyNet
@@ -893,5 +911,3 @@ init();
 </script>
 </body>
 </html>
-
-

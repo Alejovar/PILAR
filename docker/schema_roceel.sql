@@ -36,6 +36,7 @@ DROP TABLE IF EXISTS roles;
 
 -- ── DROP tablas de Roceel (por si es un re-deploy) ──
 DROP TABLE IF EXISTS empleado_plantas;
+DROP TABLE IF EXISTS sistema_config;
 DROP TABLE IF EXISTS registros_asistencia;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS empleados;
@@ -153,6 +154,18 @@ CREATE TABLE empleado_plantas (
 -- Migrar planta_id actual → registro principal en la pivote
 INSERT IGNORE INTO empleado_plantas (empleado_id, planta_id, es_principal)
 SELECT id, planta_id, TRUE FROM empleados WHERE planta_id IS NOT NULL;
+
+
+-- ============================================================
+-- SISTEMA CONFIG (feature flags y configuración global)
+-- ============================================================
+CREATE TABLE sistema_config (
+    clave      VARCHAR(50)  NOT NULL PRIMARY KEY,
+    valor      VARCHAR(255) NOT NULL,
+    updated_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO sistema_config (clave, valor) VALUES ('liveness', 'off');
 
 -- ============================================================
 -- DATOS SEMILLA

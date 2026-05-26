@@ -317,45 +317,61 @@ const API_E      = '/src/php/api/empleados/';
 const API_AP     = '/src/php/api/areas_puestos/';
 const API_PL     = '/src/php/api/plantas/';
 const API_PL_LIST = API_PL + 'plantas.php?action=list';
-const LIVENESS_KEY = 'roceel_liveness'; // localStorage key compartida con checador.php
-
 let allEmpleados = [], allAreas = [], allPuestos = [], allPlantas = [];
 
 // ══════════════════════════════════════════════════════════
-// FEATURE FLAG — Liveness Detection
+// FEATURE FLAG — Liveness Detection (global via BD)
 // ══════════════════════════════════════════════════════════
 const livenessToggle = document.getElementById('livenessToggle');
 const livenessBadge  = document.getElementById('livenessBadge');
-
-function leerLiveness() {
-  return localStorage.getItem(LIVENESS_KEY) === 'on';
-}
+const API_CONFIG     = '/src/php/api/config/';
 
 function aplicarLiveness(activo) {
-  livenessToggle.checked      = activo;
-  livenessBadge.textContent   = activo ? 'ON' : 'OFF';
-  livenessBadge.className     = 'flag-status-badge ' + (activo ? 'on' : 'off');
-  localStorage.setItem(LIVENESS_KEY, activo ? 'on' : 'off');
+  livenessToggle.checked    = activo;
+  livenessBadge.textContent = activo ? 'ON' : 'OFF';
+  livenessBadge.className   = 'flag-status-badge ' + (activo ? 'on' : 'off');
 }
 
-// Inicializar con el valor guardado
-aplicarLiveness(leerLiveness());
+// Leer valor actual desde BD al cargar
+async function cargarLiveness() {
+  try {
+    const r = await fetch(API_CONFIG + 'get_config.php?clave=liveness');
+    const d = await r.json();
+    aplicarLiveness(d.valor === 'on');
+  } catch { aplicarLiveness(false); }
+}
 
-livenessToggle.addEventListener('change', () => {
-  aplicarLiveness(livenessToggle.checked);
-  toast(
-    livenessToggle.checked
-      ? '🛡️ Anti-spoofing activado en el checador.'
-      : '⚠️ Anti-spoofing desactivado.',
-    livenessToggle.checked ? 'success' : 'error'
-  );
+// Guardar en BD al cambiar
+livenessToggle.addEventListener('change', async () => {
+  const activo = livenessToggle.checked;
+  aplicarLiveness(activo);
+  try {
+    const r = await fetch(API_CONFIG + 'save_config.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clave: 'liveness', valor: activo ? 'on' : 'off' })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      toast(
+        activo ? '🛡️ Anti-spoofing activado globalmente.' : '⚠️ Anti-spoofing desactivado.',
+        activo ? 'success' : 'error'
+      );
+    } else {
+      toast('Error al guardar configuración.', 'error');
+      aplicarLiveness(!activo); // revertir
+    }
+  } catch {
+    toast('Error de red.', 'error');
+    aplicarLiveness(!activo);
+  }
 });
 
 // ══════════════════════════════════════════════════════════
 // LOAD
 // ══════════════════════════════════════════════════════════
 async function init() {
-  await Promise.all([loadAreas(), loadPlantas()]);
+  await Promise.all([loadAreas(), loadPlantas(), cargarLiveness()]);
   loadEmpleados();
 }
 
