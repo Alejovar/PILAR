@@ -11,7 +11,7 @@
       position:relative; width:100%; max-width:340px;
       margin:0 auto; border-radius:16px; overflow:hidden; background:#000;
     }
-    .cam-wrap video  { width:100%; display:block; border-radius:16px; }
+    .cam-wrap video { width:100%; display:block; border-radius:16px; transform: scaleX(-1); }
     .cam-wrap canvas {
       position:absolute; top:0; left:0;
       width:100%; height:100%; pointer-events:none;
@@ -286,7 +286,7 @@ const SCAN_INTERVAL   = 120;   // ms — más rápido para liveness fluido
 const CONFIRM_LOCK    = 2000;
 
 // ── Liveness config ──
-const EAR_BLINK_THRESHOLD = 0.21;  // EAR menor a esto = ojo cerrado
+const EAR_BLINK_THRESHOLD = 0.25;  // EAR menor a esto = ojo cerrado
 const BLINKS_REQUIRED     = 2;     // parpadeos necesarios
 const CHALLENGE_TIMEOUT   = 8000;  // ms para completar el challenge
 const HEAD_TURN_THRESHOLD = 12;    // grados de rotación aceptada como "giró"
