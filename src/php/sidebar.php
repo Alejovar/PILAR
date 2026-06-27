@@ -15,10 +15,9 @@ $nav = [
 <aside class="sidebar">
   <div>
     <div class="sidebar-brand">
-      <img src="/src/css/imagen/Logo-Roceel.jpg" alt="Logo ROCEEL" class="brand-icon" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
+      <img src="/src/css/imagen/Logo-Pilar.jpg" alt="Logo PILAR" class="brand-icon" style="width: 60px; height: 60px; object-fit: contain; border-radius: 8px;">
       <div>
-        <div class="brand-name">ROCEEL</div>
-        <div class="brand-sub">Servicios Especializados</div>
+        <div class="brand-name">PILAR</div>
       </div>
     </div>
 
@@ -61,7 +60,7 @@ $nav = [
   const iconSun   = document.getElementById('themeIconSun');
   const iconMoon  = document.getElementById('themeIconMoon');
   const label     = document.getElementById('themeToggleLabel');
-  const STORAGE_KEY = 'roceel_theme';
+  const STORAGE_KEY = 'pilar_theme';
 
   function aplicarTema(tema) {
     if (tema === 'light') {

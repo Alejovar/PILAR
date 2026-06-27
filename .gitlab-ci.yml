@@ -11,7 +11,7 @@ stages:
 install_deps:
   stage: install_dependencies
   script:
-    - echo "Preparando el entorno para Roceel..."
+    - echo "Preparando el entorno para Pilar..."
 
 # ── 2. TESTS ──
 lint-job:
@@ -42,7 +42,7 @@ build_docker_image:
   services:
     - docker:24-dind
   script:
-    - echo "🔨 Construyendo imagen Docker de Roceel..."
+    - echo "🔨 Construyendo imagen Docker de Pilar..."
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker build -t $CI_REGISTRY_IMAGE:latest -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
     - docker push $CI_REGISTRY_IMAGE:latest
@@ -86,19 +86,19 @@ deploy_to_staging:
         echo '🧹 Limpiando disco...'
         docker system prune -af
         df -h
-        cd ~/kitchenlink
+        cd ~/pilar
         docker compose down -v --remove-orphans || true
       "
 
-    - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/kitchenlink/docker"
-    - scp docker-compose.yml          $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker-compose.yml
-    - scp docker/init.sql             $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/init.sql
-    - scp docker/schema_roceel.sql    $VM_USER@$STAGING_VM_IP:~/kitchenlink/docker/schema_roceel.sql
+    - ssh $VM_USER@$STAGING_VM_IP "mkdir -p ~/pilar/docker"
+    - scp docker-compose.yml          $VM_USER@$STAGING_VM_IP:~/pilar/docker-compose.yml
+    - scp docker/init.sql             $VM_USER@$STAGING_VM_IP:~/pilar/docker/init.sql
+    - scp docker/schema_pilar.sql     $VM_USER@$STAGING_VM_IP:~/pilar/docker/schema_pilar.sql
 
     - |
       ssh $VM_USER@$STAGING_VM_IP "
         set -e
-        cd ~/kitchenlink
+        cd ~/pilar
         echo 'DB_ROOT_PASSWORD=${STAGING_DB_ROOT_PASSWORD}' >  .env
         echo 'DB_USER=${STAGING_DB_USER}'                   >> .env
         echo 'DB_PASSWORD=${STAGING_DB_PASSWORD}'            >> .env
@@ -112,7 +112,7 @@ deploy_to_staging:
         echo '⏳ Esperando que MySQL esté disponible...'
         i=0
         while [ \"\$i\" -lt 30 ]; do
-          docker exec kitchenlink-db mysqladmin ping -h localhost \
+          docker exec pilar-db mysqladmin ping -h localhost \
             -uroot -p'${STAGING_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
           i=\$((i + 1))
@@ -121,35 +121,35 @@ deploy_to_staging:
         echo '⏳ Esperando que la tabla users exista...'
         i=0
         while [ \"\$i\" -lt 60 ]; do
-          if docker exec kitchenlink-db mysql \
-            -uroot -p'${STAGING_DB_ROOT_PASSWORD}' \
-            -Nse \"SELECT 1 FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users' LIMIT 1;\" 2>/dev/null | grep -qx '1'; then
+            if docker exec pilar-db mysql \
+              -uroot -p'${STAGING_DB_ROOT_PASSWORD}' \
+              -Nse \"SELECT 1 FROM information_schema.tables WHERE table_schema='pilar_db' AND table_name='users' LIMIT 1;\" 2>/dev/null | grep -qx '1'; then
             break
           fi
           i=\$((i + 1))
           sleep 2
         done
 
-        # ── ROCEEL: Limpiar tablas anteriores y aplicar schema nuevo ──
-        echo '🗄️ Aplicando schema de Roceel (DROP + CREATE)...'
-        docker exec -i kitchenlink-db mysql \
-          -uroot -p'${STAGING_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/schema_roceel.sql
-        echo '✅ Schema de Roceel aplicado OK.'
+        # ── PILAR: Limpiar tablas anteriores y aplicar schema nuevo ──
+        echo '🗄️ Aplicando schema de Pilar (DROP + CREATE)...'
+        docker exec -i pilar-db mysql \
+           -uroot -p'${STAGING_DB_ROOT_PASSWORD}' pilar_db \
+          < ~/pilar/docker/schema_pilar.sql
+        echo '✅ Schema de Pilar aplicado OK.'
 
         # ── FIX: Validar usuario de Vault en MySQL ──
         echo '🔍 Validando que el usuario de Vault existe en MySQL...'
-        USER_EXISTS=\$(docker exec kitchenlink-db mysql \
+        USER_EXISTS=\$(docker exec pilar-db mysql \
           -uroot -p'${STAGING_DB_ROOT_PASSWORD}' \
           -se \"SELECT COUNT(*) FROM mysql.user WHERE user='${STAGING_DB_USER}';\" 2>/dev/null)
 
         if [ \"\$USER_EXISTS\" = \"0\" ] || [ -z \"\$USER_EXISTS\" ]; then
           echo '⚠️  Usuario de Vault no encontrado en MySQL. Recreando...'
-          docker exec kitchenlink-db mysql \
+          docker exec pilar-db mysql \
             -uroot -p'${STAGING_DB_ROOT_PASSWORD}' -e \"
               CREATE USER '${STAGING_DB_USER}'@'%'
                 IDENTIFIED WITH mysql_native_password BY '${STAGING_DB_PASSWORD}';
-              GRANT ALL PRIVILEGES ON KitchenLink.* TO '${STAGING_DB_USER}'@'%';
+              GRANT ALL PRIVILEGES ON pilar_db.* TO '${STAGING_DB_USER}'@'%';
               FLUSH PRIVILEGES;
             \"
           echo '✅ Usuario de Vault recreado correctamente.'
@@ -196,19 +196,19 @@ deploy_to_production:
         echo '🧹 Limpiando disco...'
         docker system prune -af
         df -h
-        cd ~/kitchenlink
+        cd ~/pilar
         docker compose down -v --remove-orphans || true
       "
 
-    - ssh $VM_USER@$VM_IP_ADDRESS "mkdir -p ~/kitchenlink/docker"
-    - scp docker-compose.yml          $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker-compose.yml
-    - scp docker/init.sql             $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/init.sql
-    - scp docker/schema_roceel.sql    $VM_USER@$VM_IP_ADDRESS:~/kitchenlink/docker/schema_roceel.sql
+    - ssh $VM_USER@$VM_IP_ADDRESS "mkdir -p ~/pilar/docker"
+    - scp docker-compose.yml          $VM_USER@$VM_IP_ADDRESS:~/pilar/docker-compose.yml
+    - scp docker/init.sql             $VM_USER@$VM_IP_ADDRESS:~/pilar/docker/init.sql
+    - scp docker/schema_pilar.sql     $VM_USER@$VM_IP_ADDRESS:~/pilar/docker/schema_pilar.sql
 
     - |
       ssh $VM_USER@$VM_IP_ADDRESS "
         set -e
-        cd ~/kitchenlink
+        cd ~/pilar
         echo 'DB_ROOT_PASSWORD=${PROD_DB_ROOT_PASSWORD}' >  .env
         echo 'DB_USER=${PROD_DB_USER}'                   >> .env
         echo 'DB_PASSWORD=${PROD_DB_PASSWORD}'            >> .env
@@ -223,7 +223,7 @@ deploy_to_production:
         echo '⏳ Esperando que MySQL esté disponible...'
         i=0
         while [ \"\$i\" -lt 30 ]; do
-          docker exec kitchenlink-db mysqladmin ping -h localhost \
+          docker exec pilar-db mysqladmin ping -h localhost \
             -uroot -p'${PROD_DB_ROOT_PASSWORD}' --silent && break
           sleep 1
           i=\$((i + 1))
@@ -232,35 +232,35 @@ deploy_to_production:
         echo '⏳ Esperando que la tabla users exista...'
         i=0
         while [ \"\$i\" -lt 60 ]; do
-          if docker exec kitchenlink-db mysql \
-            -uroot -p'${PROD_DB_ROOT_PASSWORD}' \
-            -Nse \"SELECT 1 FROM information_schema.tables WHERE table_schema='KitchenLink' AND table_name='users' LIMIT 1;\" 2>/dev/null | grep -qx '1'; then
+            if docker exec pilar-db mysql \
+              -uroot -p'${PROD_DB_ROOT_PASSWORD}' \
+              -Nse \"SELECT 1 FROM information_schema.tables WHERE table_schema='pilar_db' AND table_name='users' LIMIT 1;\" 2>/dev/null | grep -qx '1'; then
             break
           fi
           i=\$((i + 1))
           sleep 2
         done
 
-        # ── ROCEEL: Limpiar tablas anteriores y aplicar schema nuevo ──
-        echo '🗄️ Aplicando schema de Roceel (DROP + CREATE)...'
-        docker exec -i kitchenlink-db mysql \
-          -uroot -p'${PROD_DB_ROOT_PASSWORD}' KitchenLink \
-          < ~/kitchenlink/docker/schema_roceel.sql
-        echo '✅ Schema de Roceel aplicado OK.'
+        # ── PILAR: Limpiar tablas anteriores y aplicar schema nuevo ──
+        echo '🗄️ Aplicando schema de Pilar (DROP + CREATE)...'
+        docker exec -i pilar-db mysql \
+          -uroot -p'${PROD_DB_ROOT_PASSWORD}' pilar_db \
+          < ~/pilar/docker/schema_pilar.sql
+        echo '✅ Schema de Pilar aplicado OK.'
 
         # ── FIX: Validar usuario de Vault en MySQL ──
         echo '🔍 Validando que el usuario de Vault existe en MySQL...'
-        USER_EXISTS=\$(docker exec kitchenlink-db mysql \
+        USER_EXISTS=\$(docker exec pilar-db mysql \
           -uroot -p'${PROD_DB_ROOT_PASSWORD}' \
           -se \"SELECT COUNT(*) FROM mysql.user WHERE user='${PROD_DB_USER}';\" 2>/dev/null)
 
         if [ \"\$USER_EXISTS\" = \"0\" ] || [ -z \"\$USER_EXISTS\" ]; then
           echo '⚠️  Usuario de Vault no encontrado en MySQL. Recreando...'
-          docker exec kitchenlink-db mysql \
+          docker exec pilar-db mysql \
             -uroot -p'${PROD_DB_ROOT_PASSWORD}' -e \"
               CREATE USER '${PROD_DB_USER}'@'%'
                 IDENTIFIED WITH mysql_native_password BY '${PROD_DB_PASSWORD}';
-              GRANT ALL PRIVILEGES ON KitchenLink.* TO '${PROD_DB_USER}'@'%';
+              GRANT ALL PRIVILEGES ON pilar_db.* TO '${PROD_DB_USER}'@'%';
               FLUSH PRIVILEGES;
             \"
           echo '✅ Usuario de Vault recreado correctamente.'

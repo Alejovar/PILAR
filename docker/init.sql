@@ -1,13 +1,13 @@
 -- ============================================================
---  ROCEEL Servicios Especializados — Init DB
+--  PILAR — Init DB
 --  Se ejecuta automáticamente en el primer arranque del contenedor MySQL.
 --  En deploys subsecuentes el pipeline hace DROP + re-creación via SSH.
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS roceel_db
+CREATE DATABASE IF NOT EXISTS pilar_db
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
-USE roceel_db;
+USE pilar_db;
 
 -- ============================================================
 -- PLANTAS
@@ -152,7 +152,7 @@ INSERT IGNORE INTO puestos (nombre, area_id) VALUES
 INSERT IGNORE INTO empleados
   (numero_empleado, nombre, apellido_paterno, email, puesto_id, planta_id, activo)
 VALUES
-  ('00000000001', 'Admin', 'Sistema', 'admin@roceel.com', 3, 1, TRUE);
+  ('00000000001', 'Admin', 'Sistema', 'admin@pilar.com', 3, 1, TRUE);
 
 -- password = 'Admin1234'  (bcrypt cost 12 — cambiar en producción)
 INSERT IGNORE INTO usuarios (empleado_id, username, password_hash, rol, activo)

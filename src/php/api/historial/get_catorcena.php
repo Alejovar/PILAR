@@ -125,7 +125,7 @@ foreach ($empleados as $emp) {
     $horasExtra      = max(0, round($horasTrabajadas - $LIMITE, 2));
 
     // Solo incluir si tiene algún registro (o incluir todos — depende del contexto)
-    // Roceel quiere ver a todos aunque tengan 0 horas, para detectar ausencias
+    // Pilar quiere ver a todos aunque tengan 0 horas, para detectar ausencias
     $reporte[] = [
         'id'              => $emp['id'],
         'numero_empleado' => $emp['numero_empleado'],

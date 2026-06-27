@@ -1,12 +1,12 @@
 <?php
 // /src/php/db_connection.php
-// La BD sigue siendo KitchenLink (mismo contenedor/servidor que antes).
+// La BD usa el nombre de la app rebrandada.
 // Las variables vienen del .env que escribe el pipeline via Vault.
 
 define('DB_HOST', getenv('DB_HOST') ?: 'db');
-define('DB_USER', getenv('DB_USER') ?: 'KitchenLink');
+define('DB_USER', getenv('DB_USER') ?: 'pilar_user');
 define('DB_PASS', getenv('DB_PASSWORD') ?: '');
-define('DB_NAME', getenv('DB_NAME') ?: 'KitchenLink');
+define('DB_NAME', getenv('DB_NAME') ?: 'pilar_db');
 
 $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 

@@ -14,9 +14,9 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Administrador');
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel de Control | ROCEEL</title>
+  <title>Panel de Control | PILAR</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/src/css/roceel.css">
+  <link rel="stylesheet" href="/src/css/pilar.css">
 </head>
 <body>
 <div class="shell">
@@ -29,7 +29,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Administrador');
 
     <div class="page-header">
       <div class="page-header-left">
-        <div class="page-eyebrow">ROCEEL Servicios Especializados</div>
+        <div class="page-eyebrow">PILAR</div>
         <h1 class="page-title">Panel de Control</h1>
         <p class="page-sub">Gestión de plantas, empleados e historial de asistencia.</p>
       </div>

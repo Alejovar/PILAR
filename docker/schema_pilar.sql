@@ -1,17 +1,17 @@
 -- ============================================================
---  ROCEEL — Schema de migración
---  Se ejecuta sobre la BD KitchenLink existente:
+--  PILAR — Schema de migración
+--  Se ejecuta sobre la BD pilar_db existente:
 --    1. DROP de todas las tablas anteriores
---    2. CREATE de las tablas de Roceel
+--    2. CREATE de las tablas de Pilar
 --    3. Datos semilla
 --
 --  El pipeline lo corre así:
---    docker exec -i kitchenlink-db mysql -uroot -p'XXX' KitchenLink < schema_roceel.sql
+--    docker exec -i pilar-db mysql -uroot -p'XXX' pilar_db < schema_pilar.sql
 -- ============================================================
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ── DROP tablas de KitchenLink ──
+-- ── DROP tablas heredadas ──
 DROP TABLE IF EXISTS sales_history_details;
 DROP TABLE IF EXISTS sales_history;
 DROP TABLE IF EXISTS order_details;
@@ -34,7 +34,7 @@ DROP TABLE IF EXISTS tables;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS roles;
 
--- ── DROP tablas de Roceel (por si es un re-deploy) ──
+-- ── DROP tablas de Pilar (por si es un re-deploy) ──
 DROP TABLE IF EXISTS empleado_plantas;
 DROP TABLE IF EXISTS sistema_config;
 DROP TABLE IF EXISTS registros_asistencia;
@@ -187,7 +187,7 @@ INSERT INTO puestos (nombre, area_id) VALUES
 INSERT INTO empleados
   (numero_empleado, nombre, apellido_paterno, email, puesto_id, planta_id, activo)
 VALUES
-  ('00000000001', 'Admin', 'Sistema', 'admin@roceel.com', 3, 1, TRUE);
+  ('00000000001', 'Admin', 'Sistema', 'admin@pilar.com', 3, 1, TRUE);
 
 -- password = 'Admin1234' (bcrypt cost 12 — cambiar en producción)
 INSERT INTO usuarios (empleado_id, username, password_hash, rol, activo)

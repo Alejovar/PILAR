@@ -1,4 +1,4 @@
-# ROCEEL — Sistema de Control de Asistencia
+# PILAR — Sistema de Control de Asistencia
 
 Sistema web PHP/MySQL para control de asistencia de empleados con cálculo de horas trabajadas por catorcena.
 
@@ -13,18 +13,18 @@ Sistema web PHP/MySQL para control de asistencia de empleados con cálculo de ho
 ## Estructura
 
 ```
-roceel/
+PILAR/
 ├── login.php                    ← Login admin/RRHH
 ├── checador.php                 ← Checador PÚBLICO (sin login, responsivo)
 ├── dashboard.php                ← Panel de control
 ├── index.php                    ← Redirige a login
 ├── docker/
-│   └── schema_roceel.sql        ← Schema completo con datos de prueba
+│   └── schema_pilar.sql         ← Schema completo con datos de prueba
 ├── docker-compose.yml
 ├── Dockerfile
 ├── src/
 │   ├── css/
-│   │   ├── roceel.css           ← Design system completo (dark/amarillo/verde)
+│   │   ├── pilar.css            ← Design system completo (dark/amarillo/verde)
 │   │   └── checador.css         ← Estilos del checador público
 │   └── php/
 │       ├── sidebar.php          ← Sidebar compartido
@@ -66,7 +66,7 @@ roceel/
 
 ```bash
 # 1. Clona / copia el proyecto
-cd roceel
+cd PILAR
 
 # 2. Levantar contenedores
 docker compose up -d --build
@@ -138,9 +138,9 @@ Solo se marcan como **extra** las horas que exceden las 90 de la catorcena compl
 | Variable  | Default         |
 |-----------|-----------------|
 | DB_HOST   | db              |
-| DB_USER   | roceel_user     |
-| DB_PASS   | roceel_pass     |
-| DB_NAME   | roceel_db       |
+| DB_USER   | pilar_user      |
+| DB_PASS   | pilar_pass      |
+| DB_NAME   | pilar_db        |
 
 ---
 
@@ -148,7 +148,7 @@ Solo se marcan como **extra** las horas que exceden las 90 de la catorcena compl
 
 - **Username**: `admin`  
 - **Password**: `Admin1234`  
-- Cambiar el hash en `docker/schema_roceel.sql` antes de producción:
+- Cambiar el hash en `docker/schema_pilar.sql` antes de producción:
 
 ```php
 echo password_hash('TuContraseña', PASSWORD_BCRYPT);

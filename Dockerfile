@@ -1,5 +1,5 @@
 # ============================================================
-#  ROCEEL — Contenedor App
+#  PILAR — Contenedor App
 #  PHP 8.1-FPM + Nginx + mysqli  (mismo stack que KitchenLink)
 #
 #  face-api.js corre 100% en el browser.

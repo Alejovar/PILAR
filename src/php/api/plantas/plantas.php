@@ -24,9 +24,9 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Plantas | ROCEEL</title>
+  <title>Plantas | PILAR</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/src/css/roceel.css">
+  <link rel="stylesheet" href="/src/css/pilar.css">
 
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -135,7 +135,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
       <div class="page-header-left">
         <div class="page-eyebrow">Configuración</div>
         <h1 class="page-title">Plantas</h1>
-        <p class="page-sub">Registra y administra las instalaciones de Roceel.</p>
+        <p class="page-sub">Registra y administra las instalaciones de Pilar.</p>
       </div>
       <button class="btn btn-primary" id="btnNuevPlanta">
         <i class="fas fa-plus"></i> Nueva planta
@@ -224,7 +224,7 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
         <!-- Búsqueda de dirección -->
         <div class="map-search-bar">
           <input class="form-input" type="text" id="mapSearchInput"
-                 placeholder="Buscar dirección o lugar... (ej. Planta ROCEEL, Saltillo)">
+                 placeholder="Buscar dirección o lugar... (ej. Planta PILAR, Saltillo)">
           <button type="button" class="btn btn-ghost" id="mapSearchBtn">
             <i class="fas fa-search"></i> Buscar
           </button>

@@ -14,7 +14,7 @@ if (!empty($_SESSION['user_id'])) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Acceso | ROCEEL Servicios Especializados</title>
+  <title>Acceso | PILAR</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800;900&display=swap');
@@ -234,10 +234,9 @@ if (!empty($_SESSION['user_id'])) {
 <!-- HERO LEFT -->
 <div class="hero">
   <div class="hero-brand">
-    <img src="./src/css/imagen/Logo-Roceel.jpg" alt="Logo ROCEEL" class="hero-logo">
+    <img src="./src/css/imagen/Logo-Pilar.jpg" alt="Logo PILAR" class="hero-logo">
     <div>
-      <div class="hero-brand-name">ROCEEL</div>
-      <div class="hero-brand-sub">Servicios Especializados</div>
+      <div class="hero-brand-name">PILAR</div>
     </div>
   </div>
 

@@ -22,7 +22,7 @@ function getLivenessConfig(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Checador Facial | ROCEEL</title>
+  <title>Checador Facial | PILAR</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/src/css/checador.css">
   <style>
@@ -220,9 +220,9 @@ function getLivenessConfig(): string {
 <body>
 
 <header class="checker-header">
-  <div class="checker-logo">R</div>
+  <div class="checker-logo">P</div>
   <div>
-    <div class="checker-brand">ROCEEL</div>
+    <div class="checker-brand">PILAR</div>
     <div class="checker-brand-sub">Checador Facial</div>
   </div>
   <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
@@ -352,7 +352,7 @@ function getLivenessConfig(): string {
 
 <script>
 /* ============================================================
-   ROCEEL — Checador Facial con Liveness Detection (3 capas)
+  PILAR — Checador Facial con Liveness Detection (3 capas)
    1. EAR Blink detection  — detecta parpadeos reales
    2. Head-turn challenge  — dirección aleatoria de cabeza
    3. Rate limiting        — bloqueo por intentos fallidos

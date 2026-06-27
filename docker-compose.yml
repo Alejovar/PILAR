@@ -1,7 +1,7 @@
 services:
   db:
     image: mysql:8.0
-    container_name: kitchenlink-db
+    container_name: pilar-db
     restart: unless-stopped
 
     ports:
@@ -9,8 +9,8 @@ services:
 
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: KitchenLink
-      MYSQL_USER: ${DB_USER:-roceel_user}
+      MYSQL_DATABASE: pilar_db
+      MYSQL_USER: ${DB_USER:-pilar_user}
       MYSQL_PASSWORD: ${DB_PASSWORD}
 
     volumes:
@@ -25,9 +25,9 @@ services:
       start_period: 120s
 
   app:
-    image: ${APP_IMAGE:-roceel-app}
+    image: ${APP_IMAGE:-pilar-app}
     build: .
-    container_name: kitchenlink-app
+    container_name: pilar-app
     restart: unless-stopped
 
     ports:
@@ -35,9 +35,9 @@ services:
 
     environment:
       DB_HOST: db
-      DB_USER: ${DB_USER:-roceel_user}
+      DB_USER: ${DB_USER:-pilar_user}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: KitchenLink
+      DB_NAME: pilar_db
 
     depends_on:
       db:

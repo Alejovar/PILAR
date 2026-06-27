@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap');
 
 /* ============================================================
-   ROCEEL SERVICIOS ESPECIALIZADOS — Design System
+  PILAR — Design System
    Paleta: Oscuro + Amarillo (#F5C400) + Verde (#22C55E)
    ============================================================ */
 :root {
-  --primary:       #F5C400;        /* Amarillo Roceel */
+  --primary:       #F5C400;        /* Amarillo Pilar */
   --primary-dark:  #d4a900;
   --primary-glow:  rgba(245,196,0,0.15);
   --accent:        #22C55E;        /* Verde operativo */
@@ -264,7 +264,6 @@ input, select, textarea { font-family: inherit; }
   gap: 16px;
   flex-wrap: wrap;
 }
-.page-header-left {}
 .page-eyebrow {
   font-size: 11px;
   font-weight: 700;

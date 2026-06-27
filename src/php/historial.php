@@ -9,9 +9,9 @@ $userName = htmlspecialchars($_SESSION['user_name'] ?? 'Admin');
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Historial Catorcena | ROCEEL</title>
+  <title>Historial Catorcena | PILAR</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="/src/css/roceel.css">
+  <link rel="stylesheet" href="/src/css/pilar.css">
   <!-- SheetJS para exportar Excel -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -265,7 +265,7 @@ document.getElementById('btnExportar').addEventListener('click', () => {
   // Ajustar anchos
   ws['!cols'] = [10,28,18,18,20,17,13].map(w => ({wch:w}));
 
-  XLSX.writeFile(wb, `ROCEEL_catorcena_${inicio}_${fin}.xlsx`);
+  XLSX.writeFile(wb, `PILAR_catorcena_${inicio}_${fin}.xlsx`);
   toast('Excel generado correctamente.','success');
 });
 
